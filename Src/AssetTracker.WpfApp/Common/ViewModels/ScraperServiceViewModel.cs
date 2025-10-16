@@ -12,6 +12,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
         public ScraperServiceViewModel(IEventAggregator eventAggregator)
         {
             _eventAggregator = eventAggregator;
+            _eventAggregator.Subscribe<ServiceCommandExecutedEvent>(OnServiceCommandExecuted);
             _model = new TModel();
 
             // Initialize commands

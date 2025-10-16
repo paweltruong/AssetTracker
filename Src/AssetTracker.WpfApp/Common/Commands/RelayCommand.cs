@@ -1,4 +1,5 @@
-﻿using System.Windows.Input;
+﻿using System.ComponentModel;
+using System.Windows.Input;
 
 namespace AssetTracker.WpfApp.Common.Commands
 {
@@ -44,5 +45,65 @@ namespace AssetTracker.WpfApp.Common.Commands
             add { }
             remove { }
         }
+    }
+
+    public interface IAsyncRelayCommand : ICommand
+    {
+        Task ExecuteAsync();
+
+    }
+
+    public class AsyncRelayCommand : IAsyncRelayCommand, INotifyPropertyChanged
+    {
+        private readonly Func<Task> _execute;
+        private readonly Func<bool> _canExecute;
+        private bool _isExecuting;
+
+        public AsyncRelayCommand(Func<Task> execute, Func<bool> canExecute = null)
+        {
+            _execute = execute;
+            _canExecute = canExecute;
+        }
+
+        public bool IsExecuting
+        {
+            get => _isExecuting;
+            set
+            {
+                if (_isExecuting != value)
+                {
+                    _isExecuting = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsExecuting)));
+                    RaiseCanExecuteChanged();
+                }
+            }
+        }
+
+        public bool CanExecute(object? parameter) =>
+            !IsExecuting && (_canExecute?.Invoke() ?? true);
+
+        public async void Execute(object? parameter) => await ExecuteAsync();
+
+        public async Task ExecuteAsync()
+        {
+            if (CanExecute(null))
+            {
+                try
+                {
+                    IsExecuting = true;
+                    await _execute();
+                }
+                finally
+                {
+                    IsExecuting = false;
+                }
+            }
+        }
+
+        public event EventHandler CanExecuteChanged;
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public void RaiseCanExecuteChanged() =>
+            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
     }
 }

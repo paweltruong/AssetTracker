@@ -2,6 +2,8 @@
 {
     public enum ServiceStatusEvents
     {
-        Start = 0
+        Start = 0,
+        Success = 1,
+        Failure = 2,
     }
 }

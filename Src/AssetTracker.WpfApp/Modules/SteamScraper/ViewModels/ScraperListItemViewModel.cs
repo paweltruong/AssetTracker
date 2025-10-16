@@ -20,7 +20,7 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
         }
         // Command methods
         protected override void ConfigureService(object parameter)
-        {            
+        {
             _eventAggregator.Publish(new ChangeMainViewEvent
             {
                 ServiceName = SteamScraperModule.ModuleName,
@@ -60,7 +60,7 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
         protected override void OnServiceCommandExecuted(ServiceCommandExecutedEvent eventData)
         {
             // Handle the event at higher level
-            if(eventData != null 
+            if (eventData != null
                 && eventData.ServiceName.Equals(SteamScraperModule.ModuleName)
                 && eventData.CommandData is ServiceStatusEvents)
             {
@@ -68,6 +68,15 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
                 {
                     case ServiceStatusEvents.Start:
                         Model.Status = ScraperServiceStatus.Running;
+                        OnPropertyChanged(nameof(Model));
+                        break;
+                    case ServiceStatusEvents.Success:
+                        Model.Status = ScraperServiceStatus.DataLoaded;
+                        OnPropertyChanged(nameof(Model));
+                        break;
+                    case ServiceStatusEvents.Failure:
+                        Model.Status = ScraperServiceStatus.Failed;
+                        OnPropertyChanged(nameof(Model));
                         break;
                     //case ServiceCommands.Stop:
                     //    StopService(null);

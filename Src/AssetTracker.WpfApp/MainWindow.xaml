@@ -8,7 +8,8 @@
         xmlns:views="clr-namespace:AssetTracker.WpfApp.Common.Views"
         mc:Ignorable="d"
         Icon="/Assets/appIcon.png"
-        Title="Asset Tracker" Height="450" Width="800">
+        WindowState="Maximized"
+        Title="Asset Tracker" Height="600" Width="800">
     <Window.Resources>
         <converters:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
         <!-- Template for displaying service modules -->
