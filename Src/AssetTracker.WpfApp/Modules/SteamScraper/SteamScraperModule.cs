@@ -17,6 +17,7 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper
             services.AddSingleton<ScraperMainView>();
             services.AddSingleton<ScrapeWizardViewModel>();
             services.AddSingleton<ScrapeWizardView>();
+            services.AddSingleton<DataView>();
             services.AddSingleton<ISteamService, SteamService>();
         }
 

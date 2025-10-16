@@ -1,10 +1,5 @@
 ﻿using AssetTracker.WpfApp.Common.Models;
 using AssetTracker.WpfApp.Common.Models.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AssetTracker.WpfApp.Common.ViewModels
 {
@@ -37,6 +32,15 @@ namespace AssetTracker.WpfApp.Common.ViewModels
             return true;
         }
         protected override void StartService(object parameter)
+        {
+        }
+
+        protected override bool CanExecuteViewData(object parameter)
+        {
+            return true;
+        }
+
+        protected override void ExecuteViewData(object parameter)
         {
         }
     }

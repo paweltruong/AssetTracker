@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using AssetTracker.WpfApp.Modules.SteamScraper.Models;
+using System.Net.Http;
 using System.Text.Json;
 
 namespace AssetTracker.WpfApp.Modules.SteamScraper.Services

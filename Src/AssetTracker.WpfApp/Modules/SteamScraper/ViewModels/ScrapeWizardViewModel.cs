@@ -1,6 +1,7 @@
 ﻿using AssetTracker.WpfApp.Common.Commands;
 using AssetTracker.WpfApp.Common.Events;
 using AssetTracker.WpfApp.Common.ViewModels;
+using AssetTracker.WpfApp.Modules.SteamScraper.Models;
 using AssetTracker.WpfApp.Modules.SteamScraper.Services;
 using System.Collections.ObjectModel;
 using System.Diagnostics;

@@ -143,15 +143,15 @@
                 <Button Content="{Binding Model.ScrapeDataButtonText}" 
                         Style="{StaticResource RoundedButtonStyle}"
                         Command="{Binding ConfigureCommand}"/>
-                <Button Content="Stop" 
+                <Button Content="Open File" 
                         Style="{StaticResource RoundedButtonStyle}"
-                        Command="{Binding StopCommand}"/>
-                <Button Content="Start" 
+                        Command="{Binding LoadFileCommand}"/>
+                <Button Content="Save To File" 
                         Style="{StaticResource RoundedButtonStyle}"
-                        Command="{Binding StartCommand}"/>
-                <Button Content="View Logs" 
+                        Command="{Binding SaveFileCommand}"/>
+                <Button Content="View Data" 
                         Style="{StaticResource RoundedButtonStyle}"
-                        Command="{Binding ViewLogsCommand}"/>
+                        Command="{Binding ViewDataCommand}"/>
             </StackPanel>
         </Border>
     </Grid>

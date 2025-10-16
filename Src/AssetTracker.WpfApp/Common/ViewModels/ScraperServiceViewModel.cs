@@ -17,8 +17,9 @@ namespace AssetTracker.WpfApp.Common.ViewModels
 
             // Initialize commands
             ConfigureCommand = new RelayCommand(ConfigureService);
-            StopCommand = new RelayCommand(StopService, CanStopService);
-            StartCommand = new RelayCommand(StartService, CanStartService);
+            OpenFileCommand = new RelayCommand(StopService, CanStopService);
+            SaveFileCommand = new RelayCommand(StartService, CanStartService);
+            ViewDataCommand = new RelayCommand(ExecuteViewData, CanExecuteViewData);
         }
 
         // Expose model properties to View
@@ -31,8 +32,9 @@ namespace AssetTracker.WpfApp.Common.ViewModels
 
         // Commands
         public ICommand ConfigureCommand { get; }
-        public ICommand StartCommand { get; }
-        public ICommand StopCommand { get; }
+        public ICommand SaveFileCommand { get; }
+        public ICommand OpenFileCommand { get; }
+        public ICommand ViewDataCommand { get; }
 
         // Command methods
         protected abstract void ConfigureService(object parameter);
@@ -40,6 +42,10 @@ namespace AssetTracker.WpfApp.Common.ViewModels
         protected abstract void StopService(object parameter);
         protected abstract bool CanStartService(object parameter);
         protected abstract void StartService(object parameter);
+
+
+        protected abstract bool CanExecuteViewData(object parameter);
+        protected abstract void ExecuteViewData(object parameter);
 
         protected virtual void OnServiceCommandExecuted(ServiceCommandExecutedEvent eventData)
         {

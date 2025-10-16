@@ -36,8 +36,8 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
             OnPropertyChanged(nameof(Model));
 
             // Refresh command states
-            ((RelayCommand)StartCommand).RaiseCanExecuteChanged();
-            ((RelayCommand)StopCommand).RaiseCanExecuteChanged();
+            ((RelayCommand)SaveFileCommand).RaiseCanExecuteChanged();
+            ((RelayCommand)OpenFileCommand).RaiseCanExecuteChanged();
 
             MessageBox.Show("Scraper service stopped!");
         }
@@ -51,10 +51,25 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
             OnPropertyChanged(nameof(Model));
 
             // Refresh command states
-            ((RelayCommand)StartCommand).RaiseCanExecuteChanged();
-            ((RelayCommand)StopCommand).RaiseCanExecuteChanged();
+            ((RelayCommand)SaveFileCommand).RaiseCanExecuteChanged();
+            ((RelayCommand)OpenFileCommand).RaiseCanExecuteChanged();
 
             MessageBox.Show("Scraper service started!");
+        }
+
+        protected override bool CanExecuteViewData(object parameter)
+        {
+            //TODO:
+            return true;
+        }
+
+        protected override void ExecuteViewData(object parameter)
+        {
+            _eventAggregator.Publish(new ChangeMainViewEvent
+            {
+                ServiceName = SteamScraperModule.ModuleName,
+                MainView = typeof(DataView)
+            });
         }
 
         protected override void OnServiceCommandExecuted(ServiceCommandExecutedEvent eventData)
