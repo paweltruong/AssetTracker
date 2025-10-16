@@ -4,9 +4,51 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AssetTracker.WpfApp"
+        xmlns:converters="clr-namespace:AssetTracker.WpfApp.Common.Converters"
+        xmlns:views="clr-namespace:AssetTracker.WpfApp.Common.Views"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Icon="/Assets/appIcon.png"
+        Title="Asset Tracker" Height="450" Width="800">
+    <Window.Resources>
+        <converters:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
+        <!-- Template for displaying service modules -->
+        <DataTemplate DataType="{x:Type views:ScraperServiceListItemView}">
+            <ContentControl Content="{Binding}"/>
+        </DataTemplate>
+    </Window.Resources>
 
+    <!--<Grid>
+        <views:ScraperServiceView Margin="20"/>
+    </Grid>-->
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Services List -->
+        <Border Grid.Column="0" Background="#F5F5F5" BorderBrush="#DDDDDD" BorderThickness="0,0,1,0">
+            <StackPanel>
+                <TextBlock Text="Scraper Services" FontSize="16" FontWeight="Bold" Margin="10" Foreground="#333333"/>
+
+                <ListBox ItemsSource="{Binding ServiceViews}"
+                         SelectedItem="{Binding SelectedServiceView,Mode=TwoWay}"
+                         BorderThickness="0"
+                         Background="Transparent">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <ContentControl Content="{Binding ListItemView}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </StackPanel>
+        </Border>
+
+        <!-- Selected Service Scraped Data View -->
+        <Border Grid.Column="1" Background="White">
+            <ContentControl Content="{Binding SelectedServiceMainView}" Margin="20"/>
+        </Border>
     </Grid>
+
 </Window>

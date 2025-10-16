@@ -1,0 +1,41 @@
+﻿using AssetTracker.WpfApp.Common.Commands;
+using AssetTracker.WpfApp.Common.Models;
+using AssetTracker.WpfApp.Common.Models.Enums;
+using System.Windows;
+using System.Windows.Input;
+
+namespace AssetTracker.WpfApp.Common.ViewModels
+{
+    public abstract class ScraperServiceViewModel<TModel> : ViewModelBase, IScraperServiceViewModel where TModel : ScraperServiceDataModel, new()
+    {
+        protected readonly TModel _model;
+        public ScraperServiceViewModel()
+        {
+            _model = new TModel();
+
+            // Initialize commands
+            ConfigureCommand = new RelayCommand(ConfigureService);
+            StopCommand = new RelayCommand(StopService, CanStopService);
+            StartCommand = new RelayCommand(StartService, CanStartService);
+        }
+
+        // Expose model properties to View
+        public abstract string Title { get; protected set; }
+        public abstract string Description { get; protected set; }        
+        public abstract ScraperServiceStatus Status { get; protected set; }
+        public abstract string IconUrl { get; protected set; }
+
+        // Commands
+        public ICommand ConfigureCommand { get; }
+        public ICommand StartCommand { get; }
+        public ICommand StopCommand { get; }
+
+        // Command methods
+        protected abstract void ConfigureService(object parameter);
+        protected abstract bool CanStopService(object parameter);
+        protected abstract void StopService(object parameter);
+        protected abstract bool CanStartService(object parameter);
+        protected abstract void StartService(object parameter);
+    }
+}
+
