@@ -3,6 +3,9 @@
     public enum ScraperServiceStatus
     {
         Unknown = 0,
-        Running = 1,
+        NotLoaded = 1,
+        Failed = 2,
+        Running = 3,
+        DataLoaded = 4
     }
 }

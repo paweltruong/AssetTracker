@@ -10,7 +10,8 @@
              d:DataContext="{d:DesignInstance Type=vm:DesignTimeScraperServiceViewModel, IsDesignTimeCreatable=True}"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
-        <converters:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
+        <converters:ScraperServiceStatusToBrushConverter x:Key="ScraperServiceStatusToBrushConverter"/>
+        <converters:ScraperServiceStatusToTextConverter x:Key="ScraperServiceStatusToTextConverter"/>
 
         <!-- Rounded Button Style -->
         <Style x:Key="RoundedButtonStyle" TargetType="Button">
@@ -84,7 +85,7 @@
                         Background="Transparent" 
                         CornerRadius="8"
                         Margin="0,0,15,0">
-                    <Image Source="{Binding IconUrl}"
+                    <Image Source="{Binding Model.IconUrl}"
                            Width="40" 
                            Height="40"
                            Stretch="Uniform"
@@ -101,7 +102,7 @@
 
                     <!-- Title -->
                     <TextBlock Grid.Row="0" 
-                               Text="{Binding Title}" 
+                               Text="{Binding Model.Title}" 
                                FontSize="16" 
                                FontWeight="Bold" 
                                Foreground="#333333"
@@ -109,7 +110,7 @@
 
                     <!-- Description -->
                     <TextBlock Grid.Row="1" 
-                               Text="{Binding Description}"
+                               Text="{Binding Model.Description}"
                                FontSize="12" 
                                Foreground="#666666"
                                TextWrapping="Wrap"
@@ -117,12 +118,12 @@
 
                     <!-- Status -->
                     <Border Grid.Row="2" 
-                            Background="{Binding StatusColor, Converter={StaticResource ColorToBrushConverter}}" 
+                            Background="{Binding Model.Status, Converter={StaticResource ScraperServiceStatusToBrushConverter}}" 
                             CornerRadius="4" 
                             Padding="8,2" 
                             HorizontalAlignment="Left"
                             Margin="0,2,0,0">
-                        <TextBlock Text="{Binding Status}" 
+                        <TextBlock Text="{Binding Model.Status, Converter={StaticResource ScraperServiceStatusToTextConverter}}" 
                                    FontSize="11" 
                                    Foreground="White" 
                                    FontWeight="SemiBold"/>
@@ -138,7 +139,7 @@
                 Padding="10,0">
             <StackPanel Orientation="Horizontal" 
                         HorizontalAlignment="Center">
-                <Button Content="Configure" 
+                <Button Content="{Binding Model.ScrapeDataButtonText}" 
                         Style="{StaticResource RoundedButtonStyle}"
                         Command="{Binding ConfigureCommand}"/>
                 <Button Content="Stop" 

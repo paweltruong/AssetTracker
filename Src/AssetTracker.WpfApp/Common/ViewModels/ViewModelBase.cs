@@ -1,14 +1,9 @@
-﻿using System.ComponentModel;
+﻿using AssetTracker.WpfApp.Common.Models;
+using System.ComponentModel;
 
 namespace AssetTracker.WpfApp.Common.ViewModels
 {
-    public class ViewModelBase : IViewModel
+    public class ViewModelBase : BindableBase, IViewModel
     {
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
     }
 }

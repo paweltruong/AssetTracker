@@ -1,14 +1,12 @@
 ﻿using AssetTracker.WpfApp.Common.Commands;
 using AssetTracker.WpfApp.Common.Models;
-using AssetTracker.WpfApp.Common.Models.Enums;
-using System.Windows;
 using System.Windows.Input;
 
 namespace AssetTracker.WpfApp.Common.ViewModels
 {
     public abstract class ScraperServiceViewModel<TModel> : ViewModelBase, IScraperServiceViewModel where TModel : ScraperServiceDataModel, new()
     {
-        protected readonly TModel _model;
+        protected TModel _model;
         public ScraperServiceViewModel()
         {
             _model = new TModel();
@@ -20,10 +18,12 @@ namespace AssetTracker.WpfApp.Common.ViewModels
         }
 
         // Expose model properties to View
-        public abstract string Title { get; protected set; }
-        public abstract string Description { get; protected set; }        
-        public abstract ScraperServiceStatus Status { get; protected set; }
-        public abstract string IconUrl { get; protected set; }
+        public virtual TModel Model 
+        { 
+            get => _model;
+            protected set => SetProperty(ref _model, value);
+
+        }
 
         // Commands
         public ICommand ConfigureCommand { get; }

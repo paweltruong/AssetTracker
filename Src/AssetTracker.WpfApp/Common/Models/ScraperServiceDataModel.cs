@@ -3,41 +3,41 @@ using System.ComponentModel;
 
 namespace AssetTracker.WpfApp.Common.Models
 {
-    public class ScraperServiceDataModel : INotifyPropertyChanged
+    public class ScraperServiceDataModel : BindableBase
     {
         private string _title;
         private string _description;
-        private ScraperServiceStatus _status;
+        private ScraperServiceStatus _status = ScraperServiceStatus.Unknown;
         private string _iconUrl;
+        private string _scrapeDataButtonText = "Scrape Data";
 
         public string Title
         {
             get => _title;
-            set { _title = value; OnPropertyChanged(nameof(Title)); }
+            set => SetProperty(ref _title, value);
         }
 
         public string Description
         {
             get => _description;
-            set { _description = value; OnPropertyChanged(nameof(Description)); }
+            set => SetProperty(ref _description, value);
         }
 
         public ScraperServiceStatus Status
         {
             get => _status;
-            set { _status = value; OnPropertyChanged(nameof(Status)); }
+            set => SetProperty(ref _status, value);
         }
         public string IconUrl
         {
             get => _iconUrl;
-            set { _iconUrl = value; OnPropertyChanged(nameof(IconUrl)); }
+            set => SetProperty(ref _iconUrl, value);
         }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        protected virtual void OnPropertyChanged(string propertyName)
+        public string ScrapeDataButtonText
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+            get => _scrapeDataButtonText;
+            set => SetProperty(ref _scrapeDataButtonText, value);
         }
     }
 }
