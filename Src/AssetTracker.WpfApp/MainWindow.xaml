@@ -17,10 +17,6 @@
         </DataTemplate>
     </Window.Resources>
 
-    <!--<Grid>
-        <views:ScraperServiceView Margin="20"/>
-    </Grid>-->
-
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>

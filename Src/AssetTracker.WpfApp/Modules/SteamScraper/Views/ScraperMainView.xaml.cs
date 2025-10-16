@@ -19,9 +19,9 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.Views
     /// <summary>
     /// Interaction logic for SteamScraperMainView.xaml
     /// </summary>
-    public partial class SteamScraperMainView : UserControl, IScraperServiceMainView
+    public partial class ScraperMainView : UserControl, IScraperServiceMainView
     {
-        public SteamScraperMainView()
+        public ScraperMainView()
         {
             InitializeComponent();
         }

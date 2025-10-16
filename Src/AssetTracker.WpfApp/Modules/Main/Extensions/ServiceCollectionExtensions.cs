@@ -1,10 +1,6 @@
-﻿using AssetTracker.WpfApp.Modules.Main.ViewModels;
+﻿using AssetTracker.WpfApp.Common.Events;
+using AssetTracker.WpfApp.Modules.Main.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AssetTracker.WpfApp.Modules.Main.Extensions
 {
@@ -14,6 +10,7 @@ namespace AssetTracker.WpfApp.Modules.Main.Extensions
         {
             services.AddSingleton<MainWindowViewModel>();
             services.AddSingleton<MainWindow>();
+            services.AddSingleton<IEventAggregator, EventAggregator>();
         }
     }
 }

@@ -7,9 +7,9 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.Views
     /// <summary>
     /// Interaction logic for SteamScraperListItemView.xaml
     /// </summary>
-    public partial class SteamScraperListItemView : UserControl, IScraperServiceListItemView
+    public partial class ScraperListItemView : UserControl, IScraperServiceListItemView
     {
-        public SteamScraperListItemView(SteamScraperServiceViewModel viewModel)
+        public ScraperListItemView(ScraperListItemViewModel viewModel)
         {
             InitializeComponent();
             DataContext = viewModel;

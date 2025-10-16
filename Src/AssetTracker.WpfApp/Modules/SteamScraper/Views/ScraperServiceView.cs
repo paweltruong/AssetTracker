@@ -2,12 +2,12 @@
 
 namespace AssetTracker.WpfApp.Modules.SteamScraper.Views
 {
-    public class SteamScraperServiceView : IScraperServiceView
+    public class ScraperServiceView : IScraperServiceView
     {
-        SteamScraperListItemView _listItemView;
-        SteamScraperMainView _mainView;
+        ScraperListItemView _listItemView;
+        ScraperMainView _mainView;
 
-        public SteamScraperServiceView(SteamScraperListItemView listItemView, SteamScraperMainView mainView)
+        public ScraperServiceView(ScraperListItemView listItemView, ScraperMainView mainView)
         {
             _listItemView = listItemView;
             _mainView = mainView;

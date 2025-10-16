@@ -10,7 +10,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
 {
     public class DesignTimeScraperServiceViewModel : ScraperServiceViewModel<ScraperServiceDataModel>
     {
-        public DesignTimeScraperServiceViewModel()
+        public DesignTimeScraperServiceViewModel() : base(null)
         {
             // Set design-time data
             // Assuming the base class has properties like Title, Description, Status, etc.
