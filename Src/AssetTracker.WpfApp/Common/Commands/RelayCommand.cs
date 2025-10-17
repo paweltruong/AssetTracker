@@ -3,6 +3,11 @@ using System.Windows.Input;
 
 namespace AssetTracker.WpfApp.Common.Commands
 {
+    public interface IRelayCommand : ICommand
+    {
+        void RaiseCanExecuteChanged();
+    }
+
     /// <summary>
     /// A command that relays its functionality to other objects by invoking delegates.
     /// </summary>
@@ -17,7 +22,7 @@ namespace AssetTracker.WpfApp.Common.Commands
     /// Strongly typed version of RelayCommand
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class RelayCommand<T> : ICommand
+    public class RelayCommand<T> : IRelayCommand
     {
         private readonly Action<T> _execute;
         private readonly Func<T, bool> _canExecute;
@@ -40,10 +45,9 @@ namespace AssetTracker.WpfApp.Common.Commands
         public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    public interface IAsyncRelayCommand : ICommand
+    public interface IAsyncRelayCommand : IRelayCommand
     {
         Task ExecuteAsync();
-        void RaiseCanExecuteChanged();
     }
 
     /// <summary>

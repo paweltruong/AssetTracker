@@ -4,11 +4,16 @@ namespace AssetTracker.WpfApp.Common.Models
 {
     public class ScraperServiceDataModel : BindableBase
     {
+        public const string ViewDataButtonTextDefault = "View Data";
+        public const string ViewDataButtonTextFormatted = "View Data ({0})";
+
         private string _title;
         private string _description;
         private ScraperServiceStatus _status = ScraperServiceStatus.Unknown;
         private string _iconUrl;
         private string _scrapeDataButtonText = "Scrape Data";
+        private string _viewDataButtonText = ViewDataButtonTextDefault;
+        private int _dataCount = 0;
 
         public string Title
         {
@@ -37,6 +42,18 @@ namespace AssetTracker.WpfApp.Common.Models
 
             get => _scrapeDataButtonText;
             set => SetProperty(ref _scrapeDataButtonText, value);
+        }
+        public string ViewDataButtonText
+        {
+
+            get => _viewDataButtonText;
+            set => SetProperty(ref _viewDataButtonText, value);
+        }
+
+        public int DataCount
+        {
+            get => _dataCount;
+            set => SetProperty(ref _dataCount, value);
         }
     }
 }

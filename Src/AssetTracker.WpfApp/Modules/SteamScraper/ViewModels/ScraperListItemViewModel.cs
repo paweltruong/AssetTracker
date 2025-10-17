@@ -8,7 +8,7 @@ using System.Windows;
 
 namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
 {
-    public class ScraperListItemViewModel : ScraperServiceViewModel<ScraperServiceDataModel>
+    public class ScraperListItemViewModel : ScraperServiceListItemViewModel<ScraperServiceDataModel>
     {
 
         public ScraperListItemViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
@@ -20,7 +20,7 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
         }
 
         // Command methods
-        protected override void ConfigureService(object parameter)
+        protected override void ExecuteConfigureServiceCommand(object parameter)
         {
             _eventAggregator.Publish(new ChangeMainViewEvent
             {
@@ -28,22 +28,13 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
                 MainView = typeof(ScrapeWizardView)
             });
         }
-        protected override bool CanStopService(object parameter) => false;
-        protected override void StopService(object parameter)
+        protected override bool CanExecuteOpenFileCommand(object parameter) => false;
+        protected override void ExecuteOpenFileCommand(object parameter)
         {
-            // Your business logic here
 
-            // Update UI properties
-            OnPropertyChanged(nameof(Model));
-
-            // Refresh command states
-            ((RelayCommand)SaveFileCommand).RaiseCanExecuteChanged();
-            ((RelayCommand)OpenFileCommand).RaiseCanExecuteChanged();
-
-            MessageBox.Show("Scraper service stopped!");
         }
-        protected override bool CanStartService(object parameter) => true;
-        protected override void StartService(object parameter)
+        protected override bool CanExecuteSaveFileCommand(object parameter) => true;
+        protected override void ExecuteSaveFileCommand(object parameter)
         {
             // Your business logic here
             _model.Status = ScraperServiceStatus.Running;
@@ -58,13 +49,13 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
             MessageBox.Show("Scraper service started!");
         }
 
-        protected override bool CanExecuteViewData(object parameter)
+        protected override bool CanExecuteViewDataCommand(object parameter)
         {
             //TODO:
             return true;
         }
 
-        protected override void ExecuteViewData(object parameter)
+        protected override void ExecuteViewDataCommand(object parameter)
         {
             _eventAggregator.Publish(new ChangeMainViewEvent
             {
@@ -75,6 +66,8 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
 
         protected override void OnServiceCommandExecuted(ServiceCommandExecutedEvent eventData)
         {
+            base.OnServiceCommandExecuted(eventData);
+
             // Handle the event at higher level
             if (eventData != null
                 && eventData.ServiceName.Equals(SteamScraperModule.ModuleName)
@@ -103,6 +96,20 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
                     default:
                         break;
                 }
+            }
+        }
+
+        protected override void OnServiceDataChanged(ServiceDataChangedEvent eventData)
+        {
+            base.OnServiceDataChanged(eventData);
+
+            if (eventData != null
+                && eventData.ServiceName.Equals(SteamScraperModule.ModuleName))
+            {
+                Model.ViewDataButtonText = eventData.DataCount > 0 ? 
+                    string.Format(ScraperServiceDataModel.ViewDataButtonTextFormatted, eventData.DataCount)
+                    : ScraperServiceDataModel.ViewDataButtonTextDefault;
+                OnPropertyChanged(nameof(Model));
             }
         }
     }

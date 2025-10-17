@@ -134,6 +134,11 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
                     ServiceName = SteamScraperModule.ModuleName,
                     CommandData = ServiceStatusEvents.Success
                 });
+                _eventAggregator.Publish(new ServiceDataChangedEvent
+                {
+                    ServiceName = SteamScraperModule.ModuleName,
+                    DataCount = Games.Count()
+                });
             }
             catch (OperationCanceledException ocex)
             {

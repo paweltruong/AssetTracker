@@ -151,7 +151,7 @@
                         IsEnabled="False"
                         Style="{StaticResource RoundedButtonStyle}"
                         Command="{Binding SaveFileCommand}"/>
-                <Button Content="View Data" 
+                <Button Content="{Binding Model.ViewDataButtonText}" 
                         Style="{StaticResource RoundedButtonStyle}"
                         Command="{Binding ViewDataCommand}"/>
             </StackPanel>
