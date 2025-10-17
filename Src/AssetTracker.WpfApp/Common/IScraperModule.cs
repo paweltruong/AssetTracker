@@ -1,4 +1,4 @@
-﻿using AssetTracker.WpfApp.Common.Views;
+﻿using AssetTracker.WpfApp.Common.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AssetTracker.WpfApp.Common
@@ -9,6 +9,6 @@ namespace AssetTracker.WpfApp.Common
     public interface IScraperModule
     {
         void ConfigureModule(IServiceCollection services);
-        IScraperServiceView GetView(IServiceProvider serviceProvider);
+        IScraperServiceMasterViewModel GetMasterViewModel(IServiceProvider serviceProvider);
     }
 }

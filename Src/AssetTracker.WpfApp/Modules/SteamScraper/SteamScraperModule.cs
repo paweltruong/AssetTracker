@@ -1,4 +1,5 @@
 ﻿using AssetTracker.WpfApp.Common;
+using AssetTracker.WpfApp.Common.ViewModels;
 using AssetTracker.WpfApp.Modules.SteamScraper.Services;
 using AssetTracker.WpfApp.Modules.SteamScraper.ViewModels;
 using AssetTracker.WpfApp.Modules.SteamScraper.Views;
@@ -11,8 +12,8 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper
         public const string ModuleName = "SteamScraper";
         public void ConfigureModule(IServiceCollection services)
         {
+            services.AddSingleton<ScraperServiceMasterViewModel>();
             services.AddSingleton<ScraperListItemViewModel>();
-            services.AddSingleton<ScraperServiceView>();
             services.AddSingleton<ScraperListItemView>();
             services.AddSingleton<ScraperMainView>();
             services.AddSingleton<ScrapeWizardViewModel>();
@@ -21,9 +22,9 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper
             services.AddSingleton<ISteamService, SteamService>();
         }
 
-        public AssetTracker.WpfApp.Common.Views.IScraperServiceView GetView(IServiceProvider serviceProvider)
+        public IScraperServiceMasterViewModel GetMasterViewModel(IServiceProvider serviceProvider)
         {
-            return serviceProvider.GetRequiredService<ScraperServiceView>();
+            return serviceProvider.GetRequiredService<ScraperServiceMasterViewModel>();
         }
     }
 }

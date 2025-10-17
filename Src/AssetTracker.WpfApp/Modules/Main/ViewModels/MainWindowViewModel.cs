@@ -16,23 +16,23 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
         {
             _eventAggregator = eventAggregator;
             _eventAggregator.Subscribe<ChangeMainViewEvent>(OnChangeMainViewEvent);
-            _serviceViews = new ObservableCollection<IScraperServiceView>();
+            _serviceViews = new ObservableCollection<IScraperServiceMasterViewModel>();
         }
 
-        private ObservableCollection<IScraperServiceView> _serviceViews;
-        public ObservableCollection<IScraperServiceView> ServiceViews
+        private ObservableCollection<IScraperServiceMasterViewModel> _serviceViews;
+        public ObservableCollection<IScraperServiceMasterViewModel> ServiceViews
         {
             get => _serviceViews;
             private set { SetProperty(ref _serviceViews, value); }
         }
 
-        IScraperServiceView? _selectedServiceView; public IScraperServiceView? SelectedServiceView
+        IScraperServiceMasterViewModel? _selectedServiceView; public IScraperServiceMasterViewModel? SelectedServiceView
         {
             get => _selectedServiceView;
             set
             {
                 _selectedServiceView = value;
-                SelectedServiceMainView = value?.MainView;
+                SelectedServiceMainView = value?.DefaultMainView;
                 OnPropertyChanged(nameof(SelectedServiceView));
             }
         }
@@ -50,7 +50,7 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
 
             foreach (var module in modules)
             {
-                var view = module.GetView(serviceProvider);
+                var view = module.GetMasterViewModel(serviceProvider);
                 if (view != null)
                 {
                     ServiceViews.Add(view);
