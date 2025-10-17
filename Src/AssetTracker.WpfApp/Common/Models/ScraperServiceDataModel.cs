@@ -1,5 +1,4 @@
 ﻿using AssetTracker.WpfApp.Common.Models.Enums;
-using System.ComponentModel;
 
 namespace AssetTracker.WpfApp.Common.Models
 {

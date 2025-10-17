@@ -1,4 +1,5 @@
 ﻿using AssetTracker.WpfApp.Common.Events;
+using AssetTracker.WpfApp.Common.Services;
 using AssetTracker.WpfApp.Modules.Main.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,6 +12,7 @@ namespace AssetTracker.WpfApp.Modules.Main.Extensions
             services.AddSingleton<MainWindowViewModel>();
             services.AddSingleton<MainWindow>();
             services.AddSingleton<IEventAggregator, EventAggregator>();
+            services.AddTransient<IMyHttpClient,MyHttpClient>();
         }
     }
 }

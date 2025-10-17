@@ -144,9 +144,11 @@
                         Style="{StaticResource RoundedButtonStyle}"
                         Command="{Binding ConfigureCommand}"/>
                 <Button Content="Open File" 
+                        IsEnabled="False"
                         Style="{StaticResource RoundedButtonStyle}"
                         Command="{Binding LoadFileCommand}"/>
                 <Button Content="Save To File" 
+                        IsEnabled="False"
                         Style="{StaticResource RoundedButtonStyle}"
                         Command="{Binding SaveFileCommand}"/>
                 <Button Content="View Data" 

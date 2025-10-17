@@ -72,10 +72,6 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
 
-                <!-- Sort by Name --><!--
-                <ListView.SortDescriptions>
-                    <sc:SortDescription PropertyName="Name" Direction="Ascending"/>
-                </ListView.SortDescriptions>-->
             </ListView>
         </Grid>
 </UserControl>

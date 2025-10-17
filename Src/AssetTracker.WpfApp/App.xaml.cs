@@ -2,10 +2,6 @@
 using AssetTracker.WpfApp.Modules.Main.Extensions;
 using AssetTracker.WpfApp.Modules.SteamScraper;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Configuration;
-using System.Data;
-using System.Reflection;
 using System.Windows;
 
 namespace AssetTracker.WpfApp

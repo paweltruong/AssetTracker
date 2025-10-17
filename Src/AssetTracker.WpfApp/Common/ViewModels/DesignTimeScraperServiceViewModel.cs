@@ -8,9 +8,6 @@ namespace AssetTracker.WpfApp.Common.ViewModels
         public DesignTimeScraperServiceViewModel() : base(null)
         {
             // Set design-time data
-            // Assuming the base class has properties like Title, Description, Status, etc.
-            // You can set them here for design-time visualization
-            // Example:
             Model.Title = "Design Time Scraper Service";
             Model.Description = "This is a description for design time.";
             Model.Status =  ScraperServiceStatus.Running;
