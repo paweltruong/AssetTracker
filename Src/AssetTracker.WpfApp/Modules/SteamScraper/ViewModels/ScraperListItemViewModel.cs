@@ -31,22 +31,12 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
         protected override bool CanExecuteOpenFileCommand(object parameter) => false;
         protected override void ExecuteOpenFileCommand(object parameter)
         {
-
+            throw new NotImplementedException();
         }
         protected override bool CanExecuteSaveFileCommand(object parameter) => true;
         protected override void ExecuteSaveFileCommand(object parameter)
         {
-            // Your business logic here
-            _model.Status = ScraperServiceStatus.Running;
-
-            // Update UI properties
-            OnPropertyChanged(nameof(Model));
-
-            // Refresh command states
-            ((RelayCommand)SaveFileCommand).RaiseCanExecuteChanged();
-            ((RelayCommand)OpenFileCommand).RaiseCanExecuteChanged();
-
-            MessageBox.Show("Scraper service started!");
+           throw new NotImplementedException();
         }
 
         protected override bool CanExecuteViewDataCommand(object parameter)
