@@ -40,17 +40,13 @@ namespace AssetTracker.WpfApp.Common.Commands
 
         public void Execute(object? parameter) => _execute((T)parameter);
 
-        public event EventHandler? CanExecuteChanged
-        {
-            add { }
-            remove { }
-        }
+        public event EventHandler? CanExecuteChanged;
     }
 
     public interface IAsyncRelayCommand : ICommand
     {
         Task ExecuteAsync();
-
+        void RaiseCanExecuteChanged();
     }
 
     public class AsyncRelayCommand : IAsyncRelayCommand, INotifyPropertyChanged
@@ -100,8 +96,8 @@ namespace AssetTracker.WpfApp.Common.Commands
             }
         }
 
-        public event EventHandler CanExecuteChanged;
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event EventHandler? CanExecuteChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public void RaiseCanExecuteChanged() =>
             CanExecuteChanged?.Invoke(this, EventArgs.Empty);

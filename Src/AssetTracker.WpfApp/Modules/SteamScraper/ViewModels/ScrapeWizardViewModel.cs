@@ -13,9 +13,10 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
     {
         private readonly IEventAggregator _eventAggregator;
         private readonly ISteamService _steamService;
+        private CancellationTokenSource _lastCancellationTokenSource;
         public ICommand OpenLinkCommand { get; }
         public IAsyncRelayCommand StartCommand { get; }
-        public ICommand StopCommand { get; }
+        public IAsyncRelayCommand StopCommand { get; }
 
         public ScrapeWizardViewModel(IEventAggregator eventAggregator, ISteamService steamService)
         {
@@ -24,7 +25,7 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
 
             OpenLinkCommand = new RelayCommand<string>(OpenLink);
             StartCommand = new AsyncRelayCommand(StartScrape, CanStartScrape);
-            StopCommand = new RelayCommand(StopScrape, CanStopScrape);
+            StopCommand = new AsyncRelayCommand(StopScrape, CanStopScrape);
         }
 
         string _steamId;
@@ -34,8 +35,8 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
             set
             {
                 SetProperty(ref _steamId, value);
-                OnPropertyChanged(nameof(CanStart));
-                OnPropertyChanged(nameof(CanStop));
+                StartCommand.RaiseCanExecuteChanged();
+                StopCommand.RaiseCanExecuteChanged();
             }
         }
         string _steamApiKey;
@@ -45,15 +46,19 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
             set
             {
                 SetProperty(ref _steamApiKey, value);
-                OnPropertyChanged(nameof(CanStart));
-                OnPropertyChanged(nameof(CanStop));
+                StartCommand.RaiseCanExecuteChanged();
+                StopCommand.RaiseCanExecuteChanged();
             }
         }
         private bool _isProcessing;
         public bool IsProcessing
         {
             get => _isProcessing;
-            set => SetProperty(ref _isProcessing, value);
+            set
+            {
+                SetProperty(ref _isProcessing, value);
+                StopCommand.RaiseCanExecuteChanged();
+            }
         }
         private string _statusMessage;
         public string StatusMessage
@@ -69,24 +74,37 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
             set => SetProperty(ref _games, value);
         }
 
-        public bool CanStart
-        {
-            get => true;
-            //get => !string.IsNullOrEmpty(SteamId) && !string.IsNullOrEmpty(SteamApiKey);
-        }
-        public bool CanStop
-        {
-            get => false;
-        }
-
-        bool CanStartScrape() => CanStart;
-        bool CanStopScrape(object param) => CanStop;
+        bool CanStartScrape() => !string.IsNullOrEmpty(SteamId) && !string.IsNullOrEmpty(SteamApiKey);
+        bool CanStopScrape() => IsProcessing;
 
 
-        private void StopScrape(object obj)
+        private async Task StopScrape()
         {
-            throw new NotImplementedException();
+            if (!IsProcessing
+                || _scrapingTask == null
+                || _lastCancellationTokenSource == null)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error cannot stop scraping {SteamScraperModule.ModuleName}");
+                return;
+            }
+
+            try
+            {
+                await _lastCancellationTokenSource.CancelAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error while cancelling scraping {SteamScraperModule.ModuleName}: {ex.Message}");
+            }
+            StatusMessage = "Scraping cancelled by user.";
+            _eventAggregator.Publish(new ServiceCommandExecutedEvent
+            {
+                ServiceName = SteamScraperModule.ModuleName,
+                CommandData = ServiceStatusEvents.Cancelled,
+            });
         }
+
+        Task<List<SteamGame>> _scrapingTask;
 
         private async Task StartScrape()
         {
@@ -95,15 +113,18 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
                 ServiceName = SteamScraperModule.ModuleName,
                 CommandData = ServiceStatusEvents.Start
             });
+            StatusMessage = "Scraping...";
 
             try
             {
                 // Start progress animation
                 IsProcessing = true;
 
-                // Fetch data from Steam API
-                var games = await _steamService.GetSteamGamesAsync(SteamApiKey, SteamId);
+                _lastCancellationTokenSource = new CancellationTokenSource();
 
+                // Fetch data from Steam API
+                _scrapingTask = _steamService.GetSteamGamesAsync(SteamApiKey, SteamId, _lastCancellationTokenSource.Token);
+                var games = await _scrapingTask;
 
                 Games = new ObservableCollection<SteamGame>(games);
                 StatusMessage = $"Loaded {games.Count} games successfully!";
@@ -112,6 +133,15 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
                 {
                     ServiceName = SteamScraperModule.ModuleName,
                     CommandData = ServiceStatusEvents.Success
+                });
+            }
+            catch (OperationCanceledException ocex)
+            {
+                StatusMessage = $"Scraping was cancelled";
+                _eventAggregator.Publish(new ServiceCommandExecutedEvent
+                {
+                    ServiceName = SteamScraperModule.ModuleName,
+                    CommandData = ServiceStatusEvents.Cancelled
                 });
             }
             catch (Exception ex)
@@ -140,7 +170,5 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
                 });
             }
         }
-
-
     }
 }
