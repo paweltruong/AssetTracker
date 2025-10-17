@@ -22,7 +22,7 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper
             services.AddSingleton<ISteamService, SteamService>();
         }
 
-        public IScraperServiceMasterViewModel GetMasterViewModel(IServiceProvider serviceProvider)
+        public IScraperServiceMasterModel GetMasterModel(IServiceProvider serviceProvider)
         {
             return serviceProvider.GetRequiredService<ScraperServiceMasterViewModel>();
         }

@@ -4,7 +4,7 @@ using AssetTracker.WpfApp.Modules.SteamScraper.Views;
 
 namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
 {
-    public class ScraperServiceMasterViewModel : IScraperServiceMasterViewModel
+    public class ScraperServiceMasterViewModel : IScraperServiceMasterModel
     {
         ScraperListItemView _listItemView;
         ScraperMainView _mainView;

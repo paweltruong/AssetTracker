@@ -29,7 +29,7 @@
             <StackPanel>
                 <TextBlock Text="Scraper Services" FontSize="16" FontWeight="Bold" Margin="10" Foreground="#333333"/>
 
-                <ListBox ItemsSource="{Binding ServiceViews}"
+                <ListBox ItemsSource="{Binding ScraperServices}"
                          SelectedItem="{Binding SelectedServiceView,Mode=TwoWay}"
                          BorderThickness="0"
                          Background="Transparent">

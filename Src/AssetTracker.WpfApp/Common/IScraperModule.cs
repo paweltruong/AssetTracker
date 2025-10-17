@@ -9,6 +9,6 @@ namespace AssetTracker.WpfApp.Common
     public interface IScraperModule
     {
         void ConfigureModule(IServiceCollection services);
-        IScraperServiceMasterViewModel GetMasterViewModel(IServiceProvider serviceProvider);
+        IScraperServiceMasterModel GetMasterModel(IServiceProvider serviceProvider);
     }
 }
