@@ -3,44 +3,41 @@ using System.Windows.Input;
 
 namespace AssetTracker.WpfApp.Common.Commands
 {
-    public class RelayCommand : ICommand
+    /// <summary>
+    /// A command that relays its functionality to other objects by invoking delegates.
+    /// </summary>
+    public class RelayCommand : RelayCommand<object>
     {
-        private readonly Action<object> _execute;
-        private readonly Func<object, bool> _canExecute;
-
-        public RelayCommand(Action<object> execute, Func<object, bool> canExecute = null)
+        public RelayCommand(Action<object> execute, Func<object, bool> canExecute = null) : base(execute, canExecute)
         {
-            _execute = execute ?? throw new ArgumentNullException(nameof(execute));
-            _canExecute = canExecute;
         }
-
-        public event EventHandler? CanExecuteChanged
-        {
-            add { CommandManager.RequerySuggested += value; }
-            remove { CommandManager.RequerySuggested -= value; }
-        }
-
-        public bool CanExecute(object? parameter) => _canExecute?.Invoke(parameter) ?? true;
-
-        public void Execute(object? parameter) => _execute(parameter);
-
-        public void RaiseCanExecuteChanged() => CommandManager.InvalidateRequerySuggested();
     }
 
+    /// <summary>
+    /// Strongly typed version of RelayCommand
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class RelayCommand<T> : ICommand
     {
         private readonly Action<T> _execute;
+        private readonly Func<T, bool> _canExecute;
 
-        public RelayCommand(Action<T> execute)
+        public RelayCommand(Action<T> execute, Func<T, bool> canExecute = null)
         {
             _execute = execute;
+            _canExecute = canExecute;
         }
+        public bool CanExecute(object? parameter) => CanExecute((T)parameter);
 
-        public bool CanExecute(object? parameter) => true;
+        public void Execute(object? parameter) => Execute((T)parameter);
 
-        public void Execute(object? parameter) => _execute((T)parameter);
+        public bool CanExecute(T parameter) => _canExecute?.Invoke(parameter) ?? true;
+
+        public void Execute(T parameter) => _execute(parameter);
 
         public event EventHandler? CanExecuteChanged;
+
+        public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public interface IAsyncRelayCommand : ICommand
@@ -49,6 +46,9 @@ namespace AssetTracker.WpfApp.Common.Commands
         void RaiseCanExecuteChanged();
     }
 
+    /// <summary>
+    /// RelayCommand for asynchronous delegates
+    /// </summary>
     public class AsyncRelayCommand : IAsyncRelayCommand, INotifyPropertyChanged
     {
         private readonly Func<Task> _execute;
