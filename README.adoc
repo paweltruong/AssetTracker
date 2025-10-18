@@ -28,12 +28,14 @@ I had some idea what features AssetTracker should have, but definetily problem i
 
 Using my own experience and other tools like AI chatbots, google etc. I tried to find out what features and use cases or essential for me and what would be some of the technical problems.
 
-Features:
+*Features:*
+
 * Importing asset data from multiple sources like Humble Bundle, Steam, GOG, Epic Games Store, Prime Gaming, FAB, Unity Asset Store, Cosmos from Leartes, Itch.io, Synty Store etc.
 * Tracking owned assets and ability to aggregate them
 * Tracking wishlisted assets
 
-Problematic areas:
+*Problematic areas:*
+
 * Duplicates handling - sometimes I could have same products on different store fe. Unity Asset Store and Synty Store
 * Different asset meta data formats depending on API or data available on the websites for scrapping
 * Different import approaches Steam provides API, Humble Bundle provides API but only for partners other types would require scraping the data from web, this could be problematic if website structure changes, and to acces your assets you have to be logged in, so scrapping would require handling authentication cookies etc. There are solutions for this but this is strictly related to the final technology or infrastructure used for the application.
@@ -44,7 +46,8 @@ Using the reasearch above I decided to build a simple proof of concept applicati
 
 First I've focused on the happy path and used Vibe coding approach. This would give me quick feedback if my idea is valid and if I can proceed with further development.
 
-Observations:
+*Observations:*
+
 * UX - I have to store data used for importing assets, like authentication cookies for web scrapping, API keys etc. It is very inconvenient to provide this data every time I want to import my assets. So I have to build some kind of user profile management.
 * Security - storing sensitive data like authentication cookies or API keys requires proper security measures. I have to make sure this data is stored securely or not in plain text at least.
 * UX - there should be features for managing imported assets (sorting, filtering, tagging etc.)
