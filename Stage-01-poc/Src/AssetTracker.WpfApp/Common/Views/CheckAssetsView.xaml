@@ -1,0 +1,47 @@
+﻿<UserControl x:Class="AssetTracker.WpfApp.Common.Views.CheckAssetsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:AssetTracker.WpfApp.Common.Views"
+             xmlns:converters="clr-namespace:AssetTracker.WpfApp.Common.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <converters:BooleanInverterConverter x:Key="BooleanInverterConverter"/>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Label Grid.Column="0" Content="Paste link to check:" FontSize="14" FontWeight="Bold" Padding="10" Foreground="#222222"/>
+        <TextBox Grid.Column="1" Text="{Binding CheckLinkUrl, UpdateSourceTrigger=PropertyChanged}" Margin="10" Padding="10,5" FontSize="14"
+                 IsEnabled="{Binding IsCheckLinkInProgress, Converter={StaticResource BooleanInverterConverter}}"/>
+        <Button Grid.Column="2" Content="Check Link" Command="{Binding CheckLinkCommand}" Margin="10" Padding="10,5"
+                Visibility="{Binding IsCheckLinkInProgress, Converter={StaticResource InvertedBooleanToVisibilityConverter}}"/>
+        <Button Grid.Column="2" Content="Cancel" Command="{Binding CancelCheckLinkCommand}" Margin="10" Padding="10,5"
+                Visibility="{Binding IsCheckLinkInProgress, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+        <ProgressBar Grid.Row="1" Grid.ColumnSpan="3"
+             Height="20"
+             IsIndeterminate="{Binding IsCheckLinkInProgress}"
+             Visibility="{Binding IsCheckLinkInProgress, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        
+        <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Text="{Binding CheckLinkStatusMessage}" FontSize="12" Foreground="Gray" Margin="10,0,10,10" VerticalAlignment="Bottom"/>
+
+        <TextBlock Grid.Row="3" Grid.ColumnSpan="3" Text="TODO:results" FontSize="12" Foreground="Gray" Margin="10,0,10,10" VerticalAlignment="Bottom"/>
+
+    </Grid>
+</UserControl>

@@ -7,6 +7,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
     /// </summary>
     public interface IScraperServiceMasterModel
     {
+        string ModuleName { get; }
         IScraperServiceListItemView? ListItemView { get; }
         IScraperServiceMainView? DefaultMainView { get; }
     }

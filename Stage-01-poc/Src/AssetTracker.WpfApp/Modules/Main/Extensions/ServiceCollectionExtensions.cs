@@ -13,6 +13,7 @@ namespace AssetTracker.WpfApp.Modules.Main.Extensions
             services.AddSingleton<MainWindow>();
             services.AddSingleton<IEventAggregator, EventAggregator>();
             services.AddTransient<IMyHttpClient,MyHttpClient>();
+            services.AddSingleton<IAssetsComparer, AssetsComparer>();
         }
     }
 }

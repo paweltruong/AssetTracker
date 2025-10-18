@@ -9,6 +9,8 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
         ScraperListItemView _listItemView;
         ScraperMainView _mainView;
 
+        public string ModuleName => SteamScraperModule.ModuleName;
+
         public ScraperServiceMasterViewModel(ScraperListItemView listItemView, ScraperMainView mainView)
         {
             _listItemView = listItemView;
@@ -17,5 +19,6 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
         public IScraperServiceListItemView? ListItemView => _listItemView;
 
         public IScraperServiceMainView? DefaultMainView => _mainView;
+
     }
 }

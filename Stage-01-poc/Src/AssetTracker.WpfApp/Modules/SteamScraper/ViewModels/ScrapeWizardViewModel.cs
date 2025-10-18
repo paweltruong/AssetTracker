@@ -13,6 +13,7 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
     {
         private readonly IEventAggregator _eventAggregator;
         private readonly ISteamService _steamService;
+
         private CancellationTokenSource _lastCancellationTokenSource;
         public ICommand OpenLinkCommand { get; }
         public IAsyncRelayCommand StartCommand { get; }
