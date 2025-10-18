@@ -10,7 +10,7 @@ Paweł Truong
 
 image:https://img.shields.io/badge/License-MIT-yellow.svg[License: MIT,link={license-url}]
 image:https://img.shields.io/badge/.NET-{dotnet-version}-purple.svg[.NET,link=https://dotnet.microsoft.com]
-image:https://img.shields.io/badge/Blazor-Server-blue.svg[WPF,link=https://learn.microsoft.com/dotnet/desktop/wpf/overview/]
+
 
 
 From idea to final product
