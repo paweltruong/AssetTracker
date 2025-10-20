@@ -32,7 +32,7 @@ namespace AssetTracker.UnitTests.Modules.SteamScraper.Services
             var apiResponse = TestDataHelper.CreateSteamApiResponse();
             string requestUrl = TestDataHelper.GetSteamGamesRequestUrl(steamApiKey, steamId);
 
-            _httpClient.Setup(x => x.GetAsync(requestUrl))
+            _httpClient.Setup(x => x.GetAsync(requestUrl, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new HttpResponseMessage
                 {
                     StatusCode = HttpStatusCode.OK,

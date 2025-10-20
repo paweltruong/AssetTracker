@@ -1,6 +1,6 @@
 ﻿namespace AssetTracker.WpfApp.Common.Models.Enums
 {
-    public enum AssetTypes
+    public enum AssetType
     {
         Unknown = 0,
         Game = 1,

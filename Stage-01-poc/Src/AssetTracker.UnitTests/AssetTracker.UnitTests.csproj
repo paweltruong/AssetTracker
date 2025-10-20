@@ -10,6 +10,35 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Modules\HumbleBundle\AssetsResolver\TestData\source_books_magpie-games-extravaganza-books.html" />
+    <None Remove="Modules\HumbleBundle\AssetsResolver\TestData\source_books_python-programming-pearson-books.html" />
+    <None Remove="Modules\HumbleBundle\AssetsResolver\TestData\source_games_ign-fan-fest-2025-fall-edition.html" />
+    <None Remove="Modules\HumbleBundle\AssetsResolver\TestData\source_games_lone-survivor-bundle.html" />
+    <None Remove="Modules\HumbleBundle\AssetsResolver\TestData\source_software_30000-loops-for-30-software.html" />
+    <None Remove="Modules\HumbleBundle\AssetsResolver\TestData\source_software_audiophile-collection-software.html" />
+    <None Remove="Modules\HumbleBundle\AssetsResolver\TestData\source_software_best-synty-game-dev-assets-5.html" />
+    <None Remove="Modules\HumbleBundle\AssetsResolver\TestData\source_software_complete-devops-mlops-mastery-bundle-packt-software.html" />
+    <None Remove="Modules\HumbleBundle\AssetsResolver\TestData\source_store_no-mans-sky.html" />
+    <None Remove="Modules\HumbleBundle\AssetsResolver\TestData\source_store_ultimate-chicken-horse.html" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Modules\HumbleBundle\AssetsResolver\TestData\source_books_magpie-games-extravaganza-books.html" />
+    <EmbeddedResource Include="Modules\HumbleBundle\AssetsResolver\TestData\source_books_python-programming-pearson-books.html" />
+    <EmbeddedResource Include="Modules\HumbleBundle\AssetsResolver\TestData\source_games_ign-fan-fest-2025-fall-edition.html" />
+    <EmbeddedResource Include="Modules\HumbleBundle\AssetsResolver\TestData\source_games_lone-survivor-bundle.html" />
+    <EmbeddedResource Include="Modules\HumbleBundle\AssetsResolver\TestData\source_software_30000-loops-for-30-software.html" />
+    <EmbeddedResource Include="Modules\HumbleBundle\AssetsResolver\TestData\source_software_audiophile-collection-software.html" />
+    <EmbeddedResource Include="Modules\HumbleBundle\AssetsResolver\TestData\source_software_best-synty-game-dev-assets-5.html" />
+    <EmbeddedResource Include="Modules\HumbleBundle\AssetsResolver\TestData\source_software_complete-unreal-engine-57-assets-deluxe-bundle-software.html" />
+    <EmbeddedResource Include="Modules\HumbleBundle\AssetsResolver\TestData\source_software_gigantic-game-dev-assets-tools-megabundle-software.html" />
+    <EmbeddedResource Include="Modules\HumbleBundle\AssetsResolver\TestData\source_software_complete-devops-mlops-mastery-bundle-packt-software.html" />
+    <EmbeddedResource Include="Modules\HumbleBundle\AssetsResolver\TestData\source_store_no-mans-sky.html" />
+    <EmbeddedResource Include="Modules\HumbleBundle\AssetsResolver\TestData\source_store_tiny-tinas-wonderlands-chaotic-great-edition.html" />
+    <EmbeddedResource Include="Modules\HumbleBundle\AssetsResolver\TestData\source_store_ultimate-chicken-horse.html" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
     <PackageReference Include="FluentAssertions" Version="8.7.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />

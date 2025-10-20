@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Net.Http;
 
 namespace AssetTracker.WpfApp.Common.Services
@@ -10,6 +11,26 @@ namespace AssetTracker.WpfApp.Common.Services
     {
         Uri? BaseAddress { get; set; }
         TimeSpan Timeout { get; set; }
+
+        #region Simple Get Overloads
+
+        Task<string> GetStringAsync([StringSyntax(StringSyntaxAttribute.Uri)] string? requestUri);
+        Task<string> GetStringAsync(Uri? requestUri);
+        Task<string> GetStringAsync([StringSyntax(StringSyntaxAttribute.Uri)] string? requestUri, CancellationToken cancellationToken);
+        Task<string> GetStringAsync(Uri? requestUri, CancellationToken cancellationToken);
+        //Task<string> GetStringAsyncCore(HttpRequestMessage request, CancellationToken cancellationToken);
+        Task<byte[]> GetByteArrayAsync([StringSyntax(StringSyntaxAttribute.Uri)] string? requestUri);
+        Task<byte[]> GetByteArrayAsync(Uri? requestUri);
+        Task<byte[]> GetByteArrayAsync([StringSyntax(StringSyntaxAttribute.Uri)] string? requestUri, CancellationToken cancellationToken);
+        Task<byte[]> GetByteArrayAsync(Uri? requestUri, CancellationToken cancellationToken);
+        //Task<byte[]> GetByteArrayAsyncCore(HttpRequestMessage request, CancellationToken cancellationToken);
+        Task<Stream> GetStreamAsync([StringSyntax(StringSyntaxAttribute.Uri)] string? requestUri);
+        Task<Stream> GetStreamAsync([StringSyntax(StringSyntaxAttribute.Uri)] string? requestUri, CancellationToken cancellationToken);
+        Task<Stream> GetStreamAsync(Uri? requestUri);
+        Task<Stream> GetStreamAsync(Uri? requestUri, CancellationToken cancellationToken);
+        //Task<Stream> GetStreamAsyncCore(HttpRequestMessage request, CancellationToken cancellationToken);
+
+        #endregion Simple Get Overloads
 
         #region REST Send Overloads
 
