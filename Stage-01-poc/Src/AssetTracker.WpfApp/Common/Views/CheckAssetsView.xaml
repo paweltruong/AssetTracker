@@ -11,6 +11,7 @@
         <converters:BooleanInverterConverter x:Key="BooleanInverterConverter"/>
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter"/>
+        <converters:CollectionToVisibilityConverter x:Key="CollectionToVisibilityConverter"/>
     </UserControl.Resources>
 
     <Grid>
@@ -41,7 +42,56 @@
         
         <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Text="{Binding CheckLinkStatusMessage}" FontSize="12" Foreground="Gray" Margin="10,0,10,10" VerticalAlignment="Bottom"/>
 
-        <TextBlock Grid.Row="3" Grid.ColumnSpan="3" Text="TODO:results" FontSize="12" Foreground="Gray" Margin="10,0,10,10" VerticalAlignment="Bottom"/>
+        
+        
+        <!--<TextBlock Grid.Row="3" Grid.ColumnSpan="3" 
+                   Text="TODO:results" 
+                   FontSize="12" 
+                   Foreground="Gray" 
+                   Margin="10,0,10,10" 
+                   VerticalAlignment="Bottom"/>-->
+        <Grid Grid.Row="3" Grid.ColumnSpan="3" >
+            <DataGrid ItemsSource="{Binding ComparisonResults}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      IsReadOnly="True"
+                      Margin="10"
+                      Visibility="{Binding ComparisonResults, Converter={StaticResource CollectionToVisibilityConverter}}">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Icon" Width="60">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Image Source="{Binding ImageUrl}" 
+                           Width="32" 
+                           Height="32"
+                           Stretch="Uniform"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Name" 
+                                  Binding="{Binding Name}" 
+                                  Width="*"/>
+                    <DataGridTextColumn Header="Asset Type" 
+                                  Binding="{Binding AssetType}" 
+                                  Width="150"/>
+                    <DataGridTextColumn Header="Status" 
+                                  Binding="{Binding Status}" 
+                                  Width="120"/>
+                    <DataGridTemplateColumn Header="Link" Width="150">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="Open Link" 
+                                    Command="{Binding DataContext.OpenLinkCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    CommandParameter="{Binding AssetUrl}"
+                                    Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
+                                    Background="Transparent"
+                                    BorderThickness="0"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
 
     </Grid>
 </UserControl>

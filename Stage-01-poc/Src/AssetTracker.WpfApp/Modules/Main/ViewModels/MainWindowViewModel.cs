@@ -1,6 +1,8 @@
 ﻿using AssetTracker.WpfApp.Common;
 using AssetTracker.WpfApp.Common.Commands;
 using AssetTracker.WpfApp.Common.Events;
+using AssetTracker.WpfApp.Common.Models;
+using AssetTracker.WpfApp.Common.Models.Enums;
 using AssetTracker.WpfApp.Common.Services;
 using AssetTracker.WpfApp.Common.Services.AssetsResolver;
 using AssetTracker.WpfApp.Common.Services.AssetsResolver.Definitions;
@@ -9,8 +11,9 @@ using AssetTracker.WpfApp.Common.ViewModels;
 using AssetTracker.WpfApp.Common.Views;
 using AssetTracker.WpfApp.Modules.SteamScraper;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Windows.Input;
 
 namespace AssetTracker.WpfApp.Modules.Main.ViewModels
 {
@@ -32,6 +35,17 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
 
             CheckLinkCommand = new AsyncRelayCommand(ExecuteCheckLinkCommand, CanExecuteCheckLinkCommand);
             CancelCheckLinkCommand = new AsyncRelayCommand(ExecuteCancelCheckLinkCommand, CanExecuteCancelCheckLinkCommand);
+            OpenLinkCommand = new RelayCommand<string>(url =>
+            {
+                if (!string.IsNullOrEmpty(url))
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = url,
+                        UseShellExecute = true
+                    });
+                }
+            });
         }
 
         private bool CanExecuteCancelCheckLinkCommand()
@@ -118,7 +132,17 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
                     return;
                 }
 
-                await _assetsComparer.CompareAsync(_lastCheckLinkCancellationTokenSource.Token);
+                ComparisonResults = new ObservableCollection<AssetComparisonResult>(
+                    successfullResolvers.SelectMany(t => t.Result.Items.Select(a => new AssetComparisonResult
+                    {
+                        ImageUrl = a.ImageUrl,
+                        Name = a.Name,
+                        AssetType = a.AssetType,
+                        Status = AssetComparisonStatus.Unknown,
+                        AssetUrl = a.AssetUrl
+                    }))
+                );
+                //await _assetsComparer.CompareAsync(_lastCheckLinkCancellationTokenSource.Token);
 
                 _eventAggregator.Publish(new CheckLinkStatusChangedEvent
                 {
@@ -166,6 +190,13 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
             protected set => SetProperty(ref _checkLinkStatusMessage, value);
         }
 
+        private ObservableCollection<AssetComparisonResult> _comparisonResults = new ObservableCollection<AssetComparisonResult>();
+        public ObservableCollection<AssetComparisonResult> ComparisonResults
+        {
+            get => _comparisonResults;
+            private set { SetProperty(ref _comparisonResults, value); }
+        }
+
         private ObservableCollection<IScraperServiceMasterModel> _scraperServices;
         public ObservableCollection<IScraperServiceMasterModel> ScraperServices
         {
@@ -191,7 +222,7 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
             private set { SetProperty(ref _selectedServiceMainView, value); }
         }
 
-
+        public IRelayCommand OpenLinkCommand { get; }
         public IRelayCommand CheckLinkCommand { get; }
         public IRelayCommand CancelCheckLinkCommand { get; }
 

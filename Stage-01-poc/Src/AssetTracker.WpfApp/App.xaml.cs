@@ -15,22 +15,25 @@ namespace AssetTracker.WpfApp
         private ServiceCollection _serviceCollection;
         private ServiceProvider _serviceProvider;
         private List<IScraperModule> _modules = new List<IScraperModule>();
-        private ILoggerFactory _loggerFactory;
 
         public App()
         {
-            // Configure logging first
-            ConfigureLogging();
-
             _serviceCollection = new ServiceCollection();
 
             // Add logging services first
-            _serviceCollection.AddSingleton(_loggerFactory);
+            _serviceCollection.AddLogging(builder =>
+            {
+                builder.ClearProviders();
+                builder.AddDebug();
+                builder.AddConsole();
+                builder.SetMinimumLevel(LogLevel.Trace);
+            });
 
             // Configure your existing services
             _serviceCollection.ConfigureServices();
 
             _modules.Add(new SteamScraperModule());
+            _modules.Add(new HumbleBundleModule());
 
             foreach (var module in _modules)
             {
@@ -44,21 +47,8 @@ namespace AssetTracker.WpfApp
             mainWindow.Show();
         }
 
-        private void ConfigureLogging()
-        {
-            _loggerFactory = LoggerFactory.Create(builder =>
-            {
-                builder.ClearProviders(); 
-                builder.AddDebug();        
-                builder.AddConsole();
-                builder.SetMinimumLevel(LogLevel.Trace);
-                // You can add more providers here as needed
-            });
-        }
-
         protected override void OnExit(ExitEventArgs e)
         {
-            _loggerFactory?.Dispose();
             _serviceProvider?.Dispose();
             base.OnExit(e);
         }

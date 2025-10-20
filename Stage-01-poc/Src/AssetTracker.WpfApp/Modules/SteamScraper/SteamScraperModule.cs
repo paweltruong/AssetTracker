@@ -14,7 +14,7 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper
         public const string ModuleName = "SteamScraper";
         public void ConfigureModule(IServiceCollection services)
         {
-            services.AddKeyedSingleton<IAssetsResolver, SteamAssetUrlResolver>(ModuleName);
+            services.AddKeyedSingleton<IAssetsResolver, SteamAssetsResolver>(ModuleName);
             services.AddSingleton<ScraperServiceMasterViewModel>();
             services.AddSingleton<ScraperListItemViewModel>();
             services.AddSingleton<ScraperListItemView>();

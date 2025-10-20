@@ -6,7 +6,6 @@ using AssetTracker.WpfApp.Common.Services.AssetsResolver.Definitions;
 using AssetTracker.WpfApp.Modules.HumbleBundle.AssetsResolver.Definitions;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
-using System.Net.Http;
 using System.Text.Json;
 
 namespace AssetTracker.WpfApp.Modules.HumbleBundle.AssetsResolver
@@ -33,13 +32,14 @@ namespace AssetTracker.WpfApp.Modules.HumbleBundle.AssetsResolver
             AssetType linkAssetType;
             bool isBundle;
             bool wasSuccessful = false;
+            IEnumerable<AssetItem> assets = new List<AssetItem>();
 
             if (!TryGetAssetTypeFromUrl(url, out linkAssetType, out isBundle))
             {
                 return new AssetsResolverResult
                 {
                     WasSuccessful = wasSuccessful,
-                    Items = new List<AssetItem>()
+                    Items = assets
                 };
             }
 
@@ -51,7 +51,7 @@ namespace AssetTracker.WpfApp.Modules.HumbleBundle.AssetsResolver
                 // Fetch the HTML content
                 string htmlContent = await _httpClient.GetStringAsync(url);
 
-                var assets = GetAssetDataFromHtmlSource(linkAssetType, isBundle, ref htmlContent);
+                assets = GetAssetDataFromHtmlSource(linkAssetType, isBundle, ref htmlContent);
 
                 _logger.LogTrace(string.Join("\r\n", assets.Select(x => x.Name)));
                 wasSuccessful = true;
@@ -73,7 +73,7 @@ namespace AssetTracker.WpfApp.Modules.HumbleBundle.AssetsResolver
             return new AssetsResolverResult
             {
                 WasSuccessful = wasSuccessful,
-                Items = new List<AssetItem>()
+                Items = assets
             };
         }
 

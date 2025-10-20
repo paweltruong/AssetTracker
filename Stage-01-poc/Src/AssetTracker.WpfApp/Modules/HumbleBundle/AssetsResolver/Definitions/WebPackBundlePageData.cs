@@ -4,6 +4,9 @@ namespace AssetTracker.WpfApp.Modules.HumbleBundle.AssetsResolver.Definitions
 {
     public class WebPackBundlePageData
     {
+        public const string DeveloperSyntyStudios = "Synty Studios";
+
+
         [JsonPropertyName("bundleData")]
         public BundleData BundleData { get; set; }
 
@@ -138,6 +141,12 @@ namespace AssetTracker.WpfApp.Modules.HumbleBundle.AssetsResolver.Definitions
 
         public string GetAssetUrl()
         {
+            if (Developers.Any(x =>
+                x.Name.Equals(WebPackBundlePageData.DeveloperSyntyStudios,
+                StringComparison.OrdinalIgnoreCase)))
+                return Developers.First(x =>
+                x.Name.Equals(WebPackBundlePageData.DeveloperSyntyStudios,
+                StringComparison.OrdinalIgnoreCase)).Url;
             //TODO: get steam store link for game if it could be redeemed on steam (look for availability_icons)
             return "TODO";
         }
