@@ -12,6 +12,7 @@
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter"/>
         <converters:CollectionToVisibilityConverter x:Key="CollectionToVisibilityConverter"/>
+        <converters:StatusToStyleConverter x:Key="StatusToStyleConverter"/>
     </UserControl.Resources>
 
     <Grid>
@@ -42,14 +43,6 @@
         
         <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Text="{Binding CheckLinkStatusMessage}" FontSize="12" Foreground="Gray" Margin="10,0,10,10" VerticalAlignment="Bottom"/>
 
-        
-        
-        <!--<TextBlock Grid.Row="3" Grid.ColumnSpan="3" 
-                   Text="TODO:results" 
-                   FontSize="12" 
-                   Foreground="Gray" 
-                   Margin="10,0,10,10" 
-                   VerticalAlignment="Bottom"/>-->
         <Grid Grid.Row="3" Grid.ColumnSpan="3" >
             <DataGrid ItemsSource="{Binding ComparisonResults}"
                       AutoGenerateColumns="False"
@@ -83,9 +76,16 @@
                     <DataGridTextColumn Header="Asset Type" 
                                   Binding="{Binding AssetType}" 
                                   Width="150"/>
-                    <DataGridTextColumn Header="Status" 
-                                  Binding="{Binding Status}" 
-                                  Width="120"/>
+                    <DataGridTemplateColumn Header="Status" Width="120">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Status}" 
+                                           Style="{Binding Status, Converter={StaticResource StatusToStyleConverter}}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                     <DataGridTemplateColumn Header="Link" Width="150">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>

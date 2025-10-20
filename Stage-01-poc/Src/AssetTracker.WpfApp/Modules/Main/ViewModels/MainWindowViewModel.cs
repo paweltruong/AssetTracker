@@ -13,7 +13,6 @@ using AssetTracker.WpfApp.Modules.SteamScraper;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Threading;
 
 namespace AssetTracker.WpfApp.Modules.Main.ViewModels
 {
@@ -57,63 +56,44 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
             }
             else if (@event.CheckLinkProcessStatus == GenericProcessStatus.Completed)
             {
-                //await Task.Run(() =>
-                //{
+                foreach (var result in ComparisonResults)
+                {
+                    result.Status = AssetComparisonStatus.Processing;
+                }
 
-                //    CheckLinkStatusMessage = "Link check completed.";
-                //    var newResults = new ObservableCollection<AssetComparisonResult>(ComparisonResults);
+                // Process each item in parallel and update status independently
+                var tasks = ComparisonResults.Select(async result =>
+                {
+                    try
+                    {
+                        var compareResult = await _assetsComparer.CompareAssetAsync(result.InnerItem, CancellationToken.None);
 
-                //    Parallel.ForEach(newResults, result =>
-                //    {
-                //        var compareResult = _assetsComparer.CompareAssetAsync(result.InnerItem);
-                //        if (compareResult.WasSuccessful)
-                //        {
-                //            result.Status = compareResult.MatchingOwnedAssets.Any() ?
-                //                AssetComparisonStatus.Exists : AssetComparisonStatus.NotExists;
-                //        }
-                //        else
-                //        {
-                //            result.Status = AssetComparisonStatus.Error;
-                //        }
-                //    });
+                        // Use Dispatcher to update UI properties on the UI thread
+                        await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                        {
+                            if (compareResult.WasSuccessful)
+                            {
+                                result.Status = compareResult.MatchingOwnedAssets.Any() ?
+                                    AssetComparisonStatus.Exists : AssetComparisonStatus.NotExists;
+                            }
+                            else
+                            {
+                                result.Status = AssetComparisonStatus.Error;
+                            }
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                        {
+                            result.Status = AssetComparisonStatus.Error;
+                        });
+                        Debug.WriteLine($"Error comparing asset: {ex.Message}");
+                    }
+                });
 
-
-                //    //using var cts = new CancellationTokenSource();
-                //    //var cancellationToken = cts.Token;
-                //    //await Parallel.ForEachAsync(newResults, cts.Token, async (result, cancellationToken) =>
-                //    //{
-                //    //    var compareResult = await _assetsComparer.CompareAssetAsync(result.InnerItem, cancellationToken);
-                //    //    if (compareResult.WasSuccessful)
-                //    //    {
-                //    //        result.Status = compareResult.MatchingOwnedAssets.Any() ?
-                //    //            AssetComparisonStatus.Exists : AssetComparisonStatus.NotExists;
-                //    //    }
-                //    //    else
-                //    //    {
-                //    //        result.Status = AssetComparisonStatus.Error;
-                //    //    }
-                //    //});
-
-                //    //foreach (var item in newResults)
-                //    //{
-                //    //    var compareResult = await _assetsComparer.CompareAssetAsync(item.InnerItem, cancellationToken);
-                //    //    if (compareResult.WasSuccessful)
-                //    //    {
-                //    //        item.Status = compareResult.MatchingOwnedAssets.Any() ?
-                //    //            AssetComparisonStatus.Exists : AssetComparisonStatus.NotExists;
-                //    //    }
-                //    //    else
-                //    //    {
-                //    //        item.Status = AssetComparisonStatus.Error;
-                //    //    }
-                //    //}
-
-                //    // Execute on UI thread if needed
-                //    System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                //    {
-                //        ComparisonResults = newResults;
-                //    });
-                //});
+                await Task.WhenAll(tasks);
+                CheckLinkStatusMessage = "All comparisons completed.";
 
             }
             else if (@event.CheckLinkProcessStatus == GenericProcessStatus.Failed)

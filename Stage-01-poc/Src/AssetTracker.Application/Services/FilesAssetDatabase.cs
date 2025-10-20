@@ -14,28 +14,20 @@ namespace AssetTracker.Application.Services
         {
             if (asset.Name.Equals("POLYGON - Casino"))
             {
-                return await new Task<IEnumerable<OwnedAsset>>(() =>
+                // Return the result directly - no Task creation needed
+                return new List<OwnedAsset>
                 {
-                    List<OwnedAsset> ownedAssets = new List<OwnedAsset>
+                    new OwnedAsset
                     {
-                        new OwnedAsset
-                        {
-                             Name = "POLYGON - Casino",
-                            //public AssetType AssetType { get; set; }
-                            //public HashSet<string>? Tags { get; set; }
-                            //public string? ImageUrl { get; set; }
-                            //public IList<Publisher> Publishers { get; set; }
-                            //public IList<Developer> Developers { get; set; }
-                            //public string? AssetUrl { get; set; }
-                            MarketplaceAccountId = "paweltruong@o2.pl",
-                            MarketplaceName = "Synty Store",
-                            MarketplaceUrl = "https://syntystore.com/collections/polygon-sci-fi-city-pack/products/polygon-casino",
-                        }
-                    };
-                    return ownedAssets.AsEnumerable();
-                });
+                        Name = "POLYGON - Casino",
+                        MarketplaceAccountId = "paweltruong@o2.pl",
+                        MarketplaceName = "Synty Store",
+                        MarketplaceUrl = "https://syntystore.com/collections/polygon-sci-fi-city-pack/products/polygon-casino",
+                    }
+                };
             }
-            return await new Task<IEnumerable<OwnedAsset>>(() => Enumerable.Empty<OwnedAsset>());
+
+            return Enumerable.Empty<OwnedAsset>();
         }
     }
 }
