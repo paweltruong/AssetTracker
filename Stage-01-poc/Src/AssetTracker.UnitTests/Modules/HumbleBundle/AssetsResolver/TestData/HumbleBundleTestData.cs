@@ -1,4 +1,5 @@
-﻿using AssetTracker.WpfApp.Common.Models;
+﻿using AssetTracker.Core.Models.Enums;
+using AssetTracker.WpfApp.Common.Models;
 using AssetTracker.WpfApp.Common.Models.Enums;
 
 namespace AssetTracker.UnitTests.Modules.HumbleBundle.AssetsResolver.TestData

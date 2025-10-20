@@ -1,6 +1,5 @@
-﻿using AssetTracker.WpfApp.Common;
-using AssetTracker.WpfApp.Common.Services;
-using AssetTracker.WpfApp.Common.Services.AssetsResolver;
+﻿using AssetTracker.Core.Services.AssetsResolver;
+using AssetTracker.WpfApp.Common;
 using AssetTracker.WpfApp.Common.ViewModels;
 using AssetTracker.WpfApp.Modules.SteamScraper.Services;
 using AssetTracker.WpfApp.Modules.SteamScraper.ViewModels;

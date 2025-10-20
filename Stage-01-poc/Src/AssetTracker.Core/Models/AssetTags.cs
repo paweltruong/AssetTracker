@@ -1,8 +1,13 @@
-﻿using AssetTracker.WpfApp.Common.Models.Enums;
+﻿using AssetTracker.Core.Models.Enums;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace AssetTracker.WpfApp.Common.Models
+namespace AssetTracker.Core.Models
 {
-    public static class Tags
+    public static class AssetTags
     {
         public const string GameTag = "Game";
         public const string SoftwareTag = "Software";

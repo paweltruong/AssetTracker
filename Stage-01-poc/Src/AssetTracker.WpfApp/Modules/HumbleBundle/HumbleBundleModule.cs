@@ -1,5 +1,5 @@
-﻿using AssetTracker.WpfApp.Common;
-using AssetTracker.WpfApp.Common.Services.AssetsResolver;
+﻿using AssetTracker.Core.Services.AssetsResolver;
+using AssetTracker.WpfApp.Common;
 using AssetTracker.WpfApp.Common.ViewModels;
 using AssetTracker.WpfApp.Modules.HumbleBundle.AssetsResolver;
 using AssetTracker.WpfApp.Modules.HumbleBundle.Scrapper.ViewModels;

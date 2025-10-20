@@ -1,4 +1,5 @@
-﻿using AssetTracker.WpfApp.Common;
+﻿using AssetTracker.Application;
+using AssetTracker.WpfApp.Common;
 using AssetTracker.WpfApp.Modules.Main.Extensions;
 using AssetTracker.WpfApp.Modules.SteamScraper;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +11,7 @@ namespace AssetTracker.WpfApp
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App : Application
+    public partial class App : System.Windows.Application
     {
         private ServiceCollection _serviceCollection;
         private ServiceProvider _serviceProvider;
@@ -31,6 +32,7 @@ namespace AssetTracker.WpfApp
 
             // Configure your existing services
             _serviceCollection.ConfigureServices();
+            ApplicationIocConfig.RegisterServices(_serviceCollection);
 
             _modules.Add(new SteamScraperModule());
             _modules.Add(new HumbleBundleModule());

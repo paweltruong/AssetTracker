@@ -1,4 +1,5 @@
-﻿using AssetTracker.UnitTests.Modules.HumbleBundle.AssetsResolver.TestData;
+﻿using AssetTracker.Core.Models;
+using AssetTracker.UnitTests.Modules.HumbleBundle.AssetsResolver.TestData;
 using AssetTracker.WpfApp.Common.Models;
 using AssetTracker.WpfApp.Common.Models.Enums;
 using FluentAssertions;
@@ -25,7 +26,7 @@ namespace AssetTracker.UnitTests.Modules.HumbleBundle.AssetsResolver.Helpers
             return reader.ReadToEnd();
         }
 
-        public static void AssertAssetItemsEqual(List<ExpectedAssetItem> expected, List<AssetItem> actual)
+        public static void AssertAssetItemsEqual(List<ExpectedAssetItem> expected, List<Asset> actual)
         {
             actual.Should().HaveCount(expected.Count);
 

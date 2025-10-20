@@ -28,6 +28,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AssetTracker.Application\AssetTracker.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Assets\appIcon.png" />
   </ItemGroup>
 

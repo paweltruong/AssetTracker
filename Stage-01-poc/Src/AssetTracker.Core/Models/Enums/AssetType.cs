@@ -1,4 +1,4 @@
-﻿namespace AssetTracker.WpfApp.Common.Models.Enums
+﻿namespace AssetTracker.Core.Models.Enums
 {
     public enum AssetType
     {

@@ -1,6 +1,6 @@
-﻿using AssetTracker.WpfApp.Common.Models;
-using AssetTracker.WpfApp.Common.Services.AssetsResolver;
-using AssetTracker.WpfApp.Common.Services.AssetsResolver.Definitions;
+﻿using AssetTracker.Core.Models;
+using AssetTracker.Core.Services.AssetsResolver;
+using AssetTracker.Core.Services.AssetsResolver.Definitions;
 
 namespace AssetTracker.WpfApp.Modules.SteamScraper.Services
 {
@@ -14,7 +14,7 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.Services
                 return new AssetsResolverResult
                 {
                     WasSuccessful = false,
-                    Items = new List<AssetItem>()
+                    Items = new List<Asset>()
                 };
             }
 
@@ -23,7 +23,7 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.Services
             return new AssetsResolverResult
             {
                 WasSuccessful = true,
-                Items = new List<AssetItem>()
+                Items = new List<Asset>()
             };
         }
     }

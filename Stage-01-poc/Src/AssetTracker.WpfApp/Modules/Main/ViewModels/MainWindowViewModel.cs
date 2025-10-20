@@ -1,11 +1,11 @@
-﻿using AssetTracker.WpfApp.Common;
+﻿using AssetTracker.Core.Models.Enums;
+using AssetTracker.Core.Services.AssetsComparer;
+using AssetTracker.Core.Services.AssetsResolver;
+using AssetTracker.Core.Services.AssetsResolver.Definitions;
+using AssetTracker.WpfApp.Common;
 using AssetTracker.WpfApp.Common.Commands;
 using AssetTracker.WpfApp.Common.Events;
 using AssetTracker.WpfApp.Common.Models;
-using AssetTracker.WpfApp.Common.Models.Enums;
-using AssetTracker.WpfApp.Common.Services;
-using AssetTracker.WpfApp.Common.Services.AssetsResolver;
-using AssetTracker.WpfApp.Common.Services.AssetsResolver.Definitions;
 using AssetTracker.WpfApp.Common.Utils;
 using AssetTracker.WpfApp.Common.ViewModels;
 using AssetTracker.WpfApp.Common.Views;
@@ -13,7 +13,7 @@ using AssetTracker.WpfApp.Modules.SteamScraper;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Windows.Input;
+using System.Threading;
 
 namespace AssetTracker.WpfApp.Modules.Main.ViewModels
 {
@@ -29,6 +29,7 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
         {
             _eventAggregator = eventAggregator;
             _eventAggregator.Subscribe<ChangeMainViewEvent>(OnChangeMainViewEvent);
+            _eventAggregator.Subscribe<CheckLinkStatusChangedEvent>(OnCheckLinkStatusChangedEvent);
             _assetsComparer = assetsComparer;
 
             _scraperServices = new ObservableCollection<IScraperServiceMasterModel>();
@@ -46,6 +47,83 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
                     });
                 }
             });
+        }
+
+        private async void OnCheckLinkStatusChangedEvent(CheckLinkStatusChangedEvent @event)
+        {
+            if (@event.CheckLinkProcessStatus == GenericProcessStatus.InProgress)
+            {
+                CheckLinkStatusMessage = "Checking link...";
+            }
+            else if (@event.CheckLinkProcessStatus == GenericProcessStatus.Completed)
+            {
+                //await Task.Run(() =>
+                //{
+
+                //    CheckLinkStatusMessage = "Link check completed.";
+                //    var newResults = new ObservableCollection<AssetComparisonResult>(ComparisonResults);
+
+                //    Parallel.ForEach(newResults, result =>
+                //    {
+                //        var compareResult = _assetsComparer.CompareAssetAsync(result.InnerItem);
+                //        if (compareResult.WasSuccessful)
+                //        {
+                //            result.Status = compareResult.MatchingOwnedAssets.Any() ?
+                //                AssetComparisonStatus.Exists : AssetComparisonStatus.NotExists;
+                //        }
+                //        else
+                //        {
+                //            result.Status = AssetComparisonStatus.Error;
+                //        }
+                //    });
+
+
+                //    //using var cts = new CancellationTokenSource();
+                //    //var cancellationToken = cts.Token;
+                //    //await Parallel.ForEachAsync(newResults, cts.Token, async (result, cancellationToken) =>
+                //    //{
+                //    //    var compareResult = await _assetsComparer.CompareAssetAsync(result.InnerItem, cancellationToken);
+                //    //    if (compareResult.WasSuccessful)
+                //    //    {
+                //    //        result.Status = compareResult.MatchingOwnedAssets.Any() ?
+                //    //            AssetComparisonStatus.Exists : AssetComparisonStatus.NotExists;
+                //    //    }
+                //    //    else
+                //    //    {
+                //    //        result.Status = AssetComparisonStatus.Error;
+                //    //    }
+                //    //});
+
+                //    //foreach (var item in newResults)
+                //    //{
+                //    //    var compareResult = await _assetsComparer.CompareAssetAsync(item.InnerItem, cancellationToken);
+                //    //    if (compareResult.WasSuccessful)
+                //    //    {
+                //    //        item.Status = compareResult.MatchingOwnedAssets.Any() ?
+                //    //            AssetComparisonStatus.Exists : AssetComparisonStatus.NotExists;
+                //    //    }
+                //    //    else
+                //    //    {
+                //    //        item.Status = AssetComparisonStatus.Error;
+                //    //    }
+                //    //}
+
+                //    // Execute on UI thread if needed
+                //    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                //    {
+                //        ComparisonResults = newResults;
+                //    });
+                //});
+
+            }
+            else if (@event.CheckLinkProcessStatus == GenericProcessStatus.Failed)
+            {
+                CheckLinkStatusMessage = "Link check failed.";
+            }
+            else if (@event.CheckLinkProcessStatus == GenericProcessStatus.Canceled)
+            {
+                CheckLinkStatusMessage = "Link check canceled.";
+            }
         }
 
         private bool CanExecuteCancelCheckLinkCommand()
@@ -133,14 +211,7 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
                 }
 
                 ComparisonResults = new ObservableCollection<AssetComparisonResult>(
-                    successfullResolvers.SelectMany(t => t.Result.Items.Select(a => new AssetComparisonResult
-                    {
-                        ImageUrl = a.ImageUrl,
-                        Name = a.Name,
-                        AssetType = a.AssetType,
-                        Status = AssetComparisonStatus.Unknown,
-                        AssetUrl = a.AssetUrl
-                    }))
+                    successfullResolvers.SelectMany(t => t.Result.Items.Select(a => new AssetComparisonResult(a)))
                 );
                 //await _assetsComparer.CompareAsync(_lastCheckLinkCancellationTokenSource.Token);
 

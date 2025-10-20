@@ -1,40 +1,29 @@
-﻿using AssetTracker.WpfApp.Common.Models.Enums;
+﻿using AssetTracker.Core.Models;
+using AssetTracker.Core.Models.Enums;
 
 namespace AssetTracker.WpfApp.Common.Models
 {
     public class AssetComparisonResult : BindableBase
     {
-        private string _imageUrl;
-        public string ImageUrl
+
+        public AssetComparisonResult(Asset innerItem)
         {
-            get => _imageUrl;
-            set => SetProperty(ref _imageUrl, value);
+               _innerItem = innerItem;
         }
 
-        private string _name;
-        public string Name
-        {
-            get => _name;
-            set => SetProperty(ref _name, value);
-        }
-        private AssetType _assetType;
-        public AssetType AssetType
-        {
-            get => _assetType;
-            set => SetProperty(ref _assetType, value);
-        }
+        Asset _innerItem;
+        public Asset InnerItem => _innerItem;
+        public string? ImageUrl => _innerItem.ImageUrl;
+        public string Name => _innerItem.Name;
+        public AssetType AssetType => _innerItem.AssetType;
+        public string? AssetUrl => _innerItem.AssetUrl;
+
 
         private AssetComparisonStatus _status;
         public AssetComparisonStatus Status
         {
             get => _status;
             set => SetProperty(ref _status, value);
-        }
-        private string _assetUrl;
-        public string AssetUrl
-        {
-            get => _assetUrl;
-            set => SetProperty(ref _assetUrl, value);
         }
     }
 }

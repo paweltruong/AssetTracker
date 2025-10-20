@@ -1,8 +1,8 @@
-﻿using AssetTracker.WpfApp.Common.Models;
-using AssetTracker.WpfApp.Common.Models.Enums;
+﻿using AssetTracker.Core.Models;
+using AssetTracker.Core.Models.Enums;
+using AssetTracker.Core.Services.AssetsResolver;
+using AssetTracker.Core.Services.AssetsResolver.Definitions;
 using AssetTracker.WpfApp.Common.Services;
-using AssetTracker.WpfApp.Common.Services.AssetsResolver;
-using AssetTracker.WpfApp.Common.Services.AssetsResolver.Definitions;
 using AssetTracker.WpfApp.Modules.HumbleBundle.AssetsResolver.Definitions;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
@@ -32,7 +32,7 @@ namespace AssetTracker.WpfApp.Modules.HumbleBundle.AssetsResolver
             AssetType linkAssetType;
             bool isBundle;
             bool wasSuccessful = false;
-            IEnumerable<AssetItem> assets = new List<AssetItem>();
+            IEnumerable<Asset> assets = new List<Asset>();
 
             if (!TryGetAssetTypeFromUrl(url, out linkAssetType, out isBundle))
             {
@@ -113,7 +113,7 @@ namespace AssetTracker.WpfApp.Modules.HumbleBundle.AssetsResolver
             return false;
         }
 
-        public IEnumerable<AssetItem> GetAssetDataFromHtmlSource(AssetType assetType, bool isBundle, ref string htmlSource)
+        public IEnumerable<Asset> GetAssetDataFromHtmlSource(AssetType assetType, bool isBundle, ref string htmlSource)
         {
             // Parse HTML using HtmlAgilityPack
             var htmlDocument = new HtmlDocument();
@@ -144,7 +144,7 @@ namespace AssetTracker.WpfApp.Modules.HumbleBundle.AssetsResolver
             {
                 // Handle non-bundle case if needed
             }
-            return new List<AssetItem>();
+            return new List<Asset>();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using AssetTracker.WpfApp.Common.Models.Enums;
+﻿using AssetTracker.Core.Models.Enums;
+using AssetTracker.WpfApp.Common.Models.Enums;
 using System.Collections.Generic;
 using System.IO.Pipes;
 
@@ -60,13 +61,13 @@ namespace AssetTracker.WpfApp.Common.Models
 
     public class PublisherItem
     {
-        public string Name { get; set; }
-        public string Url { get; set; }
+        public string? Name { get; set; }
+        public string? Url { get; set; }
     }
 
     public class DeveloperItem
     {
-        public string Name { get; set; }
-        public string Url { get; set; }
+        public string? Name { get; set; }
+        public string? Url { get; set; }
     }
 }

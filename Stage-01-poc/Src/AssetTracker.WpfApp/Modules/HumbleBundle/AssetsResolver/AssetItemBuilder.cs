@@ -1,16 +1,15 @@
-﻿using AssetTracker.WpfApp.Common.Models;
-using AssetTracker.WpfApp.Common.Models.Enums;
+﻿using AssetTracker.Core.Models;
+using AssetTracker.Core.Models.Enums;
 using AssetTracker.WpfApp.Modules.HumbleBundle.AssetsResolver.Definitions;
 
 namespace AssetTracker.WpfApp.Modules.HumbleBundle.AssetsResolver
 {
     public class AssetItemBuilder
     {
-
-        public static List<AssetItem> BuildAssetItems(WebPackBundlePageData data)
+        public static List<Asset> BuildAssetItems(WebPackBundlePageData data)
         {
             IEnumerable<TierItem?> tierItems = data.GetTierItems();
-            var items = new AssetItem[data.BundleData.TierItemData.Count];
+            var items = new Asset[data.BundleData.TierItemData.Count];
 
             Parallel.For(0, items.Length, i =>
             {
@@ -19,7 +18,7 @@ namespace AssetTracker.WpfApp.Modules.HumbleBundle.AssetsResolver
             return items.Where(x=>x != null).ToList();
         }
 
-        static AssetItem? ConvertToAssetItem(TierItem tierItem)
+        static Asset? ConvertToAssetItem(TierItem tierItem)
         {
             var assetType = GetAssetType(tierItem.ItemContentType);
             if(assetType == AssetType.Unknown)
@@ -27,18 +26,18 @@ namespace AssetTracker.WpfApp.Modules.HumbleBundle.AssetsResolver
                 //itgetsbetter items etc
                 return null;
             }
-            var defaultTag = Tags.GetDefaultTags(assetType);
+            var defaultTag = AssetTags.GetDefaultTags(assetType);
             //TODO:new feature to specify tags to be applied on import
             var userDefinedDefaultTagsSet = new HashSet<string>();
 
             userDefinedDefaultTagsSet.Add(defaultTag);
 
-            var assetItem = new AssetItem()
+            var assetItem = new Asset()
             {
                 Name = tierItem.HumanName,
                 AssetType = assetType,
                 Tags = userDefinedDefaultTagsSet,
-                ImageUrl = tierItem.ResolvedPaths.FrontPageArtImgixRetina,
+                ImageUrl = tierItem.ResolvedPaths.FeaturedImage ?? tierItem.ResolvedPaths.FrontPageArtImgixRetina,
                 Developers = ConvertToDeveloperItems(tierItem.Developers),
                 Publishers = ConvertToPublisherItems(tierItem.Publishers),
                 AssetUrl = tierItem.GetAssetUrl()
@@ -47,13 +46,13 @@ namespace AssetTracker.WpfApp.Modules.HumbleBundle.AssetsResolver
             return assetItem;
         }
 
-        static PublisherItem[] ConvertToPublisherItems(IEnumerable<PublisherData> publishers)
+        static Publisher[] ConvertToPublisherItems(IEnumerable<PublisherData> publishers)
         {
             if (publishers == null || !publishers.Any())
             {
-                return Array.Empty<PublisherItem>();
+                return Array.Empty<Publisher>();
             }
-            var items = publishers.Select(d => new PublisherItem()
+            var items = publishers.Select(d => new Publisher()
             {
                 Name = d.Name,
                 Url = d.Url
@@ -62,13 +61,13 @@ namespace AssetTracker.WpfApp.Modules.HumbleBundle.AssetsResolver
             return items;
         }
 
-        static DeveloperItem[] ConvertToDeveloperItems(IEnumerable<DeveloperData> developers)
+        static Developer[] ConvertToDeveloperItems(IEnumerable<DeveloperData> developers)
         {
             if (developers == null || !developers.Any())
             {
-                return Array.Empty<DeveloperItem>();
+                return Array.Empty<Developer>();
             }
-            var items = developers.Select(d => new DeveloperItem()
+            var items = developers.Select(d => new Developer()
             {
                 Name = d.Name,
                 Url = d.Url
