@@ -1,4 +1,5 @@
-﻿using AssetTracker.Core.Models.Enums;
+﻿using AssetTracker.Core.Models;
+using AssetTracker.Core.Models.Enums;
 using AssetTracker.WpfApp.Common.Models.Enums;
 using System.Collections.Generic;
 using System.IO.Pipes;
@@ -10,6 +11,18 @@ namespace AssetTracker.WpfApp.Common.Models
     {
         public AssetItem()
         {
+        }
+
+        public AssetItem(OwnedAsset ownedAsset)
+        {
+            Name = ownedAsset.Name;
+            AssetType = ownedAsset.AssetType;
+            Tags = new HashSet<string>(ownedAsset.Tags ?? Enumerable.Empty<string>());
+            ImageUrl = ownedAsset.ImageUrl;
+            Publishers = ownedAsset.Publishers?.Select(p => new PublisherItem { Name = p.Name, Url = p.Url }).ToArray() ?? Array.Empty<PublisherItem>();
+            Developers = ownedAsset.Developers?.Select(d => new DeveloperItem { Name = d.Name, Url = d.Url }).ToArray() ?? Array.Empty<DeveloperItem>();
+            AssetUrl = ownedAsset.AssetUrl;
+
         }
 
         private string _name;

@@ -10,5 +10,6 @@ namespace AssetTracker.WpfApp.Common.ViewModels
         string ModuleName { get; }
         IScraperServiceListItemView? ListItemView { get; }
         IScraperServiceMainView? DefaultMainView { get; }
+        IScraperServiceMainView? ImportAssetsView { get; }
     }
 }

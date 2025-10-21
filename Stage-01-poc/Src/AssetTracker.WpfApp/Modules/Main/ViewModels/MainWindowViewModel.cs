@@ -2,6 +2,7 @@
 using AssetTracker.Core.Services.AssetsComparer;
 using AssetTracker.Core.Services.AssetsResolver;
 using AssetTracker.Core.Services.AssetsResolver.Definitions;
+using AssetTracker.Core.Services.Plugins;
 using AssetTracker.WpfApp.Common;
 using AssetTracker.WpfApp.Common.Commands;
 using AssetTracker.WpfApp.Common.Events;
@@ -277,7 +278,9 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
         public IRelayCommand CheckLinkCommand { get; }
         public IRelayCommand CancelCheckLinkCommand { get; }
 
-        public void LoadScraperServices(IServiceProvider serviceProvider, IEnumerable<IScraperModule> modules)
+        public void LoadAssetsImporterPlugins(IServiceProvider serviceProvider,
+            IEnumerable<IScraperModule> modules,
+            List<Core.Services.Plugins.IPlugin> plugins)
         {
             _serviceProvider = serviceProvider;
             foreach (var module in modules)
@@ -288,19 +291,45 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
                     ScraperServices.Add(view);
                 }
             }
+            foreach (var plugin in plugins)
+            {
+                if (plugin is IAssetsImporterPlugin assetsImporterPlugin)
+                {
+                    if (assetsImporterPlugin.UseDefaultBrowserLayout)
+                    {
+                        var model = CreateDefaultBrowserAssetsImporterMasterModel(assetsImporterPlugin);
+                        if (model != null)
+                        {
+                            ScraperServices.Add(model);
+                        }
+                    }
+                }
+            }
+        }
+
+        private IScraperServiceMasterModel CreateDefaultBrowserAssetsImporterMasterModel(IAssetsImporterPlugin assetsImporterPlugin)
+        {
+            return new DefaultBrowserAssetsImporterMasterModel(_serviceProvider, assetsImporterPlugin);
         }
 
         private void OnChangeMainViewEvent(ChangeMainViewEvent eventData)
         {
             if (eventData != null
-                && eventData.MainView != null)
+                && eventData.IsValid)
             {
-                var newMainView = _serviceProvider.GetRequiredService(eventData.MainView) as IScraperServiceMainView;
-                if (newMainView == null)
+                if (eventData.MainViewType != null)
                 {
-                    throw new InvalidOperationException($"Could not resolve main view of type {eventData.MainView.FullName}");
+                    var newMainView = _serviceProvider.GetRequiredService(eventData.MainViewType) as IScraperServiceMainView;
+                    if (newMainView == null)
+                    {
+                        throw new InvalidOperationException($"Could not resolve main view of type {eventData.MainViewType.FullName}");
+                    }
+                    SelectedServiceMainView = newMainView;
                 }
-                SelectedServiceMainView = newMainView;
+                else if (eventData.MainView != null)
+                {
+                    SelectedServiceMainView = eventData.MainView;
+                }
             }
         }
     }

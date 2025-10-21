@@ -1,8 +1,8 @@
-﻿using AssetTracker.Core.Models;
+﻿using AssetTracker.Application.Services;
+using AssetTracker.Core.Models;
 using AssetTracker.Core.Models.Enums;
 using AssetTracker.Core.Services.AssetsResolver;
 using AssetTracker.Core.Services.AssetsResolver.Definitions;
-using AssetTracker.WpfApp.Common.Services;
 using AssetTracker.WpfApp.Modules.HumbleBundle.AssetsResolver.Definitions;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;

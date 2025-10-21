@@ -1,8 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Net.Http;
 
-namespace AssetTracker.WpfApp.Common.Services
+namespace AssetTracker.Application.Services
 {
     /// <summary>
     /// Wrapper interface for HttpClient to facilitate testing.

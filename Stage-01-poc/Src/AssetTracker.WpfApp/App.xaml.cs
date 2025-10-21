@@ -1,4 +1,6 @@
 ﻿using AssetTracker.Application;
+using AssetTracker.AssetsImporter.SyntyStore;
+using AssetTracker.Core.Services.Plugins;
 using AssetTracker.WpfApp.Common;
 using AssetTracker.WpfApp.Modules.Main.Extensions;
 using AssetTracker.WpfApp.Modules.SteamScraper;
@@ -16,6 +18,7 @@ namespace AssetTracker.WpfApp
         private ServiceCollection _serviceCollection;
         private ServiceProvider _serviceProvider;
         private List<IScraperModule> _modules = new List<IScraperModule>();
+        private List<IPlugin> _plugins = new List<IPlugin>();
 
         public App()
         {
@@ -36,16 +39,21 @@ namespace AssetTracker.WpfApp
 
             _modules.Add(new SteamScraperModule());
             _modules.Add(new HumbleBundleModule());
-
             foreach (var module in _modules)
             {
                 module.ConfigureModule(_serviceCollection);
             }
 
+            _plugins.Add(new SyntyStoreAssetsImporterPlugin());
+            foreach (var plugin in _plugins)
+            {
+                plugin.ConfigureServices(_serviceCollection);
+            }
+
             _serviceProvider = _serviceCollection.BuildServiceProvider();
 
             var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
-            mainWindow.ViewModel.LoadScraperServices(_serviceProvider, _modules);
+            mainWindow.ViewModel.LoadAssetsImporterPlugins(_serviceProvider, _modules, _plugins);
             mainWindow.Show();
         }
 

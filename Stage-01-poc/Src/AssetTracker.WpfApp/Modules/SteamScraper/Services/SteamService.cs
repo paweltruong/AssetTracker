@@ -1,4 +1,4 @@
-﻿using AssetTracker.WpfApp.Common.Services;
+﻿using AssetTracker.Application.Services;
 using AssetTracker.WpfApp.Modules.SteamScraper.Models;
 using System.Text.Json;
 

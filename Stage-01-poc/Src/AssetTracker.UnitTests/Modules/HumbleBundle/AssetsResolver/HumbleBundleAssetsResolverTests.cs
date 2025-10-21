@@ -1,6 +1,6 @@
-﻿using AssetTracker.UnitTests.Modules.HumbleBundle.AssetsResolver.Helpers;
+﻿using AssetTracker.Application.Services;
+using AssetTracker.UnitTests.Modules.HumbleBundle.AssetsResolver.Helpers;
 using AssetTracker.UnitTests.Modules.HumbleBundle.AssetsResolver.TestData;
-using AssetTracker.WpfApp.Common.Services;
 using AssetTracker.WpfApp.Modules.HumbleBundle.AssetsResolver;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;

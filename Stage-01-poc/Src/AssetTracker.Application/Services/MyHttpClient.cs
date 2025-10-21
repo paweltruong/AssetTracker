@@ -1,6 +1,4 @@
-﻿using System.Net.Http;
-
-namespace AssetTracker.WpfApp.Common.Services
+﻿namespace AssetTracker.Application.Services
 {
     public class MyHttpClient : HttpClient, IMyHttpClient
     {        

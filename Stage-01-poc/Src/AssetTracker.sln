@@ -17,6 +17,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssetTracker.Core", "AssetT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssetTracker.Application", "AssetTracker.Application\AssetTracker.Application.csproj", "{C7D45CA2-8A40-4EA9-8B40-68C7ADCE6BE9}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AAAPlugins", "AAAPlugins", "{06E3D993-BD28-4D6F-AA1C-2BFD87E74E3D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssetTracker.AssetsImporter.SyntyStore", "AssetTracker.AssetsImporter.SyntyStore\AssetTracker.AssetsImporter.SyntyStore.csproj", "{8B7F7632-24D8-4C7F-9E7D-2B5A2220D7DF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,10 @@ Global
 		{C7D45CA2-8A40-4EA9-8B40-68C7ADCE6BE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7D45CA2-8A40-4EA9-8B40-68C7ADCE6BE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7D45CA2-8A40-4EA9-8B40-68C7ADCE6BE9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B7F7632-24D8-4C7F-9E7D-2B5A2220D7DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B7F7632-24D8-4C7F-9E7D-2B5A2220D7DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B7F7632-24D8-4C7F-9E7D-2B5A2220D7DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B7F7632-24D8-4C7F-9E7D-2B5A2220D7DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -48,6 +56,7 @@ Global
 		{4E46E302-80AD-4387-9B18-24B441CA26CC} = {85F4E7BE-790B-413B-9F8B-89639D75D6B8}
 		{62D0D24E-478D-4F36-98AD-EF074ABE9974} = {16EB2C3B-9C4E-4686-8EE8-BCE72068B2E0}
 		{C7D45CA2-8A40-4EA9-8B40-68C7ADCE6BE9} = {16EB2C3B-9C4E-4686-8EE8-BCE72068B2E0}
+		{8B7F7632-24D8-4C7F-9E7D-2B5A2220D7DF} = {06E3D993-BD28-4D6F-AA1C-2BFD87E74E3D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {080F2C35-83C8-43AD-95D2-42EC3AC62627}

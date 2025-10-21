@@ -1,4 +1,5 @@
-﻿using AssetTracker.WpfApp.Common.Commands;
+﻿using AssetTracker.Core.Services.Plugins;
+using AssetTracker.WpfApp.Common.Commands;
 using AssetTracker.WpfApp.Common.Events;
 using AssetTracker.WpfApp.Common.Models;
 using AssetTracker.WpfApp.Common.Models.Enums;
@@ -6,17 +7,32 @@ using AssetTracker.WpfApp.Common.ViewModels;
 using AssetTracker.WpfApp.Modules.SteamScraper.Views;
 using System.Windows;
 
-namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
+namespace AssetTracker.WpfApp.Common.ViewModels
 {
-    public class ScraperListItemViewModel : ScraperServiceListItemViewModel<ScraperServiceDataModel>
+    public class DefaultBrowserAssetsImporterListItemViewModel : ScraperServiceListItemViewModel<ScraperServiceDataModel>
     {
+        IAssetsImporterPlugin _plugin;
+        IScraperServiceMasterModel _masterModel;
 
-        public ScraperListItemViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
+        public DefaultBrowserAssetsImporterListItemViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
         {
-            Model.Title = "Steam";
-            Model.Description = "Get owned game list";
-            Model.IconUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Steam_icon_logo.svg/512px-Steam_icon_logo.svg.png";
+            Model.Title = "Plugin";
+            Model.Description = "Get owned assets";
+            Model.IconUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Emblem-unreadable.svg/40px-Emblem-unreadable.svg.png";
             Model.Status = ScraperServiceStatus.NotLoaded;
+        }
+
+        public string PluginKey => _plugin?.PluginKey ?? string.Empty;
+
+        public void SetListItemProperties(IAssetsImporterPlugin plugin, IScraperServiceMasterModel masterModel)
+        {
+            _plugin = plugin;
+            _masterModel = masterModel;
+
+            Model.Title = plugin.DisplayName;
+            Model.Description = plugin.Description;
+            Model.IconUrl = plugin.IconUrl;
+            OnPropertyChanged(nameof(Model));
         }
 
         // Command methods
@@ -24,8 +40,8 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
         {
             _eventAggregator.Publish(new ChangeMainViewEvent
             {
-                ServiceName = SteamScraperModule.ModuleName,
-                MainViewType = typeof(ScrapeWizardView)
+                ServiceName = PluginKey,
+                MainView = _masterModel.ImportAssetsView
             });
         }
         protected override bool CanExecuteOpenFileCommand(object parameter) => false;
@@ -49,7 +65,7 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
         {
             _eventAggregator.Publish(new ChangeMainViewEvent
             {
-                ServiceName = SteamScraperModule.ModuleName,
+                ServiceName = PluginKey,
                 MainViewType = typeof(DataView)
             });
         }
@@ -60,7 +76,7 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
 
             // Handle the event at higher level
             if (eventData != null
-                && eventData.ServiceName.Equals(SteamScraperModule.ModuleName)
+                && eventData.ServiceName.Equals(PluginKey)
                 && eventData.CommandData is ServiceStatusEvents)
             {
                 switch (eventData.CommandData)
@@ -94,7 +110,7 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
             base.OnServiceDataChanged(eventData);
 
             if (eventData != null
-                && eventData.ServiceName.Equals(SteamScraperModule.ModuleName))
+                && eventData.ServiceName.Equals(PluginKey))
             {
                 Model.ViewDataButtonText = eventData.DataCount > 0 ? 
                     string.Format(ScraperServiceDataModel.ViewDataButtonTextFormatted, eventData.DataCount)

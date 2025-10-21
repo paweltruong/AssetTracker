@@ -6,19 +6,19 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
 {
     public class ScraperServiceMasterViewModel : IScraperServiceMasterModel
     {
-        ScraperListItemView _listItemView;
-        ScraperMainView _mainView;
-
         public string ModuleName => SteamScraperModule.ModuleName;
 
-        public ScraperServiceMasterViewModel(ScraperListItemView listItemView, ScraperMainView mainView)
+        public ScraperServiceMasterViewModel(ScraperListItemView listItemView, ScraperMainView mainView, ScrapeWizardView importAssetsView)
         {
-            _listItemView = listItemView;
-            _mainView = mainView;
+            ListItemView = listItemView;
+            DefaultMainView = mainView;
+            ImportAssetsView = importAssetsView;
+
         }
-        public IScraperServiceListItemView? ListItemView => _listItemView;
+        public IScraperServiceListItemView? ListItemView { get; private set; }
 
-        public IScraperServiceMainView? DefaultMainView => _mainView;
+        public IScraperServiceMainView? DefaultMainView { get; private set; }
 
+        public IScraperServiceMainView? ImportAssetsView { get; private set; }
     }
 }
