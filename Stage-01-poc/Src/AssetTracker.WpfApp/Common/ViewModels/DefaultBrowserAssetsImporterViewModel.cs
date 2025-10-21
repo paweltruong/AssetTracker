@@ -26,6 +26,12 @@ namespace AssetTracker.WpfApp.Common.ViewModels
         public IAsyncRelayCommand StartCommand { get; }
         public IAsyncRelayCommand StopCommand { get; }
 
+        Microsoft.Web.WebView2.Wpf.WebView2 _browser;
+        public void SetupBrowser(Microsoft.Web.WebView2.Wpf.WebView2 browser)
+        {
+            _browser = browser;
+        }
+
         public DefaultBrowserAssetsImporterViewModel(IEventAggregator eventAggregator, IAssetsImporterPlugin plugin, IAssetsImporter assetImporter)
         {
             _eventAggregator = eventAggregator;
@@ -119,9 +125,15 @@ namespace AssetTracker.WpfApp.Common.ViewModels
 
         Task<IEnumerable<OwnedAsset>> _scrapingTask;
 
-        public async Task StartScrapeAsync()
+        public async Task StartScrapeAsync(string url, string htmlSource)
         {
-
+            var results = await _assetImporter.ImportAssetsFromHtmlSourceAsync(url, htmlSource);
+            if (string.IsNullOrEmpty(results.NextPageUrl))
+            {
+                
+            }
+            Assets = new ObservableCollection<AssetItem>(results.OwnedAssets.Select(g => new AssetItem(g)));
+            StatusMessage = $"Loaded {Assets.Count} games successfully!";
         }
 
         private async Task StartScrape()

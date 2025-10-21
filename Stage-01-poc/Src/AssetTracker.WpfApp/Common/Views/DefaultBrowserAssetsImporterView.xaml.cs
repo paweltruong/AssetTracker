@@ -5,6 +5,7 @@ using System.Net;
 using System.Windows;
 using System.Windows.Controls;
 using System.IO;
+using AssetTracker.WpfApp.Common.ViewModels;
 
 namespace AssetTracker.WpfApp.Common.Views
 {
@@ -48,6 +49,10 @@ namespace AssetTracker.WpfApp.Common.Views
             {
                 await Browser.EnsureCoreWebView2Async();
                 Browser.Source = new Uri("https://syntystore.com/");
+                if (DataContext is DefaultBrowserAssetsImporterViewModel viewModel)
+                {
+                    viewModel.SetupBrowser(Browser);
+                }
             }
             catch (Exception ex)
             {
@@ -96,7 +101,10 @@ namespace AssetTracker.WpfApp.Common.Views
 
             string html = await Browser.ExecuteScriptAsync("document.documentElement.outerHTML;");
             html = System.Text.Json.JsonSerializer.Deserialize<string>(html);
-            DataContext as I
+            if (DataContext is DefaultBrowserAssetsImporterViewModel viewModel)
+            {
+                await viewModel.StartScrapeAsync(Browser.Source.AbsoluteUri, html);
+            }
         }
 
         private async Task<CoreWebView2Cookie[]> GetCookiesAsync(string url)
