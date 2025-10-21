@@ -6,5 +6,7 @@
         string DisplayName { get; }
         string Description { get; }
         string IconUrl { get; }
+        string ImportDescription { get; }
+        string ImportSourceUrl { get; }
     }
 }

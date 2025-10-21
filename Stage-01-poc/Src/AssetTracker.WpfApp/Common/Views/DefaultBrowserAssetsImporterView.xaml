@@ -4,7 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:AssetTracker.WpfApp.Common.Views"       
-             xmlns:converters="clr-namespace:AssetTracker.WpfApp.Common.Converters"   
+             xmlns:converters="clr-namespace:AssetTracker.WpfApp.Common.Converters"
+             xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
@@ -54,81 +55,31 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <TextBlock TextWrapping="Wrap" Margin="10">
-            <Run Text="Enter your loginId" FontWeight="Bold"/>
-            <LineBreak/>
-            <Run Text="If you don't know your steam id perform these steps:"/>
-            <LineBreak/>
-            <Run Text="Step 1: go to "/>
-            <Hyperlink NavigateUri="https://steamcommunity.com/" 
+            <Run Text="{Binding ImportDescription,Mode=OneWay}" FontWeight="Bold"/>
+            <LineBreak/>           
+            <Hyperlink NavigateUri="{Binding ImportSourceUrl,Mode=OneWay}" 
                        Command="{Binding OpenLinkCommand}" 
-                       CommandParameter="https://steamcommunity.com/">
-                https://steamcommunity.com/
+                       CommandParameter="{Binding ImportSourceUrl,Mode=OneWay}">
+                GoTo Source Page
             </Hyperlink>
-            <LineBreak/>
-            <Run Text="Step 2: Login"/>
-            <LineBreak/>
-            <Run Text="Step 3: In upper right corner click on your profile's icon"/>
-            <LineBreak/>
-            <Run Text="Step 4: Copy to clipboard your SteamId from browser address bar"/>
-            <LineBreak/>
-            <Run Text="https://steamcommunity.com/profiles/{YOUR_STEAM_ID}/" FontStyle="Italic"/>
-            <LineBreak/><LineBreak/>
-            <Grid Margin="20">
-                  <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                  </Grid.ColumnDefinitions>
-        
-                <Label Content="SteamId:" FontWeight="Bold" Grid.Column="0" Margin="0,0,0,5"/>
-        
-                <PasswordBox x:Name="SteamIdBox" 
-                             MinWidth="200px"
-                             Grid.Column="1" 
-                             Margin="0,0,0,0"
-                             PasswordChar="*"
-                             PasswordChanged="SteamIdBox_PasswordChanged"/>
-          
-            </Grid>
-            <LineBreak/><LineBreak/>
-        
-            <Run Text="Enter your Steam ApiKey" FontWeight="Bold"/>
-            <LineBreak/>
-            <Run Text="If you don't know your Steam Api Key perform these steps:"/>
-            <LineBreak/>
-            <Run Text="Step 1: go to "/>
-            <Hyperlink NavigateUri="https://steamcommunity.com/dev/apikey" 
-                       Command="{Binding OpenLinkCommand}" 
-                       CommandParameter="https://steamcommunity.com/dev/apikey">
-                https://steamcommunity.com/dev/apikey
-            </Hyperlink>
-            <LineBreak/>
-            <Run Text="Step 2: Copy your SteamApi key to clipboard"/>
-            <LineBreak/><LineBreak/>
-            <Grid Margin="20">
-                  <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                  </Grid.ColumnDefinitions>
-
-                <Label Content="Steam API Key:" FontWeight="Bold" Grid.Column="0" Margin="0,0,0,5"/>
-
-                <PasswordBox x:Name="SteamApiBox" 
-                             MinWidth="200px"
-                             Grid.Column="1" 
-                             Margin="0,0,0,0"
-                             PasswordChar="*"
-                             PasswordChanged="SteamApiBox_PasswordChanged"/>
-  
-            </Grid>
-            <LineBreak/><LineBreak/>
         </TextBlock>
 
-        <TextBlock Grid.Row="1" 
+        <wv2:WebView2 Grid.Row="1" Name="Browser" Source="https://syntystore.com/account/login"
+                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                       Loaded="Browser_Loaded" />
+
+        <StackPanel Grid.Row="2">
+            <Button  Content="Scrape Data" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="10" Width="150" Click="ScrapeButton_Click"/>
+            <Button  Content="Scrape Data2" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="10" Width="150" Click="ScrapeButton2_Click"/>
+        </StackPanel>
+        <TextBlock Grid.Row="3" 
                    Text="{Binding StatusMessage}" 
                    FontSize="12" 
                    Foreground="#666666" 
@@ -137,7 +88,7 @@
 
         <StackPanel Orientation="Horizontal" 
                     HorizontalAlignment="Center"
-                    Grid.Row="2">
+                    Grid.Row="4">
             <Button Content="Stop" 
                     Style="{StaticResource RoundedButtonStyle}"
                     Command="{Binding StopCommand}"/>
@@ -146,7 +97,7 @@
                     Command="{Binding StartCommand}"/>
         </StackPanel>
 
-        <ProgressBar Grid.Row="3" 
+        <ProgressBar Grid.Row="5" 
                      Height="20"
                      IsIndeterminate="{Binding IsProcessing}"
                      Visibility="{Binding IsProcessing, Converter={StaticResource BooleanToVisibilityConverter}}" />

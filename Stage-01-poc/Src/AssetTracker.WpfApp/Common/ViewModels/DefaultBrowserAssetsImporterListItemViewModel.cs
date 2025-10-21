@@ -1,11 +1,8 @@
 ﻿using AssetTracker.Core.Services.Plugins;
-using AssetTracker.WpfApp.Common.Commands;
 using AssetTracker.WpfApp.Common.Events;
 using AssetTracker.WpfApp.Common.Models;
 using AssetTracker.WpfApp.Common.Models.Enums;
-using AssetTracker.WpfApp.Common.ViewModels;
 using AssetTracker.WpfApp.Modules.SteamScraper.Views;
-using System.Windows;
 
 namespace AssetTracker.WpfApp.Common.ViewModels
 {

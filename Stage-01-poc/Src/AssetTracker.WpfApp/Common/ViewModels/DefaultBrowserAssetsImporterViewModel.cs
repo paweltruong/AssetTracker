@@ -17,7 +17,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
 {
     public class DefaultBrowserAssetsImporterViewModel : ViewModelBase
     {
-        private string _pluginKey;
+        private IAssetsImporterPlugin _plugin;
         private readonly IEventAggregator _eventAggregator;
         private readonly IAssetsImporter _assetImporter;
 
@@ -26,16 +26,20 @@ namespace AssetTracker.WpfApp.Common.ViewModels
         public IAsyncRelayCommand StartCommand { get; }
         public IAsyncRelayCommand StopCommand { get; }
 
-        public DefaultBrowserAssetsImporterViewModel(IEventAggregator eventAggregator, IPlugin plugin, IAssetsImporter assetImporter)
+        public DefaultBrowserAssetsImporterViewModel(IEventAggregator eventAggregator, IAssetsImporterPlugin plugin, IAssetsImporter assetImporter)
         {
             _eventAggregator = eventAggregator;
-            _pluginKey = plugin.PluginKey;
+            _plugin = plugin;
             _assetImporter = assetImporter;
 
             OpenLinkCommand = new RelayCommand<string>(OpenLink);
             StartCommand = new AsyncRelayCommand(StartScrape, CanStartScrape);
             StopCommand = new AsyncRelayCommand(StopScrape, CanStopScrape);
         }
+
+        public string PluginKey => _plugin.PluginKey;
+        public string ImportDescription => _plugin.ImportDescription;
+        public string ImportSourceUrl => _plugin.ImportSourceUrl;
 
         string _steamId;
         public string SteamId
@@ -83,7 +87,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
             set => SetProperty(ref _assets, value);
         }
 
-        bool CanStartScrape() => !string.IsNullOrEmpty(SteamId) && !string.IsNullOrEmpty(SteamApiKey);
+        bool CanStartScrape() => true;
         bool CanStopScrape() => IsProcessing;
 
 
@@ -93,7 +97,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
                 || _scrapingTask == null
                 || _lastCancellationTokenSource == null)
             {
-                System.Diagnostics.Debug.WriteLine($"Error cannot stop scraping {_pluginKey}");
+                System.Diagnostics.Debug.WriteLine($"Error cannot stop scraping {PluginKey}");
                 return;
             }
 
@@ -103,23 +107,28 @@ namespace AssetTracker.WpfApp.Common.ViewModels
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error while cancelling scraping {_pluginKey}: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error while cancelling scraping {PluginKey}: {ex.Message}");
             }
             StatusMessage = "Scraping cancelled by user.";
             _eventAggregator.Publish(new ServiceCommandExecutedEvent
             {
-                ServiceName = _pluginKey,
+                ServiceName = PluginKey,
                 CommandData = ServiceStatusEvents.Cancelled,
             });
         }
 
         Task<IEnumerable<OwnedAsset>> _scrapingTask;
 
+        public async Task StartScrapeAsync()
+        {
+
+        }
+
         private async Task StartScrape()
         {
             _eventAggregator.Publish(new ServiceCommandExecutedEvent
             {
-                ServiceName = _pluginKey,
+                ServiceName = PluginKey,
                 CommandData = ServiceStatusEvents.Start
             });
             StatusMessage = "Scraping...";
@@ -140,12 +149,12 @@ namespace AssetTracker.WpfApp.Common.ViewModels
 
                 _eventAggregator.Publish(new ServiceCommandExecutedEvent
                 {
-                    ServiceName = _pluginKey,
+                    ServiceName = PluginKey,
                     CommandData = ServiceStatusEvents.Success
                 });
                 _eventAggregator.Publish(new ServiceDataChangedEvent
                 {
-                    ServiceName = _pluginKey,
+                    ServiceName = PluginKey,
                     DataCount = Assets.Count()
                 });
             }
@@ -154,7 +163,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
                 StatusMessage = $"Scraping was cancelled";
                 _eventAggregator.Publish(new ServiceCommandExecutedEvent
                 {
-                    ServiceName = _pluginKey,
+                    ServiceName = PluginKey,
                     CommandData = ServiceStatusEvents.Cancelled
                 });
             }
@@ -163,7 +172,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
                 StatusMessage = $"Error: {ex.Message}";
                 _eventAggregator.Publish(new ServiceCommandExecutedEvent
                 {
-                    ServiceName = _pluginKey,
+                    ServiceName = PluginKey,
                     CommandData = ServiceStatusEvents.Failure
                 });
             }
