@@ -10,6 +10,7 @@ namespace AssetTracker.WpfApp.Common.Utils
     public interface IViewModelFactory
     {
         DefaultBrowserAssetsImporterViewModel CreateDefaultBrowserAssetsImporterViewModel(IAssetsImporterPlugin plugin);
+        DefaultHttpClientAssetsImporterViewModel CreateDefaultHttpClientAssetsImporterViewModel(IAssetsImporterPlugin plugin);
 
         AssetsDataViewModel CreateAssetsDataViewModel(IPlugin plugin);
     }
@@ -35,6 +36,16 @@ namespace AssetTracker.WpfApp.Common.Utils
         public AssetsDataViewModel CreateAssetsDataViewModel(IPlugin plugin)
         {
             return new AssetsDataViewModel(plugin,
+                _serviceProvider.GetRequiredService<IAssetDatabase>()
+            );
+        }
+
+        public DefaultHttpClientAssetsImporterViewModel CreateDefaultHttpClientAssetsImporterViewModel(IAssetsImporterPlugin plugin)
+        {
+            return new DefaultHttpClientAssetsImporterViewModel(
+                _serviceProvider.GetRequiredService<IEventAggregator>(),
+                plugin,
+                _serviceProvider.GetRequiredKeyedService<IAssetsImporter>(plugin.PluginKey),
                 _serviceProvider.GetRequiredService<IAssetDatabase>()
             );
         }

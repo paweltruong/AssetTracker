@@ -25,6 +25,14 @@ namespace AssetTracker.AssetsImporter.SyntyStore
 
         public string ImportSourceUrl => "https://syntystore.com/customer_authentication/redirect?locale=en";
 
+        public bool UseDefaultHttpClientLayout => false;
+
+        public Dictionary<string, string> UseHttpClientCallParams => new Dictionary<string, string>();
+
+        public string ImportApiUrl => string.Empty;
+
+        public string ImportApiCallMethod => string.Empty;
+
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddKeyedSingleton<IAssetsImporter, SyntyStoreAssetsImporter>(PluginKey);

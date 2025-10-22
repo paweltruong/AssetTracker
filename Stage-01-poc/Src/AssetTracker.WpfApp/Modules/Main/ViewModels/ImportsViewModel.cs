@@ -100,6 +100,14 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
                             ScraperServices.Add(model);
                         }
                     }
+                    else if (assetsImporterPlugin.UseDefaultHttpClientLayout)
+                    {
+                        var model = CreateDefaultHttpClientAssetsImporterMasterModel(assetsImporterPlugin);
+                        if (model != null)
+                        {
+                            ScraperServices.Add(model);
+                        }
+                    }
                 }
             }
         }
@@ -119,7 +127,7 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
                     }
                     if (newMainView is AssetsDataView assetsDataView)
                     {
-                        if(assetsDataView.DataContext == null)
+                        if (assetsDataView.DataContext == null)
                         {
                             var assetsDataViewModel = _viewModelFactory.CreateAssetsDataViewModel(eventData.RelatedPlugin);
                             assetsDataView.DataContext = assetsDataViewModel;
@@ -138,6 +146,10 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
         private IScraperServiceMasterModel CreateDefaultBrowserAssetsImporterMasterModel(IAssetsImporterPlugin assetsImporterPlugin)
         {
             return new DefaultBrowserAssetsImporterMasterModel(_serviceProvider, assetsImporterPlugin);
+        }
+        private IScraperServiceMasterModel CreateDefaultHttpClientAssetsImporterMasterModel(IAssetsImporterPlugin assetsImporterPlugin)
+        {
+            return new DefaultHttpClientAssetsImporterMasterModel(_serviceProvider, assetsImporterPlugin);
         }
 
     }

@@ -1,4 +1,5 @@
 ﻿using AssetTracker.Application;
+using AssetTracker.AssetsImporter.Steam;
 using AssetTracker.AssetsImporter.SyntyStore;
 using AssetTracker.AssetsResolver.HumbleBundle;
 using AssetTracker.Core.Services.Plugins;
@@ -43,22 +44,30 @@ namespace AssetTracker.WpfApp
             _serviceCollection.ConfigureServices();
             ApplicationIocConfig.RegisterServices(_serviceCollection);
 
-            _modules.Add(new SteamScraperModule());
-            _modules.Add(new HumbleBundleModule());
-            foreach (var module in _modules)
-            {
-                module.ConfigureModule(_serviceCollection);
-            }
+            //_modules.Add(new SteamScraperModule());
+            //_modules.Add(new HumbleBundleModule());
+            //foreach (var module in _modules)
+            //{
+            //    module.ConfigureModule(_serviceCollection);
+            //}
             Modules = _modules;
 
+            _plugins.Add(new SteamAssetsImporterPlugin());
             _plugins.Add(new SyntyStoreAssetsImporterPlugin());
             _plugins.Add(new HumbleBundleAssetsResolverPlugin());
             foreach (var plugin in _plugins)
             {
                 plugin.ConfigureServices(_serviceCollection);
-                if(plugin is IAssetsImporterPlugin assetsImporterPlugin && assetsImporterPlugin.UseDefaultBrowserLayout)
+                if(plugin is IAssetsImporterPlugin assetsImporterPlugin )
                 {
-                    _serviceCollection.AddKeyedSingleton<AssetsDataView>(plugin.PluginKey);
+                    if (assetsImporterPlugin.UseDefaultBrowserLayout)
+                    {
+                        _serviceCollection.AddKeyedSingleton<AssetsDataView>(plugin.PluginKey);
+                    }
+                    else if(assetsImporterPlugin.UseDefaultHttpClientLayout)
+                    {
+                        _serviceCollection.AddKeyedSingleton<AssetsDataView>(plugin.PluginKey);
+                    }
                 }
             }
             Plugins = _plugins;

@@ -15,8 +15,6 @@ namespace AssetTracker.WpfApp.Common.Views
     /// </summary>
     public partial class DefaultBrowserAssetsImporterView : UserControl, IScraperServiceMainView
     {
-        private HttpClient _client;
-        private CookieContainer _cookieContainer;
         private readonly ILogger _logger;
 
         public DefaultBrowserAssetsImporterView(ILogger<DefaultBrowserAssetsImporterView> logger)

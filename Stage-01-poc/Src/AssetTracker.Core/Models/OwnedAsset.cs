@@ -5,17 +5,21 @@ namespace AssetTracker.Core.Models
 {
     public class OwnedAsset : Asset
     {
-        public OwnedAsset(string name,
+        public OwnedAsset(
+                    string marketplaceUid,
+                    string name,
                     AssetType assetType,
                     string imageUrl,
                     string assetUrl,
                     string sourcePluginKey,
-                    string marketplaceKey) : base(name,
-                     assetType,
-                     imageUrl,
-                     assetUrl,
-                     sourcePluginKey,
-                     marketplaceKey)
+                    string marketplaceKey) : base(
+                        marketplaceUid,
+                        name,
+                        assetType,
+                        imageUrl,
+                        assetUrl,
+                        sourcePluginKey,
+                        marketplaceKey)
         {
 
         }

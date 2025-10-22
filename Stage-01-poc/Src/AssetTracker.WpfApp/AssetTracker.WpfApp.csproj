@@ -29,7 +29,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AssetsTracker.Wpf.Core\AssetsTracker.Wpf.Core.csproj" />
     <ProjectReference Include="..\AssetTracker.Application\AssetTracker.Application.csproj" />
+    <ProjectReference Include="..\AssetTracker.AssetsImporter.Steam\AssetTracker.AssetsImporter.Steam.csproj" />
     <ProjectReference Include="..\AssetTracker.AssetsImporter.SyntyStore\AssetTracker.AssetsImporter.SyntyStore.csproj" />
     <ProjectReference Include="..\AssetTracker.AssetsResolver.HumbleBundle\AssetTracker.AssetsResolver.HumbleBundle.csproj" />
   </ItemGroup>

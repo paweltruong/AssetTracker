@@ -56,6 +56,7 @@ namespace AssetTracker.AssetsImporter.SyntyStore
                 Success = result.Success,
                 ErrorMessage = result.ErrorMessage,
                 OwnedAssets = result.Products.Select(p => new OwnedAsset(
+                    marketplaceUid: p.Title?.ToLowerInvariant()?.Replace(" ", "-")?.Trim(),
                     name: p.Title,
                     assetType: AssetType.Software,
                     imageUrl: p.ThumbnailUrl,
@@ -65,6 +66,11 @@ namespace AssetTracker.AssetsImporter.SyntyStore
                 ),
                 NextPageUrl = result.NextPageUrl
             };
+        }
+
+        public Task<IEnumerable<OwnedAsset>> ImportAssetsFromHttpClientAsync(string importApiCallMethod, string importApiUrl, Dictionary<string, string> parameterValues, CancellationToken token)
+        {
+            throw new NotImplementedException();
         }
     }
 }

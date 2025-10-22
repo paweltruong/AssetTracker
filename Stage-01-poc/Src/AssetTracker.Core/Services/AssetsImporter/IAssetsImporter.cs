@@ -11,5 +11,6 @@ namespace AssetTracker.Core.Services.AssetsImporter
         public string ImporterAssetsUrl { get; }
         Task<IEnumerable<OwnedAsset>> ImportAssetsAsync(CancellationToken cancellationToken = default);
         Task<WebScrapingResult> ImportAssetsFromHtmlSourceAsync(string url, int pageNumber, string htmlSource, CancellationToken cancellationToken = default);
+        Task<IEnumerable<OwnedAsset>> ImportAssetsFromHttpClientAsync(string importApiCallMethod, string importApiUrl, Dictionary<string, string> parameterValues, CancellationToken token);
     }
 }

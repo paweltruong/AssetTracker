@@ -3,7 +3,6 @@ using AssetTracker.WpfApp.Common.Events;
 using AssetTracker.WpfApp.Common.Models;
 using AssetTracker.WpfApp.Common.Models.Enums;
 using AssetTracker.WpfApp.Common.Views;
-using AssetTracker.WpfApp.Modules.SteamScraper.Views;
 
 namespace AssetTracker.WpfApp.Common.ViewModels
 {

@@ -26,8 +26,10 @@ namespace AssetTracker.WpfApp.Modules.Main.Extensions
             services.AddTransient<IMyHttpClient, MyHttpClient>();
             services.AddSingleton<IAssetsComparer, DefaultAssetsComparer>();
             services.AddSingleton<IViewModelFactory, ViewModelFactory>();
-            services.AddSingleton<DefaultBrowserAssetsImporterListItemViewModel>();
+            services.AddTransient<DefaultBrowserAssetsImporterListItemViewModel>();
             services.AddTransient<DefaultBrowserAssetsImporterView>();
+            services.AddSingleton<DefaultHttpClientAssetsImporterViewModel>();
+            services.AddTransient<DefaultHttpClientAssetsImporterView>();
         }
     }
 }

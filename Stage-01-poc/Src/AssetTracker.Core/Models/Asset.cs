@@ -7,16 +7,18 @@ namespace AssetTracker.Core.Models
     {
         private Asset()
         {
-            
+
         }
 
-        public Asset(string name,
-                    AssetType assetType,
-                    string imageUrl,
-                    string assetUrl,
-                    string sourcePluginKey,
-                    string marketplaceKey)
+        public Asset(string marketplaceUid,
+            string name,
+            AssetType assetType,
+            string imageUrl,
+            string assetUrl,
+            string sourcePluginKey,
+            string marketplaceKey)
         {
+            MarketplaceUid = marketplaceUid;
             Name = name;
             AssetType = assetType;
             ImageUrl = imageUrl;
@@ -26,7 +28,7 @@ namespace AssetTracker.Core.Models
         }
 
 
-
+        public string MarketplaceUid { get; set; }
         public string Name { get; set; }
         public AssetType AssetType { get; set; }
         public HashSet<string>? Tags { get; set; }

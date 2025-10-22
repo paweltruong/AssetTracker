@@ -5,7 +5,6 @@ using AssetTracker.Core.Services.AssetsImporter.Definitions;
 using AssetTracker.Core.Services.Plugins;
 using AssetTracker.WpfApp.Common.Commands;
 using AssetTracker.WpfApp.Common.Events;
-using AssetTracker.WpfApp.Common.Models;
 using Microsoft.Web.WebView2.Core;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -14,66 +13,25 @@ using System.Windows.Input;
 
 namespace AssetTracker.WpfApp.Common.ViewModels
 {
-    public class DefaultBrowserAssetsImporterViewModel : ViewModelBase
+    public class DefaultBrowserAssetsImporterViewModel : AssetImporterPluginViewModelBase
     {
-        private IAssetsImporterPlugin _plugin;
-        private readonly IEventAggregator _eventAggregator;
-        private readonly IAssetsImporter _assetImporter;
-        private readonly IAssetDatabase _assetDatabase;
-
-        private CancellationTokenSource _lastCancellationTokenSource;
-
         List<WebScrapingResult> scrapingResults = new List<WebScrapingResult>();
         int pageNumber = 1;
 
 
         public ICommand OpenLinkCommand { get; }
-        public IAsyncRelayCommand StartCommand { get; }
-        public IAsyncRelayCommand StopCommand { get; }
 
         Microsoft.Web.WebView2.Wpf.WebView2 _browser;
 
         public DefaultBrowserAssetsImporterViewModel(IEventAggregator eventAggregator,
             IAssetsImporterPlugin plugin,
             IAssetsImporter assetImporter,
-            IAssetDatabase assetDatabase)
+            IAssetDatabase assetDatabase) : base(eventAggregator, plugin, assetImporter, assetDatabase)
         {
-            _eventAggregator = eventAggregator;
-            _plugin = plugin;
-            _assetImporter = assetImporter;
-            _assetDatabase = assetDatabase;
-
             OpenLinkCommand = new RelayCommand<string>(OpenLink);
-            StartCommand = new AsyncRelayCommand(StartScrape, CanStartScrape);
-            StopCommand = new AsyncRelayCommand(StopScrape, CanStopScrape);
         }
 
-        public string PluginKey => _plugin.PluginKey;
-        public string ImportDescription => _plugin.ImportDescription;
         public string ImportSourceUrl => _plugin.ImportSourceUrl;
-
-        string _steamId;
-        public string SteamId
-        {
-            get => _steamId;
-            set
-            {
-                SetProperty(ref _steamId, value);
-                StartCommand.RaiseCanExecuteChanged();
-                StopCommand.RaiseCanExecuteChanged();
-            }
-        }
-        string _steamApiKey;
-        public string SteamApiKey
-        {
-            get => _steamApiKey;
-            set
-            {
-                SetProperty(ref _steamApiKey, value);
-                StartCommand.RaiseCanExecuteChanged();
-                StopCommand.RaiseCanExecuteChanged();
-            }
-        }
 
         private bool _isBrowserLoading;
         public bool IsBrowserLoading
@@ -87,7 +45,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
             }
         }
 
-        public bool IsBusy => IsBrowserLoading || IsProcessing;
+        public override bool IsBusy => IsBrowserLoading || IsProcessing;
 
         private bool _isProcessing;
         public bool IsProcessing
@@ -116,8 +74,8 @@ namespace AssetTracker.WpfApp.Common.ViewModels
             set => SetProperty(ref _importedAssets, value);
         }
 
-        bool CanStartScrape() => !IsBusy;
-        bool CanStopScrape() => IsProcessing;
+        protected override bool CanStartScrape() => !IsBusy;
+        protected override bool CanStopScrape() => IsProcessing;
 
         public void SetupBrowser(Microsoft.Web.WebView2.Wpf.WebView2 browser)
         {
@@ -142,7 +100,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
             IsBrowserLoading = true;
         }
 
-        private async Task StopScrape()
+        protected override async Task StopScrape()
         {
             if (!IsProcessing
                 || _scrapingTask == null
@@ -267,7 +225,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
             }
         }
 
-        private async Task StartScrape()
+        protected override async Task StartScrape()
         {
             if (_browser == null)
             {

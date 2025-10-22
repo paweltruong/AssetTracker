@@ -1,6 +1,6 @@
 ﻿using AssetTracker.Application.Services;
+using AssetTracker.AssetsImporter.Steam.Services;
 using AssetTracker.UnitTests.Modules.SteamScraper.Helpers;
-using AssetTracker.WpfApp.Modules.SteamScraper.Services;
 using FluentAssertions;
 using Moq;
 using System.Net;

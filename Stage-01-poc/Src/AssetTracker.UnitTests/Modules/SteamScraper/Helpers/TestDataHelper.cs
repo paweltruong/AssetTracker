@@ -1,4 +1,4 @@
-﻿using AssetTracker.WpfApp.Modules.SteamScraper.Models;
+﻿using AssetTracker.AssetsImporter.Steam.Definitions;
 using System.Text.Json;
 
 namespace AssetTracker.UnitTests.Modules.SteamScraper.Helpers
