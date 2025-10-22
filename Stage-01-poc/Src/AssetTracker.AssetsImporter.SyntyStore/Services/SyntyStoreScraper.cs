@@ -1,10 +1,13 @@
 ﻿using AssetTracker.AssetsImporter.SyntyStore.Definitions;
 using HtmlAgilityPack;
+using System.Net;
+using System.Web;
 
 namespace AssetTracker.AssetsImporter.SyntyStore.Services
 {
     public class SyntyStoreScraper
     {
+        public const string PaginationUrlRoot = "https://syntystore.com";
         public SyntyStoreScraper()
         {
         }
@@ -93,10 +96,12 @@ namespace AssetTracker.AssetsImporter.SyntyStore.Services
 
             if (nextPageNode != null)
             {
-                string relativeUrl = nextPageNode.GetAttributeValue("href", "");
-                if (!string.IsNullOrEmpty(relativeUrl))
+                string relativeUrlHtmlString = nextPageNode.GetAttributeValue("href", "");
+                if (!string.IsNullOrEmpty(relativeUrlHtmlString))
                 {
-                    return $"https://syntystore.com{relativeUrl}";
+                    string decodedString = WebUtility.HtmlDecode(relativeUrlHtmlString);
+
+                    return $"{PaginationUrlRoot}{decodedString}";
                 }
             }
 

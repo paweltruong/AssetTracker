@@ -18,6 +18,8 @@ namespace AssetTracker.AssetsImporter.SyntyStore
             _syntyStoreScraper = new SyntyStoreScraper();
         }
 
+        public string ImporterAssetsUrl => "https://syntystore.com/apps/downloads/orders";
+
         public async Task<IEnumerable<OwnedAsset>> ImportAssetsAsync(CancellationToken cancellationToken = default)
         {
             //var results = await _syntyStoreScraper.ScrapeAllProductsAsync();
@@ -44,11 +46,13 @@ namespace AssetTracker.AssetsImporter.SyntyStore
             return Enumerable.Empty<OwnedAsset>();
         }
 
-        public async Task<WebScrapingResult> ImportAssetsFromHtmlSourceAsync(string url, string htmlSource, CancellationToken cancellationToken = default)
+        public async Task<WebScrapingResult> ImportAssetsFromHtmlSourceAsync(string url, int pageNumber, string htmlSource, CancellationToken cancellationToken = default)
         {
             var result = await _syntyStoreScraper.ScrapeAllProductsAsync(url, htmlSource, cancellationToken);
             return new WebScrapingResult
             {
+                SourceUrl = url,
+                PageNumber = pageNumber,
                 Success = result.Success,
                 ErrorMessage = result.ErrorMessage,
                 OwnedAssets = result.Products.Select(p => new OwnedAsset

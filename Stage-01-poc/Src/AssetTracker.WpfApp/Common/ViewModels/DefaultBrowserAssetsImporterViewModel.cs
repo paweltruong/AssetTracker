@@ -1,13 +1,16 @@
 ﻿using AssetTracker.Core.Models;
 using AssetTracker.Core.Services.AssetsImporter;
+using AssetTracker.Core.Services.AssetsImporter.Definitions;
 using AssetTracker.Core.Services.Plugins;
 using AssetTracker.WpfApp.Common.Commands;
 using AssetTracker.WpfApp.Common.Events;
 using AssetTracker.WpfApp.Common.Models;
+using Microsoft.Web.WebView2.Core;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Formats.Asn1;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,10 +30,6 @@ namespace AssetTracker.WpfApp.Common.ViewModels
         public IAsyncRelayCommand StopCommand { get; }
 
         Microsoft.Web.WebView2.Wpf.WebView2 _browser;
-        public void SetupBrowser(Microsoft.Web.WebView2.Wpf.WebView2 browser)
-        {
-            _browser = browser;
-        }
 
         public DefaultBrowserAssetsImporterViewModel(IEventAggregator eventAggregator, IAssetsImporterPlugin plugin, IAssetsImporter assetImporter)
         {
@@ -124,17 +123,59 @@ namespace AssetTracker.WpfApp.Common.ViewModels
         }
 
         Task<IEnumerable<OwnedAsset>> _scrapingTask;
-
-        public async Task StartScrapeAsync(string url, string htmlSource)
+        public async Task BeginScrapingInBrowserAsync(Microsoft.Web.WebView2.Wpf.WebView2 browser)
         {
-            var results = await _assetImporter.ImportAssetsFromHtmlSourceAsync(url, htmlSource);
-            if (string.IsNullOrEmpty(results.NextPageUrl))
-            {
-                
-            }
-            Assets = new ObservableCollection<AssetItem>(results.OwnedAssets.Select(g => new AssetItem(g)));
-            StatusMessage = $"Loaded {Assets.Count} games successfully!";
+            scrapingResults = new List<WebScrapingResult>();
+            pageNumber = 1;
+
+            _browser = browser;
+            _browser.NavigationCompleted += Browser_NavigationCompleted;
+            _browser.Source = new Uri(_assetImporter.ImporterAssetsUrl);          
         }
+
+        public async Task EndScrapingInBrowserAsync()
+        {
+            _browser.NavigationCompleted -= Browser_NavigationCompleted;
+
+            var assetItems = new List<AssetItem>();
+            StringBuilder sb = new StringBuilder();
+            foreach (var results in scrapingResults)
+            {
+                if (results.Success)
+                {
+                    assetItems.AddRange(results.OwnedAssets.Select(oa => new AssetItem(oa)));
+                    sb.AppendLine($"Scraping from PageNumver {results.PageNumber} successfull.[{results.OwnedAssets.Count()}]");
+                }
+                else
+                {
+                    sb.AppendLine($"Scraping from PageNumber {results.PageNumber} failed. [{results.SourceUrl}]");
+                }
+            }
+            Assets = new ObservableCollection<AssetItem>(assetItems.Distinct());
+            sb.AppendLine($"Scraped {pageNumber} pages with {Assets.Count} unique assets.");
+
+            StatusMessage = sb.ToString();
+        }
+
+        private async void Browser_NavigationCompleted(object? sender, CoreWebView2NavigationCompletedEventArgs e)
+        {
+            string html = await _browser.ExecuteScriptAsync("document.documentElement.outerHTML;");
+            html = System.Text.Json.JsonSerializer.Deserialize<string>(html);
+            var scrapeResult = await _assetImporter.ImportAssetsFromHtmlSourceAsync(_browser.Source.ToString(), pageNumber, html);
+            scrapingResults.Add(scrapeResult);
+            if(string.IsNullOrEmpty(scrapeResult.NextPageUrl))
+            {
+                await EndScrapingInBrowserAsync();                
+            }
+            else
+            {
+                _browser.Source = new Uri(scrapeResult.NextPageUrl);
+                ++pageNumber;
+            }
+        }
+
+        List<WebScrapingResult> scrapingResults = new List<WebScrapingResult>();
+        int pageNumber = 1;
 
         private async Task StartScrape()
         {

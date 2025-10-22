@@ -49,10 +49,6 @@ namespace AssetTracker.WpfApp.Common.Views
             {
                 await Browser.EnsureCoreWebView2Async();
                 Browser.Source = new Uri("https://syntystore.com/");
-                if (DataContext is DefaultBrowserAssetsImporterViewModel viewModel)
-                {
-                    viewModel.SetupBrowser(Browser);
-                }
             }
             catch (Exception ex)
             {
@@ -91,19 +87,9 @@ namespace AssetTracker.WpfApp.Common.Views
 
         private async void ScrapeButton2_Click(object sender, RoutedEventArgs e)
         {
-            Browser.NavigationCompleted += Browser_NavigationCompleted;
-            Browser.Source = new Uri("https://syntystore.com/apps/downloads/orders");
-        }
-
-        private async void Browser_NavigationCompleted(object? sender, CoreWebView2NavigationCompletedEventArgs e)
-        {
-            Browser.NavigationCompleted -= Browser_NavigationCompleted;
-
-            string html = await Browser.ExecuteScriptAsync("document.documentElement.outerHTML;");
-            html = System.Text.Json.JsonSerializer.Deserialize<string>(html);
             if (DataContext is DefaultBrowserAssetsImporterViewModel viewModel)
             {
-                await viewModel.StartScrapeAsync(Browser.Source.AbsoluteUri, html);
+                await viewModel.BeginScrapingInBrowserAsync(Browser);
             }
         }
 

@@ -9,6 +9,8 @@ namespace AssetTracker.Core.Services.AssetsImporter.Definitions
 {
     public class WebScrapingResult
     {
+        public string SourceUrl { get; set; }
+        public int PageNumber { get; set; }
         public bool Success { get; set; }
         public string ErrorMessage { get; set; }
         public IEnumerable<OwnedAsset> OwnedAssets { get; set; }
