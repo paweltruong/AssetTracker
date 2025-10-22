@@ -7,6 +7,7 @@ namespace AssetTracker.AssetsResolver.HumbleBundle
     public class HumbleBundleAssetsResolverPlugin : IAssetsResolverPlugin
     {
         public string PluginKey => "HumbleBundleAssetsResolver";
+        public string MarketplaceKey => "HumbleBundle";
 
         public void ConfigureServices(IServiceCollection services)
         {

@@ -1,4 +1,5 @@
 ﻿using AssetTracker.Core.Models;
+using AssetTracker.Core.Services;
 using AssetTracker.Core.Services.AssetsImporter;
 using AssetTracker.Core.Services.AssetsImporter.Definitions;
 using AssetTracker.Core.Services.Plugins;
@@ -18,6 +19,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
         private IAssetsImporterPlugin _plugin;
         private readonly IEventAggregator _eventAggregator;
         private readonly IAssetsImporter _assetImporter;
+        private readonly IAssetDatabase _assetDatabase;
 
         private CancellationTokenSource _lastCancellationTokenSource;
 
@@ -31,11 +33,15 @@ namespace AssetTracker.WpfApp.Common.ViewModels
 
         Microsoft.Web.WebView2.Wpf.WebView2 _browser;
 
-        public DefaultBrowserAssetsImporterViewModel(IEventAggregator eventAggregator, IAssetsImporterPlugin plugin, IAssetsImporter assetImporter)
+        public DefaultBrowserAssetsImporterViewModel(IEventAggregator eventAggregator,
+            IAssetsImporterPlugin plugin,
+            IAssetsImporter assetImporter,
+            IAssetDatabase assetDatabase)
         {
             _eventAggregator = eventAggregator;
             _plugin = plugin;
             _assetImporter = assetImporter;
+            _assetDatabase = assetDatabase;
 
             OpenLinkCommand = new RelayCommand<string>(OpenLink);
             StartCommand = new AsyncRelayCommand(StartScrape, CanStartScrape);
@@ -103,11 +109,11 @@ namespace AssetTracker.WpfApp.Common.ViewModels
             set => SetProperty(ref _statusMessage, value);
         }
 
-        private ObservableCollection<AssetItem> _assets;
-        public ObservableCollection<AssetItem> Assets
+        private ObservableCollection<OwnedAsset> _importedAssets;
+        public ObservableCollection<OwnedAsset> ImportedAssets
         {
-            get => _assets;
-            set => SetProperty(ref _assets, value);
+            get => _importedAssets;
+            set => SetProperty(ref _importedAssets, value);
         }
 
         bool CanStartScrape() => !IsBusy;
@@ -172,40 +178,44 @@ namespace AssetTracker.WpfApp.Common.ViewModels
             _browser.Source = new Uri(_assetImporter.ImporterAssetsUrl);
         }
 
-        public async Task EndScrapingInBrowserAsync()
+        public async Task EndScrapingInBrowserAsync(bool success)
         {
             _browser.NavigationCompleted -= Browser_NavigationCompleted;
 
-            var assetItems = new List<AssetItem>();
-            StringBuilder sb = new StringBuilder();
-            foreach (var results in scrapingResults)
+            if (success)
             {
-                if (results.Success)
+                var assetItems = new List<OwnedAsset>();
+                StringBuilder sb = new StringBuilder();
+                foreach (var results in scrapingResults)
                 {
-                    assetItems.AddRange(results.OwnedAssets.Select(oa => new AssetItem(oa)));
-                    sb.AppendLine($"Scraping from PageNumver {results.PageNumber} successfull.[{results.OwnedAssets.Count()}]");
+                    if (results.Success)
+                    {
+                        assetItems.AddRange(results.OwnedAssets);
+                        sb.AppendLine($"Scraping from PageNumver {results.PageNumber} successfull.[{results.OwnedAssets.Count()}]");
+                    }
+                    else
+                    {
+                        sb.AppendLine($"Scraping from PageNumber {results.PageNumber} failed. [{results.SourceUrl}]");
+                    }
                 }
-                else
+                ImportedAssets = new ObservableCollection<OwnedAsset>(assetItems.Distinct());
+                await _assetDatabase.AddAssetsAsync(ImportedAssets);
+                sb.AppendLine($"Scraped {pageNumber} pages with {ImportedAssets.Count} unique assets.");
+
+
+                _eventAggregator.Publish(new ServiceCommandExecutedEvent
                 {
-                    sb.AppendLine($"Scraping from PageNumber {results.PageNumber} failed. [{results.SourceUrl}]");
-                }
+                    ServiceName = PluginKey,
+                    CommandData = ServiceStatusEvents.Success
+                });
+                _eventAggregator.Publish(new ServiceDataChangedEvent
+                {
+                    ServiceName = PluginKey,
+                    DataCount = ImportedAssets.Count()
+                });
+
+                StatusMessage = sb.ToString();
             }
-            Assets = new ObservableCollection<AssetItem>(assetItems.Distinct());
-            sb.AppendLine($"Scraped {pageNumber} pages with {Assets.Count} unique assets.");
-
-
-            _eventAggregator.Publish(new ServiceCommandExecutedEvent
-            {
-                ServiceName = PluginKey,
-                CommandData = ServiceStatusEvents.Success
-            });
-            _eventAggregator.Publish(new ServiceDataChangedEvent
-            {
-                ServiceName = PluginKey,
-                DataCount = Assets.Count()
-            });
-
-            StatusMessage = sb.ToString();
 
             IsProcessing = false;
         }
@@ -214,8 +224,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
         {
             if (_lastCancellationTokenSource.IsCancellationRequested)
             {
-                await EndScrapingInBrowserAsync();
-
+                await EndScrapingInBrowserAsync(false);
                 return;
             }
 
@@ -228,7 +237,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
                 scrapingResults.Add(scrapeResult);
                 if (string.IsNullOrEmpty(scrapeResult.NextPageUrl))
                 {
-                    await EndScrapingInBrowserAsync();
+                    await EndScrapingInBrowserAsync(true);
                 }
                 else
                 {
@@ -244,6 +253,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
                     ServiceName = PluginKey,
                     CommandData = ServiceStatusEvents.Cancelled
                 });
+                await EndScrapingInBrowserAsync(false);
             }
             catch (Exception ex)
             {
@@ -253,6 +263,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
                     ServiceName = PluginKey,
                     CommandData = ServiceStatusEvents.Failure
                 });
+                await EndScrapingInBrowserAsync(false);
             }
         }
 

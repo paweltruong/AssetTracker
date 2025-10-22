@@ -55,13 +55,14 @@ namespace AssetTracker.AssetsImporter.SyntyStore
                 PageNumber = pageNumber,
                 Success = result.Success,
                 ErrorMessage = result.ErrorMessage,
-                OwnedAssets = result.Products.Select(p => new OwnedAsset
-                {
-                    Name = p.Title,
-                    AssetType = AssetType.Software,
-                    ImageUrl = p.ThumbnailUrl,
-                    AssetUrl = p.FullDownloadUrl,
-                }),
+                OwnedAssets = result.Products.Select(p => new OwnedAsset(
+                    name: p.Title,
+                    assetType: AssetType.Software,
+                    imageUrl: p.ThumbnailUrl,
+                    assetUrl: p.FullDownloadUrl,
+                    sourcePluginKey: SyntyStoreAssetsImporterPlugin.PluginKeyConst,
+                    SyntyStoreAssetsImporterPlugin.PluginMarketplaceKeyConst)
+                ),
                 NextPageUrl = result.NextPageUrl
             };
         }

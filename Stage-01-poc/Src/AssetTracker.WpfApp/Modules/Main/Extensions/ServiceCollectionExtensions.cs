@@ -25,7 +25,7 @@ namespace AssetTracker.WpfApp.Modules.Main.Extensions
             services.AddSingleton<IEventAggregator, EventAggregator>();
             services.AddTransient<IMyHttpClient, MyHttpClient>();
             services.AddSingleton<IAssetsComparer, DefaultAssetsComparer>();
-            services.AddSingleton<IImportAssetsViewModelFactory, ImportAssetsViewModelFactory>();
+            services.AddSingleton<IViewModelFactory, ViewModelFactory>();
             services.AddSingleton<DefaultBrowserAssetsImporterListItemViewModel>();
             services.AddTransient<DefaultBrowserAssetsImporterView>();
         }

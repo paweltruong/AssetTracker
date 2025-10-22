@@ -15,13 +15,13 @@ namespace AssetTracker.AssetsResolver.HumbleBundle
             {
                 items[i] = ConvertToAssetItem(tierItems.ElementAt(i));
             });
-            return items.Where(x=>x != null).ToList();
+            return items.Where(x => x != null).ToList();
         }
 
         static Asset? ConvertToAssetItem(TierItem tierItem)
         {
             var assetType = GetAssetType(tierItem.ItemContentType);
-            if(assetType == AssetType.Unknown)
+            if (assetType == AssetType.Unknown)
             {
                 //itgetsbetter items etc
                 return null;
@@ -32,17 +32,16 @@ namespace AssetTracker.AssetsResolver.HumbleBundle
 
             userDefinedDefaultTagsSet.Add(defaultTag);
 
-            var assetItem = new Asset()
-            {
-                Name = tierItem.HumanName,
-                AssetType = assetType,
-                Tags = userDefinedDefaultTagsSet,
-                ImageUrl = tierItem.ResolvedPaths.FeaturedImage ?? tierItem.ResolvedPaths.FrontPageArtImgixRetina,
-                Developers = ConvertToDeveloperItems(tierItem.Developers),
-                Publishers = ConvertToPublisherItems(tierItem.Publishers),
-                AssetUrl = tierItem.GetAssetUrl()
+            var assetItem = Asset.Create(
+                name: tierItem.HumanName,
+                assetType: assetType,
+                tags: userDefinedDefaultTagsSet,
+                imageUrl: tierItem.ResolvedPaths.FeaturedImage ?? tierItem.ResolvedPaths.FrontPageArtImgixRetina,
+                developers: ConvertToDeveloperItems(tierItem.Developers),
+                publishers: ConvertToPublisherItems(tierItem.Publishers),
+                assetUrl: tierItem.GetAssetUrl()
+                );
 
-            }; ;
             return assetItem;
         }
 

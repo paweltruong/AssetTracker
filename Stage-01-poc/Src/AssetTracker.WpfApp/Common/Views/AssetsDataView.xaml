@@ -6,15 +6,40 @@
              xmlns:local="clr-namespace:AssetTracker.WpfApp.Common.Views"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    
+
     <UserControl.Resources>
-        <Style x:Key="ListItemContainerStyle" TargetType="ContentPresenter">
+        <!-- Style for the Border that wraps each item -->
+        <Style x:Key="ListItemBorderStyle" TargetType="Border">
             <Setter Property="Margin" Value="0,0,0,8"/>
-            <!--<Setter Property="Padding" Value="12"/>
+            <Setter Property="Padding" Value="12"/>
             <Setter Property="Background" Value="White"/>
             <Setter Property="BorderBrush" Value="#E0E0E0"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="4"/>-->
+            <Setter Property="CornerRadius" Value="4"/>
+        </Style>
+
+        <!-- Link Button Style -->
+        <Style x:Key="LinkButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="#0078D4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <TextBlock Text="{TemplateBinding Content}" 
+                                   Foreground="{TemplateBinding Foreground}"
+                                   TextDecorations="Underline"
+                                   Padding="{TemplateBinding Padding}"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="#005A9E"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
     </UserControl.Resources>
 
@@ -22,7 +47,8 @@
         <ItemsControl ItemsSource="{Binding OwnedAssets}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Border Style="{StaticResource ListItemContainerStyle}">
+                    <!-- Use the correct style for Border -->
+                    <Border Style="{StaticResource ListItemBorderStyle}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -119,7 +145,7 @@
                                            HorizontalAlignment="Right"/>
                                 <Button Content="View in Marketplace" 
                                         Command="{Binding DataContext.ViewMarketplaceCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                        CommandParameter="{Binding}"
+                                        CommandParameter="{Binding AssetUrl}"
                                         Style="{StaticResource LinkButtonStyle}"
                                         HorizontalAlignment="Right"
                                         Margin="0,4,0,0"/>

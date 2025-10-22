@@ -1,4 +1,5 @@
 ﻿using AssetTracker.Core.Models;
+using System.Collections.ObjectModel;
 
 namespace AssetTracker.Core.Services
 {
@@ -6,5 +7,11 @@ namespace AssetTracker.Core.Services
     {
         Task<IEnumerable<OwnedAsset>> FindAsync(Asset asset, CancellationToken cancellationToken);
         Task FindAssetAsync();
+        Task AddAssetsAsync(IEnumerable<OwnedAsset> assets);
+
+        event EventHandler AssetDatabaseChanged;
+
+        void RaiseAssetDatabaseChangedEvent();
+        Task<IEnumerable<OwnedAsset>> GetAssetsForMarketplaceAsync(string marketplaceKey);
     }
 }

@@ -26,8 +26,8 @@ namespace AssetTracker.WpfApp.Common.ViewModels
             listItemView.DataContext = listItemViewModel;
             ListItemView = listItemView;
 
-            var factory = serviceProvider.GetRequiredService<IImportAssetsViewModelFactory>();
-            var importAssetsViewModel = factory.Create(plugin);   
+            var factory = serviceProvider.GetRequiredService<IViewModelFactory>();
+            var importAssetsViewModel = factory.CreateDefaultBrowserAssetsImporterViewModel(plugin);   
             var importAssetsView = serviceProvider.GetRequiredService<DefaultBrowserAssetsImporterView>();
             importAssetsView.DataContext = importAssetsViewModel;
             ImportAssetsView = importAssetsView;

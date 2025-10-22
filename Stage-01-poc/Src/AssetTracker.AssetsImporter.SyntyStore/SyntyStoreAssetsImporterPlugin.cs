@@ -7,7 +7,11 @@ namespace AssetTracker.AssetsImporter.SyntyStore
     public class SyntyStoreAssetsImporterPlugin : IAssetsImporterPlugin
     {
         public const string PluginKeyConst = "SyntyStoreAssetsImporterPlugin";
+
+        public const string PluginMarketplaceKeyConst = "SyntyStore";
+
         public string PluginKey => PluginKeyConst;
+        public string MarketplaceKey => PluginMarketplaceKeyConst;
 
         public bool UseDefaultBrowserLayout => true;
 

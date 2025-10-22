@@ -2,6 +2,7 @@
 using AssetTracker.WpfApp.Common;
 using AssetTracker.WpfApp.Common.Commands;
 using AssetTracker.WpfApp.Common.Events;
+using AssetTracker.WpfApp.Common.Utils;
 using AssetTracker.WpfApp.Common.ViewModels;
 using AssetTracker.WpfApp.Common.Views;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,13 +14,15 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
     public class ImportsViewModel : ViewModelBase
     {
         private readonly IEventAggregator _eventAggregator;
-        private IServiceProvider _serviceProvider;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly IViewModelFactory _viewModelFactory;
 
-        public ImportsViewModel(IEventAggregator eventAggregator, IServiceProvider serviceProvider)
+        public ImportsViewModel(IEventAggregator eventAggregator, IServiceProvider serviceProvider, IViewModelFactory viewModelFactory)
         {
             _eventAggregator = eventAggregator;
             _eventAggregator.Subscribe<ChangeMainViewEvent>(OnChangeMainViewEvent);
             _serviceProvider = serviceProvider;
+            _viewModelFactory = viewModelFactory;
 
             _scraperServices = new ObservableCollection<IScraperServiceMasterModel>();
 
@@ -36,7 +39,7 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
             });
 
 
-            LoadAssetsImporterPlugins(_serviceProvider, App.Modules, App.Plugins);
+            LoadAssetsImporterPlugins(App.Modules, App.Plugins);
         }
 
         #region Properties and Commands
@@ -73,14 +76,13 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
 
         #endregion Properties and Commands
 
-        public void LoadAssetsImporterPlugins(IServiceProvider serviceProvider,
+        public void LoadAssetsImporterPlugins(
             IEnumerable<IScraperModule> modules,
             List<Core.Services.Plugins.IPlugin> plugins)
         {
-            _serviceProvider = serviceProvider;
             foreach (var module in modules)
             {
-                var view = module.GetMasterModel(serviceProvider);
+                var view = module.GetMasterModel(_serviceProvider);
                 if (view != null)
                 {
                     ScraperServices.Add(view);
@@ -119,7 +121,7 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
                     {
                         if(assetsDataView.DataContext == null)
                         {
-                            var assetsDataViewModel = new AssetsDataViewModel(eventData.RelatedPlugin);
+                            var assetsDataViewModel = _viewModelFactory.CreateAssetsDataViewModel(eventData.RelatedPlugin);
                             assetsDataView.DataContext = assetsDataViewModel;
                         }
                     }
