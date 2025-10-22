@@ -6,14 +6,9 @@ using AssetTracker.WpfApp.Common.Commands;
 using AssetTracker.WpfApp.Common.Events;
 using AssetTracker.WpfApp.Common.Models;
 using Microsoft.Web.WebView2.Core;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Formats.Asn1;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace AssetTracker.WpfApp.Common.ViewModels
@@ -25,6 +20,11 @@ namespace AssetTracker.WpfApp.Common.ViewModels
         private readonly IAssetsImporter _assetImporter;
 
         private CancellationTokenSource _lastCancellationTokenSource;
+
+        List<WebScrapingResult> scrapingResults = new List<WebScrapingResult>();
+        int pageNumber = 1;
+
+
         public ICommand OpenLinkCommand { get; }
         public IAsyncRelayCommand StartCommand { get; }
         public IAsyncRelayCommand StopCommand { get; }
@@ -81,7 +81,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
             }
         }
 
-        public bool IsBusy=> IsBrowserLoading || IsProcessing;
+        public bool IsBusy => IsBrowserLoading || IsProcessing;
 
         private bool _isProcessing;
         public bool IsProcessing
@@ -115,7 +115,9 @@ namespace AssetTracker.WpfApp.Common.ViewModels
 
         public void SetupBrowser(Microsoft.Web.WebView2.Wpf.WebView2 browser)
         {
+            if (_browser != null) return;
             _browser = browser;
+            _browser.Source = new Uri(_plugin.ImportSourceUrl);
             _browser.NavigationStarting += _browser_NavigationStarting;// += Browser_ContentLoading;
             _browser.NavigationCompleted += _browser_NavigationCompleted;
         }
@@ -131,7 +133,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
 
         private void Browser_ContentLoading(object? sender, CoreWebView2ContentLoadingEventArgs e)
         {
-            IsBrowserLoading = true;            
+            IsBrowserLoading = true;
         }
 
         private async Task StopScrape()
@@ -161,14 +163,13 @@ namespace AssetTracker.WpfApp.Common.ViewModels
         }
 
         Task<IEnumerable<OwnedAsset>> _scrapingTask;
-        public async Task BeginScrapingInBrowserAsync(Microsoft.Web.WebView2.Wpf.WebView2 browser)
+        public async Task BeginScrapingInBrowserAsync(CancellationToken cancellationToken = default)
         {
             scrapingResults = new List<WebScrapingResult>();
             pageNumber = 1;
 
-            _browser = browser;
             _browser.NavigationCompleted += Browser_NavigationCompleted;
-            _browser.Source = new Uri(_assetImporter.ImporterAssetsUrl);          
+            _browser.Source = new Uri(_assetImporter.ImporterAssetsUrl);
         }
 
         public async Task EndScrapingInBrowserAsync()
@@ -192,62 +193,91 @@ namespace AssetTracker.WpfApp.Common.ViewModels
             Assets = new ObservableCollection<AssetItem>(assetItems.Distinct());
             sb.AppendLine($"Scraped {pageNumber} pages with {Assets.Count} unique assets.");
 
+
+            _eventAggregator.Publish(new ServiceCommandExecutedEvent
+            {
+                ServiceName = PluginKey,
+                CommandData = ServiceStatusEvents.Success
+            });
+            _eventAggregator.Publish(new ServiceDataChangedEvent
+            {
+                ServiceName = PluginKey,
+                DataCount = Assets.Count()
+            });
+
             StatusMessage = sb.ToString();
+
+            IsProcessing = false;
         }
 
         private async void Browser_NavigationCompleted(object? sender, CoreWebView2NavigationCompletedEventArgs e)
         {
+            if (_lastCancellationTokenSource.IsCancellationRequested)
+            {
+                await EndScrapingInBrowserAsync();
+
+                return;
+            }
+
             string html = await _browser.ExecuteScriptAsync("document.documentElement.outerHTML;");
             html = System.Text.Json.JsonSerializer.Deserialize<string>(html);
-            var scrapeResult = await _assetImporter.ImportAssetsFromHtmlSourceAsync(_browser.Source.ToString(), pageNumber, html);
-            scrapingResults.Add(scrapeResult);
-            if(string.IsNullOrEmpty(scrapeResult.NextPageUrl))
+
+            try
             {
-                await EndScrapingInBrowserAsync();                
+                var scrapeResult = await _assetImporter.ImportAssetsFromHtmlSourceAsync(_browser.Source.ToString(), pageNumber, html, _lastCancellationTokenSource.Token);
+                scrapingResults.Add(scrapeResult);
+                if (string.IsNullOrEmpty(scrapeResult.NextPageUrl))
+                {
+                    await EndScrapingInBrowserAsync();
+                }
+                else
+                {
+                    _browser.Source = new Uri(scrapeResult.NextPageUrl);
+                    ++pageNumber;
+                }
             }
-            else
+            catch (OperationCanceledException ocex)
             {
-                _browser.Source = new Uri(scrapeResult.NextPageUrl);
-                ++pageNumber;
+                StatusMessage = $"Scraping was cancelled";
+                _eventAggregator.Publish(new ServiceCommandExecutedEvent
+                {
+                    ServiceName = PluginKey,
+                    CommandData = ServiceStatusEvents.Cancelled
+                });
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Error: {ex.Message}";
+                _eventAggregator.Publish(new ServiceCommandExecutedEvent
+                {
+                    ServiceName = PluginKey,
+                    CommandData = ServiceStatusEvents.Failure
+                });
             }
         }
 
-        List<WebScrapingResult> scrapingResults = new List<WebScrapingResult>();
-        int pageNumber = 1;
-
         private async Task StartScrape()
         {
+            if (_browser == null)
+            {
+                StatusMessage = $"Error browser is not initialized";
+                return;
+            }
+
             _eventAggregator.Publish(new ServiceCommandExecutedEvent
             {
                 ServiceName = PluginKey,
                 CommandData = ServiceStatusEvents.Start
             });
-            StatusMessage = "Scraping...";
+            StatusMessage = "Scraping, Please dont click within the browser it could affect the scraping...";
 
+            // Start progress animation
+            IsProcessing = true;
+
+            _lastCancellationTokenSource = new CancellationTokenSource();
             try
             {
-                // Start progress animation
-                IsProcessing = true;
-
-                _lastCancellationTokenSource = new CancellationTokenSource();
-
-                // Fetch data from Steam API
-                _scrapingTask = _assetImporter.ImportAssetsAsync(_lastCancellationTokenSource.Token); //_steamService.GetSteamGamesAsync(SteamApiKey, SteamId, _lastCancellationTokenSource.Token);
-                var games = await _scrapingTask;
-
-                Assets = new ObservableCollection<AssetItem>(games.Select(g => new AssetItem(g)));
-                StatusMessage = $"Loaded {Assets.Count} games successfully!";
-
-                _eventAggregator.Publish(new ServiceCommandExecutedEvent
-                {
-                    ServiceName = PluginKey,
-                    CommandData = ServiceStatusEvents.Success
-                });
-                _eventAggregator.Publish(new ServiceDataChangedEvent
-                {
-                    ServiceName = PluginKey,
-                    DataCount = Assets.Count()
-                });
+                await BeginScrapingInBrowserAsync(_lastCancellationTokenSource.Token);
             }
             catch (OperationCanceledException ocex)
             {
@@ -269,7 +299,6 @@ namespace AssetTracker.WpfApp.Common.ViewModels
             }
             finally
             {
-                IsProcessing = false;
             }
         }
 

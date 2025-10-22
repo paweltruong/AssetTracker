@@ -28,7 +28,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
 
             var factory = serviceProvider.GetRequiredService<IImportAssetsViewModelFactory>();
             var importAssetsViewModel = factory.Create(plugin);   
-            var importAssetsView = new DefaultBrowserAssetsImporterView();
+            var importAssetsView = serviceProvider.GetRequiredService<DefaultBrowserAssetsImporterView>();
             importAssetsView.DataContext = importAssetsViewModel;
             ImportAssetsView = importAssetsView;
         }

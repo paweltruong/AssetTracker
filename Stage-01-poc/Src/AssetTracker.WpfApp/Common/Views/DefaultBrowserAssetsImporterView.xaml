@@ -73,12 +73,9 @@
 
         <wv2:WebView2 Grid.Row="1" Name="Browser" Source="https://syntystore.com/account/login"
                       HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                       Loaded="Browser_Loaded" />
+                      IsEnabled="{Binding IsProcessing, Converter={StaticResource BooleanInverterConverter}}"
+                      Loaded="Browser_Loaded" />
 
-        <StackPanel Grid.Row="2">
-            <Button  Content="Scrape Data" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="10" Width="150" Click="ScrapeButton_Click"/>
-            <Button  Content="Scrape Data2" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="10" Width="150" Click="ScrapeButton2_Click"/>
-        </StackPanel>
         <TextBlock Grid.Row="3" 
                    Text="{Binding StatusMessage}" 
                    FontSize="12" 
