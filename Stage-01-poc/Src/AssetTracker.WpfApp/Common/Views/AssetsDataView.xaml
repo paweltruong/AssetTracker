@@ -1,0 +1,133 @@
+﻿<UserControl x:Class="AssetTracker.WpfApp.Common.Views.AssetsDataView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:AssetTracker.WpfApp.Common.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    
+    <UserControl.Resources>
+        <Style x:Key="ListItemContainerStyle" TargetType="ContentPresenter">
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <!--<Setter Property="Padding" Value="12"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>-->
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <ItemsControl ItemsSource="{Binding OwnedAssets}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Style="{StaticResource ListItemContainerStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Icon Column -->
+                            <StackPanel Grid.Column="0" Margin="0,0,12,0" VerticalAlignment="Top">
+                                <Image Source="{Binding ImageUrl}" 
+                                       Width="64" 
+                                       Height="64" 
+                                       Stretch="Uniform"
+                                       HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding AssetType}" 
+                                           HorizontalAlignment="Center"
+                                           Margin="0,4,0,0"
+                                           FontSize="10"
+                                           Foreground="Gray"/>
+                            </StackPanel>
+
+                            <!-- Main Content Column -->
+                            <StackPanel Grid.Column="1" Margin="0">
+                                <TextBlock Text="{Binding Name}" 
+                                           FontWeight="Bold" 
+                                           FontSize="14"
+                                           TextWrapping="Wrap"/>
+
+                                <!-- Publishers -->
+                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                    <TextBlock Text="Publishers: " FontWeight="SemiBold" Foreground="DarkGray"/>
+                                    <ItemsControl ItemsSource="{Binding Publishers}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Name}" Margin="2,0"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+
+                                <!-- Developers -->
+                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                    <TextBlock Text="Developers: " FontWeight="SemiBold" Foreground="DarkGray"/>
+                                    <ItemsControl ItemsSource="{Binding Developers}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Name}" Margin="2,0"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+
+                                <!-- Tags -->
+                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                    <TextBlock Text="Tags: " FontWeight="SemiBold" Foreground="DarkGray"/>
+                                    <ItemsControl ItemsSource="{Binding Tags}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel Orientation="Horizontal"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="#F0F0F0" 
+                                                        CornerRadius="10" 
+                                                        Padding="6,2" 
+                                                        Margin="2,1">
+                                                    <TextBlock Text="{Binding}" 
+                                                               FontSize="10" 
+                                                               Foreground="#555"/>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Marketplace Link Column -->
+                            <StackPanel Grid.Column="2" Margin="12,0,0,0" VerticalAlignment="Top">
+                                <TextBlock Text="{Binding MarketplaceName}" 
+                                           FontSize="11" 
+                                           Foreground="DarkBlue"
+                                           FontWeight="SemiBold"
+                                           HorizontalAlignment="Right"/>
+                                <Button Content="View in Marketplace" 
+                                        Command="{Binding DataContext.ViewMarketplaceCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}"
+                                        Style="{StaticResource LinkButtonStyle}"
+                                        HorizontalAlignment="Right"
+                                        Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </ScrollViewer>
+</UserControl>

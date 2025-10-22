@@ -68,6 +68,21 @@ namespace AssetTracker.WpfApp.Common.ViewModels
                 StopCommand.RaiseCanExecuteChanged();
             }
         }
+
+        private bool _isBrowserLoading;
+        public bool IsBrowserLoading
+        {
+            get => _isBrowserLoading;
+            set
+            {
+                SetProperty(ref _isBrowserLoading, value);
+                OnPropertyChanged(nameof(IsBusy));
+                StartCommand.RaiseCanExecuteChanged();
+            }
+        }
+
+        public bool IsBusy=> IsBrowserLoading || IsProcessing;
+
         private bool _isProcessing;
         public bool IsProcessing
         {
@@ -75,9 +90,12 @@ namespace AssetTracker.WpfApp.Common.ViewModels
             set
             {
                 SetProperty(ref _isProcessing, value);
+                OnPropertyChanged(nameof(IsBusy));
                 StopCommand.RaiseCanExecuteChanged();
+                StartCommand.RaiseCanExecuteChanged();
             }
         }
+
         private string _statusMessage;
         public string StatusMessage
         {
@@ -92,9 +110,29 @@ namespace AssetTracker.WpfApp.Common.ViewModels
             set => SetProperty(ref _assets, value);
         }
 
-        bool CanStartScrape() => true;
+        bool CanStartScrape() => !IsBusy;
         bool CanStopScrape() => IsProcessing;
 
+        public void SetupBrowser(Microsoft.Web.WebView2.Wpf.WebView2 browser)
+        {
+            _browser = browser;
+            _browser.NavigationStarting += _browser_NavigationStarting;// += Browser_ContentLoading;
+            _browser.NavigationCompleted += _browser_NavigationCompleted;
+        }
+
+        private void _browser_NavigationStarting(object? sender, CoreWebView2NavigationStartingEventArgs e)
+        {
+            IsBrowserLoading = true;
+        }
+        private async void _browser_NavigationCompleted(object? sender, CoreWebView2NavigationCompletedEventArgs e)
+        {
+            IsBrowserLoading = false;
+        }
+
+        private void Browser_ContentLoading(object? sender, CoreWebView2ContentLoadingEventArgs e)
+        {
+            IsBrowserLoading = true;            
+        }
 
         private async Task StopScrape()
         {

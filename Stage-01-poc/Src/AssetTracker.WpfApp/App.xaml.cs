@@ -3,6 +3,7 @@ using AssetTracker.AssetsImporter.SyntyStore;
 using AssetTracker.AssetsResolver.HumbleBundle;
 using AssetTracker.Core.Services.Plugins;
 using AssetTracker.WpfApp.Common;
+using AssetTracker.WpfApp.Common.Views;
 using AssetTracker.WpfApp.Modules.Main.Extensions;
 using AssetTracker.WpfApp.Modules.SteamScraper;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +24,7 @@ namespace AssetTracker.WpfApp
 
         public static List<IScraperModule> Modules { get; private set; }
         public static List<IPlugin> Plugins { get; private set; }
+        Func<IServiceProvider, object?, IAssetsImporterPlugin> implementationFactory;
 
         public App()
         {
@@ -54,6 +56,10 @@ namespace AssetTracker.WpfApp
             foreach (var plugin in _plugins)
             {
                 plugin.ConfigureServices(_serviceCollection);
+                if(plugin is IAssetsImporterPlugin assetsImporterPlugin && assetsImporterPlugin.UseDefaultBrowserLayout)
+                {
+                    _serviceCollection.AddKeyedSingleton<AssetsDataView>(plugin.PluginKey);
+                }
             }
             Plugins = _plugins;
 

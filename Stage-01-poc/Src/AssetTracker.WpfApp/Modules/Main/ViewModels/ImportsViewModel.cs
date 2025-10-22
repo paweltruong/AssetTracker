@@ -5,13 +5,8 @@ using AssetTracker.WpfApp.Common.Events;
 using AssetTracker.WpfApp.Common.ViewModels;
 using AssetTracker.WpfApp.Common.Views;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AssetTracker.WpfApp.Modules.Main.ViewModels
 {
@@ -115,10 +110,18 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
             {
                 if (eventData.MainViewType != null)
                 {
-                    var newMainView = _serviceProvider.GetRequiredService(eventData.MainViewType) as IScraperServiceMainView;
+                    var newMainView = _serviceProvider.GetRequiredKeyedService(eventData.MainViewType, eventData.ServiceName) as IScraperServiceMainView;
                     if (newMainView == null)
                     {
                         throw new InvalidOperationException($"Could not resolve main view of type {eventData.MainViewType.FullName}");
+                    }
+                    if (newMainView is AssetsDataView assetsDataView)
+                    {
+                        if(assetsDataView.DataContext == null)
+                        {
+                            var assetsDataViewModel = new AssetsDataViewModel(eventData.RelatedPlugin);
+                            assetsDataView.DataContext = assetsDataViewModel;
+                        }
                     }
                     SelectedServiceMainView = newMainView;
                 }

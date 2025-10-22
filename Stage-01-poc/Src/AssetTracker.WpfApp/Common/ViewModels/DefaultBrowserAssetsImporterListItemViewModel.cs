@@ -2,6 +2,7 @@
 using AssetTracker.WpfApp.Common.Events;
 using AssetTracker.WpfApp.Common.Models;
 using AssetTracker.WpfApp.Common.Models.Enums;
+using AssetTracker.WpfApp.Common.Views;
 using AssetTracker.WpfApp.Modules.SteamScraper.Views;
 
 namespace AssetTracker.WpfApp.Common.ViewModels
@@ -35,11 +36,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
         // Command methods
         protected override void ExecuteConfigureServiceCommand(object parameter)
         {
-            _eventAggregator.Publish(new ChangeMainViewEvent
-            {
-                ServiceName = PluginKey,
-                MainView = _masterModel.ImportAssetsView
-            });
+            _eventAggregator.Publish(new ChangeMainViewEvent(_plugin, _masterModel.ImportAssetsView));
         }
         protected override bool CanExecuteOpenFileCommand(object parameter) => false;
         protected override void ExecuteOpenFileCommand(object parameter)
@@ -60,11 +57,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
 
         protected override void ExecuteViewDataCommand(object parameter)
         {
-            _eventAggregator.Publish(new ChangeMainViewEvent
-            {
-                ServiceName = PluginKey,
-                MainViewType = typeof(DataView)
-            });
+            _eventAggregator.Publish(new ChangeMainViewEvent(_plugin,  typeof(AssetsDataView)));
         }
 
         protected override void OnServiceCommandExecuted(ServiceCommandExecutedEvent eventData)

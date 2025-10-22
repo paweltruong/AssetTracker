@@ -22,11 +22,7 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
         // Command methods
         protected override void ExecuteConfigureServiceCommand(object parameter)
         {
-            _eventAggregator.Publish(new ChangeMainViewEvent
-            {
-                ServiceName = SteamScraperModule.ModuleName,
-                MainViewType = typeof(ScrapeWizardView)
-            });
+            _eventAggregator.Publish(new ChangeMainViewEvent(SteamScraperModule.ModuleName, typeof(ScrapeWizardView)));
         }
         protected override bool CanExecuteOpenFileCommand(object parameter) => false;
         protected override void ExecuteOpenFileCommand(object parameter)
@@ -47,11 +43,7 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
 
         protected override void ExecuteViewDataCommand(object parameter)
         {
-            _eventAggregator.Publish(new ChangeMainViewEvent
-            {
-                ServiceName = SteamScraperModule.ModuleName,
-                MainViewType = typeof(DataView)
-            });
+            _eventAggregator.Publish(new ChangeMainViewEvent(SteamScraperModule.ModuleName, typeof(DataView)));
         }
 
         protected override void OnServiceCommandExecuted(ServiceCommandExecutedEvent eventData)

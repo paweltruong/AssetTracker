@@ -99,7 +99,7 @@
 
         <ProgressBar Grid.Row="5" 
                      Height="20"
-                     IsIndeterminate="{Binding IsProcessing}"
-                     Visibility="{Binding IsProcessing, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                     IsIndeterminate="{Binding IsBusy}"
+                     Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}" />
     </Grid>
 </UserControl>

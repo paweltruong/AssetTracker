@@ -30,6 +30,11 @@ namespace AssetTracker.WpfApp.Common.Views
                 // Only initialize once
                 if (Browser.CoreWebView2 == null)
                 {
+                    if (DataContext is DefaultBrowserAssetsImporterViewModel viewModel)
+                    {
+                        viewModel.SetupBrowser(Browser);
+                    }
+
                     var env = await CoreWebView2Environment.CreateAsync();
                     await Browser.EnsureCoreWebView2Async(env);
 
@@ -39,7 +44,7 @@ namespace AssetTracker.WpfApp.Common.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"WebView2 init error: {ex.Message}");
+                //MessageBox.Show($"WebView2 init error: {ex.Message}");
             }
         }
 
@@ -52,7 +57,7 @@ namespace AssetTracker.WpfApp.Common.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show("WebView2 init failed: " + ex.Message);
+                //MessageBox.Show("WebView2 init failed: " + ex.Message);
             }
         }
 

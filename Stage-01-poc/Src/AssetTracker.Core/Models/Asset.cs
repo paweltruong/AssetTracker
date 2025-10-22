@@ -11,5 +11,6 @@ namespace AssetTracker.Core.Models
         public IList<Publisher> Publishers { get; set; }
         public IList<Developer> Developers { get; set; }
         public string? AssetUrl { get; set; }
+        public string SourcePluginKey { get; set; }
     }
 }
