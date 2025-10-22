@@ -15,7 +15,6 @@
   <ItemGroup>
     <Folder Include="Common\Controls\" />
     <Folder Include="Modules\GenericBrowserAssetsImporter\Views\" />
-    <Folder Include="Modules\Main\Views\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,6 +31,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AssetTracker.Application\AssetTracker.Application.csproj" />
     <ProjectReference Include="..\AssetTracker.AssetsImporter.SyntyStore\AssetTracker.AssetsImporter.SyntyStore.csproj" />
+    <ProjectReference Include="..\AssetTracker.AssetsResolver.HumbleBundle\AssetTracker.AssetsResolver.HumbleBundle.csproj" />
   </ItemGroup>
 
   <ItemGroup>

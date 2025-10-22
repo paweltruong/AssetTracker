@@ -1,7 +1,5 @@
-﻿using AssetTracker.Core.Services.AssetsResolver;
-using AssetTracker.WpfApp.Common;
+﻿using AssetTracker.WpfApp.Common;
 using AssetTracker.WpfApp.Common.ViewModels;
-using AssetTracker.WpfApp.Modules.HumbleBundle.AssetsResolver;
 using AssetTracker.WpfApp.Modules.HumbleBundle.Scrapper.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,7 +10,6 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper
         public const string ModuleName = "HumbleBundleScraper";
         public void ConfigureModule(IServiceCollection services)
         {
-            services.AddKeyedSingleton<IAssetsResolver, HumbleBundleAssetsResolver>(ModuleName);
             services.AddSingleton<HumbleBundleServiceMasterViewModel>();
         }
 

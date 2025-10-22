@@ -15,6 +15,12 @@ namespace AssetTracker.WpfApp.Modules.Main.Extensions
         {
             services.AddSingleton<MainWindowViewModel>();
             services.AddSingleton<MainWindow>();
+
+            services.AddSingleton<MyAssetsViewModel>();
+            services.AddSingleton<ImportsViewModel>();
+            services.AddSingleton<CheckAssetsViewModel>();
+            services.AddSingleton<SettingsViewModel>();
+
             services.AddSingleton<IEventAggregator, EventAggregator>();
             services.AddTransient<IMyHttpClient, MyHttpClient>();
             services.AddSingleton<IAssetsComparer, DefaultAssetsComparer>();

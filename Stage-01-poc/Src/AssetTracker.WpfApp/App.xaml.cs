@@ -1,5 +1,6 @@
 ﻿using AssetTracker.Application;
 using AssetTracker.AssetsImporter.SyntyStore;
+using AssetTracker.AssetsResolver.HumbleBundle;
 using AssetTracker.Core.Services.Plugins;
 using AssetTracker.WpfApp.Common;
 using AssetTracker.WpfApp.Modules.Main.Extensions;
@@ -19,6 +20,9 @@ namespace AssetTracker.WpfApp
         private ServiceProvider _serviceProvider;
         private List<IScraperModule> _modules = new List<IScraperModule>();
         private List<IPlugin> _plugins = new List<IPlugin>();
+
+        public static List<IScraperModule> Modules { get; private set; }
+        public static List<IPlugin> Plugins { get; private set; }
 
         public App()
         {
@@ -43,17 +47,19 @@ namespace AssetTracker.WpfApp
             {
                 module.ConfigureModule(_serviceCollection);
             }
+            Modules = _modules;
 
             _plugins.Add(new SyntyStoreAssetsImporterPlugin());
+            _plugins.Add(new HumbleBundleAssetsResolverPlugin());
             foreach (var plugin in _plugins)
             {
                 plugin.ConfigureServices(_serviceCollection);
             }
+            Plugins = _plugins;
 
             _serviceProvider = _serviceCollection.BuildServiceProvider();
 
             var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
-            mainWindow.ViewModel.LoadAssetsImporterPlugins(_serviceProvider, _modules, _plugins);
             mainWindow.Show();
         }
 
