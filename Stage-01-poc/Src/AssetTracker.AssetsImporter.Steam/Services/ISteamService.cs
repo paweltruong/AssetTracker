@@ -1,5 +1,4 @@
 ﻿using AssetTracker.AssetsImporter.Steam.Definitions;
-using AssetTracker.Core.Models;
 
 namespace AssetTracker.AssetsImporter.Steam.Services
 {

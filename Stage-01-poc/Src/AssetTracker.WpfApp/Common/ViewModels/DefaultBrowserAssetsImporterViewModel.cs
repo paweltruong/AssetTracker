@@ -164,7 +164,8 @@ namespace AssetTracker.WpfApp.Common.ViewModels
                 _eventAggregator.Publish(new ServiceCommandExecutedEvent
                 {
                     ServiceName = PluginKey,
-                    CommandData = ServiceStatusEvents.Success
+                    CommandData = ServiceStatusEvents.Success,
+                    EventDate = DateTime.Now,
                 });
                 _eventAggregator.Publish(new ServiceDataChangedEvent
                 {

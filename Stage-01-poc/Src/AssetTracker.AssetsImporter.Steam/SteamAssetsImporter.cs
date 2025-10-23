@@ -3,12 +3,6 @@ using AssetTracker.Core.Models;
 using AssetTracker.Core.Models.Enums;
 using AssetTracker.Core.Services.AssetsImporter;
 using AssetTracker.Core.Services.AssetsImporter.Definitions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Net.WebRequestMethods;
 
 namespace AssetTracker.AssetsImporter.Steam
 {

@@ -11,6 +11,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
             Model.Title = "Design Time Scraper Service";
             Model.Description = "This is a description for design time.";
             Model.Status =  ScraperServiceStatus.Running;
+            Model.DateImported = DateTime.Now;
             Model.IconUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Emblem-unreadable.svg/40px-Emblem-unreadable.svg.png";
             Model.ScrapeDataButtonText = "Scrape Data";
             Model.ViewDataButtonText = "View Data";

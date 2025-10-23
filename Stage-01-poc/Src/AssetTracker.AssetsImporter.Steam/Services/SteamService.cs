@@ -1,6 +1,5 @@
 ﻿using AssetTracker.Application.Services;
 using AssetTracker.AssetsImporter.Steam.Definitions;
-using AssetTracker.Core.Models;
 using System.Text.Json;
 
 namespace AssetTracker.AssetsImporter.Steam.Services
@@ -24,7 +23,7 @@ namespace AssetTracker.AssetsImporter.Steam.Services
             var response = await _httpClient.GetAsync(url, cancellationToken);
 
             //simulate delay for testing
-            await Task.Delay(5000, cancellationToken);
+            //await Task.Delay(5000, cancellationToken);
 
             response.EnsureSuccessStatusCode();
 

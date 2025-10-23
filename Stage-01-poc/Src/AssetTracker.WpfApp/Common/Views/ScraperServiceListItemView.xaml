@@ -10,6 +10,7 @@
              d:DataContext="{d:DesignInstance Type=vm:DesignTimeScraperServiceViewModel, IsDesignTimeCreatable=True}"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
+        <converters:DateTimeToStringConverter x:Key="DateTimeToStringConverter"/>
         <converters:ScraperServiceStatusToBrushConverter x:Key="ScraperServiceStatusToBrushConverter"/>
         <converters:ScraperServiceStatusToTextConverter x:Key="ScraperServiceStatusToTextConverter"/>
 
@@ -29,10 +30,10 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="border" 
-           CornerRadius="6" 
-           Background="{TemplateBinding Background}"
-           BorderBrush="{TemplateBinding BorderBrush}"
-           BorderThickness="{TemplateBinding BorderThickness}">
+                               CornerRadius="6" 
+                               Background="{TemplateBinding Background}"
+                               BorderBrush="{TemplateBinding BorderBrush}"
+                               BorderThickness="{TemplateBinding BorderThickness}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -118,17 +119,31 @@
                                Margin="0,2,0,2"/>
 
                     <!-- Status -->
-                    <Border Grid.Row="2" 
-                            Background="{Binding Model.Status, Converter={StaticResource ScraperServiceStatusToBrushConverter}}" 
-                            CornerRadius="4" 
-                            Padding="8,2" 
-                            HorizontalAlignment="Left"
-                            Margin="0,2,0,0">
-                        <TextBlock Text="{Binding Model.Status, Converter={StaticResource ScraperServiceStatusToTextConverter}}" 
-                                   FontSize="11" 
-                                   Foreground="White" 
+                    <Grid Grid.Row="2" >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" 
+                                Background="{Binding Model.Status, Converter={StaticResource ScraperServiceStatusToBrushConverter}}" 
+                                CornerRadius="4" 
+                                Padding="8,2" 
+                                HorizontalAlignment="Left"
+                                Margin="0,2,0,0">
+
+                            <TextBlock Text="{Binding Model.Status, Converter={StaticResource ScraperServiceStatusToTextConverter}}" 
+                                       FontSize="11" 
+                                       Foreground="White" 
+                                       FontWeight="SemiBold"/>
+
+                        </Border>
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding Model.DateImported, Converter={StaticResource DateTimeToStringConverter}}" 
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Right"
+                                   FontSize="12"
                                    FontWeight="SemiBold"/>
-                    </Border>
+                    </Grid>
                 </Grid>
             </Grid>
         </Border>

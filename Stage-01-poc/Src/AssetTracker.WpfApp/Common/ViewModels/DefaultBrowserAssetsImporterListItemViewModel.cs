@@ -76,6 +76,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
                         break;
                     case ServiceStatusEvents.Success:
                         Model.Status = ScraperServiceStatus.DataLoaded;
+                        Model.DateImported = eventData.EventDate;
                         OnPropertyChanged(nameof(Model));
                         break;
                     case ServiceStatusEvents.Failure:

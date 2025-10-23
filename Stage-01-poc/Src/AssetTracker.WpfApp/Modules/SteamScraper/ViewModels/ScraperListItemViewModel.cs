@@ -1,16 +1,13 @@
-﻿using AssetTracker.WpfApp.Common.Commands;
-using AssetTracker.WpfApp.Common.Events;
+﻿using AssetTracker.WpfApp.Common.Events;
 using AssetTracker.WpfApp.Common.Models;
 using AssetTracker.WpfApp.Common.Models.Enums;
 using AssetTracker.WpfApp.Common.ViewModels;
 using AssetTracker.WpfApp.Modules.SteamScraper.Views;
-using System.Windows;
 
 namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
 {
     public class ScraperListItemViewModel : ScraperServiceListItemViewModel<ScraperServiceDataModel>
     {
-
         public ScraperListItemViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
         {
             Model.Title = "Steam";

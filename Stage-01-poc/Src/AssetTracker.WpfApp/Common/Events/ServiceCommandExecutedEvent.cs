@@ -7,5 +7,6 @@
     {
         public string ServiceName { get; set; }
         public object CommandData { get; set; }
+        public DateTime? EventDate { get; set; }
     }
 }
