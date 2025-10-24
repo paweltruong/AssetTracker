@@ -5,10 +5,8 @@ using AssetTracker.WpfApp.Common.Utils;
 using AssetTracker.WpfApp.Common.ViewModels;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.DirectoryServices;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 
 namespace AssetTracker.WpfApp.Modules.Main.ViewModels
 {
@@ -24,7 +22,6 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
             {
                 _sortDirection = value;
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(SortSymbol));
                 OnPropertyChanged(nameof(SortIconAngle));
             }
         }
@@ -36,13 +33,10 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
             {
                 _sortedColumn = value;
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(SortSymbol));
                 OnPropertyChanged(nameof(SortIconAngle));
             }
         }
 
-        // For character symbols (▲ ▼)
-        public string SortSymbol => SortDirection == ListSortDirection.Ascending ? "▲" : "▼";
         // For icon rotation (0° for ascending, 180° for descending)
         public double SortIconAngle => SortDirection == ListSortDirection.Ascending ? 0 : 180;
 

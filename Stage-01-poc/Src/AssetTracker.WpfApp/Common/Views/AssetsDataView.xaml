@@ -25,21 +25,7 @@
                         <Border Background="Transparent" Padding="{TemplateBinding Padding}">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <TextBlock Text="{TemplateBinding Content}" 
-                                           VerticalAlignment="Center"/>
-                                <TextBlock Text="{Binding DataContext.SortSymbol, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                       Foreground="#0078D4"
-                                       FontWeight="Bold"
-                                       Margin="4,0,0,0"
-                                       VerticalAlignment="Center">
-                                    <TextBlock.Visibility>
-                                        <MultiBinding Converter="{StaticResource HeaderToVisibilityMultiConverter}">
-                                            <!-- VM's SortedColumn -->
-                                            <Binding Path="DataContext.SortedColumn" RelativeSource="{RelativeSource AncestorType=UserControl}" />
-                                            <!-- This column's Tag (robust) -->
-                                            <Binding Path="Column.Tag" RelativeSource="{RelativeSource TemplatedParent}" />
-                                        </MultiBinding>
-                                    </TextBlock.Visibility>
-                                </TextBlock>
+                                           VerticalAlignment="Center"/>                                
                             </StackPanel>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -62,15 +48,14 @@
                                 <TextBlock Text="{TemplateBinding Content}" 
                                            VerticalAlignment="Center"/>
                                 <Path x:Name="SortIcon"
-      Data="M0,0 L1,0 0.5,1 z"
-      Stretch="Uniform"
-      Fill="DarkGray"
-      Width="8"
-      Height="8"
-      Margin="4,0,0,0"
-      VerticalAlignment="Center"
-      RenderTransformOrigin="0.5,0.5">
-                                    <!-- ✅ keeps triangle centered when rotating -->
+                                      Data="M0,0 L1,0 0.5,1 z"
+                                      Stretch="Uniform"
+                                      Fill="DarkGray"
+                                      Width="8"
+                                      Height="8"
+                                      Margin="4,0,0,0"
+                                      VerticalAlignment="Center"
+                                      RenderTransformOrigin="0.5,0.5">
                                     <Path.Visibility>
                                         <MultiBinding Converter="{StaticResource HeaderToVisibilityMultiConverter}">
                                             <Binding Path="DataContext.SortedColumn"
@@ -175,11 +160,11 @@
             <ListView.View>
                 <GridView>
                     <!-- Asset Column -->
-                    <GridViewColumn Width="220" Header="Asset" 
+                    <GridViewColumn Width="250" Header="Asset" 
                                    HeaderContainerStyle="{StaticResource SortableColumnHeaderWithIconsStyle}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel>
+                                <StackPanel HorizontalAlignment="Center">
                                     <Image Source="{Binding ImageUrl}" 
                                            Width="64" 
                                            Height="64" 
