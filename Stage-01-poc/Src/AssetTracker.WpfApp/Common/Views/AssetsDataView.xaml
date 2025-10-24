@@ -92,15 +92,17 @@
             <Setter Property="Margin" Value="0,0,0,4"/>
             <Setter Property="Padding" Value="12"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <!-- Important: Allow text selection in items -->
+            <Setter Property="Focusable" Value="False"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListViewItem">
                         <Border Name="Bd"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                Padding="{TemplateBinding Padding}"
-                                CornerRadius="4">
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        Padding="{TemplateBinding Padding}"
+                        CornerRadius="4">
                             <GridViewRowPresenter />
                         </Border>
                         <ControlTemplate.Triggers>
@@ -111,6 +113,13 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+        </Style>
+
+        <!-- Add this style for selectable text -->
+        <Style x:Key="SelectableTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="Focusable" Value="True"/>
+            <!--<Setter Property="IsTextSelectionEnabled" Value="True"/>-->
+            <Setter Property="Padding" Value="2"/>
         </Style>
 
         <!-- Link Button Style -->
@@ -186,9 +195,21 @@
                     </GridViewColumn>
 
                     <!-- Name Column -->
-                    <GridViewColumn Width="200" Header="Name" 
+                    <!--<GridViewColumn Width="200" Header="Name" 
                                    HeaderContainerStyle="{StaticResource SortableColumnHeaderWithIconsStyle}"
-                                   DisplayMemberBinding="{Binding Name}"/>
+                                   DisplayMemberBinding="{Binding Name}"/>-->
+                    <GridViewColumn Width="200" Header="Name" 
+                                    HeaderContainerStyle="{StaticResource SortableColumnHeaderWithIconsStyle}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <!--<TextBlock Text="{Binding Name}" 
+                                            Style="{StaticResource SelectableTextBlockStyle}"/>-->
+                                <TextBox Text="{Binding Name}" 
+                                         IsReadOnly="True"
+                                         BorderThickness="0"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
 
                     <!-- Publishers Column -->
                     <GridViewColumn Width="150" Header="Publishers" 
