@@ -8,7 +8,8 @@ namespace AssetTracker.Application
     {
         public static void RegisterServices(IServiceCollection services)
         {
-             services.AddSingleton<IAssetDatabase, FilesAssetDatabase>();
+            services.AddSingleton<ICacheManager, CacheManager>();
+            services.AddSingleton<IAssetDatabase, FilesAssetDatabase>();
         }
     }
 }

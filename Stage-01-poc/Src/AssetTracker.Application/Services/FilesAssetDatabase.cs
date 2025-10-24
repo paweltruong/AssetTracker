@@ -5,13 +5,21 @@ namespace AssetTracker.Application.Services
 {
     public class FilesAssetDatabase : IAssetDatabase
     {
+        private readonly ICacheManager _cacheManager;
 
-        private readonly IList<OwnedAsset> _assets = new List<OwnedAsset>();
+        private IList<OwnedAsset> _assets = new List<OwnedAsset>();
         private readonly object _lock = new object();
+
+
+        public FilesAssetDatabase(ICacheManager cacheManager)
+        {
+            _cacheManager = cacheManager;
+        }
 
         public bool IsDirty { get; private set; }
 
         public event EventHandler AssetDatabaseChanged;
+        public event EventHandler AssetDatabaseLoaded;
 
         public Task AddAssetsAsync(IEnumerable<OwnedAsset> assets)
         {
@@ -65,7 +73,22 @@ namespace AssetTracker.Application.Services
             }
         }
 
+        public async Task LoadAllAssetsAsync()
+        {
+            var assetDatabaseDatas = await _cacheManager.LoadAllMarketplaceDataAsync();
+            _assets = assetDatabaseDatas.SelectMany(add=> add.OwnedAssets).ToList();
+            RaiseAssetDatabaseLoadedEvent();
+        }
+
         public async Task<IEnumerable<OwnedAsset>> GetAssetsForMarketplaceAsync(string marketplaceKey)
+        {
+            lock (_lock)
+            {
+                return _assets.Where(a => a.MarketplaceKey.Equals(marketplaceKey));
+            }
+        }
+
+        public IEnumerable<OwnedAsset> GetAssetsForMarketplace(string marketplaceKey)
         {
             lock (_lock)
             {
@@ -76,6 +99,15 @@ namespace AssetTracker.Application.Services
         public void RaiseAssetDatabaseChangedEvent()
         {
             AssetDatabaseChanged?.Invoke(this, EventArgs.Empty);
+        }
+        public void RaiseAssetDatabaseLoadedEvent()
+        {
+            AssetDatabaseLoaded?.Invoke(this, EventArgs.Empty);
+        }
+
+        public async Task SaveAsync()
+        {
+            await _cacheManager.SaveOwnedAssetsAsync(_assets);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using AssetTracker.WpfApp.Common.Events;
+﻿using AssetTracker.Core.Services;
+using AssetTracker.WpfApp.Common.Events;
 using AssetTracker.WpfApp.Common.Models;
 using AssetTracker.WpfApp.Common.Models.Enums;
 using AssetTracker.WpfApp.Common.ViewModels;
@@ -8,7 +9,7 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
 {
     public class ScraperListItemViewModel : ScraperServiceListItemViewModel<ScraperServiceDataModel>
     {
-        public ScraperListItemViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
+        public ScraperListItemViewModel(IEventAggregator eventAggregator, IAssetDatabase assetDatabase) : base(eventAggregator, assetDatabase)
         {
             Model.Title = "Steam";
             Model.Description = "Get owned game list";
@@ -29,7 +30,7 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
         protected override bool CanExecuteSaveFileCommand(object parameter) => true;
         protected override void ExecuteSaveFileCommand(object parameter)
         {
-           throw new NotImplementedException();
+            throw new NotImplementedException();
         }
 
         protected override bool CanExecuteViewDataCommand(object parameter)
@@ -85,7 +86,7 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
             if (eventData != null
                 && eventData.ServiceName.Equals(SteamScraperModule.ModuleName))
             {
-                Model.ViewDataButtonText = eventData.DataCount > 0 ? 
+                Model.ViewDataButtonText = eventData.DataCount > 0 ?
                     string.Format(ScraperServiceDataModel.ViewDataButtonTextFormatted, eventData.DataCount)
                     : ScraperServiceDataModel.ViewDataButtonTextDefault;
                 OnPropertyChanged(nameof(Model));

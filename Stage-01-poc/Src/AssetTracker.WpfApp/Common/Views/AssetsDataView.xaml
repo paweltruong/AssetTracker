@@ -12,14 +12,41 @@
         <converters:CollectionToVisibilityConverter x:Key="CollectionToVisibilityConverter"/>
         <converters:InvertedCollectionToVisibilityConverter x:Key="InvertedCollectionToVisibilityConverter"/>
 
-        <!-- Style for the Border that wraps each item -->
-        <Style x:Key="ListItemBorderStyle" TargetType="Border">
-            <Setter Property="Margin" Value="0,0,0,8"/>
-            <Setter Property="Padding" Value="12"/>
+        <!-- Style for sortable column headers -->
+        <Style x:Key="SortableColumnHeaderStyle" TargetType="GridViewColumnHeader">
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Command" Value="{Binding DataContext.SortCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+            <Setter Property="CommandParameter" Value="{Binding RelativeSource={RelativeSource Self}}"/>
+        </Style>
+
+        <!-- Style for list view items -->
+        <Style x:Key="ListViewItemStyle" TargetType="ListViewItem">
             <Setter Property="Background" Value="White"/>
             <Setter Property="BorderBrush" Value="#E0E0E0"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+            <Setter Property="Padding" Value="12"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}"
+                                CornerRadius="4">
+                            <GridViewRowPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#F0F0F0"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <!-- Link Button Style -->
@@ -48,130 +75,146 @@
     </UserControl.Resources>
 
     <Grid>
+        <TextBlock Text="No data" 
+                   Visibility="{Binding OwnedAssets, Converter={StaticResource InvertedCollectionToVisibilityConverter}}" 
+                   Margin="5,5,5,5"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Center"
+                   FontSize="16"
+                   Foreground="Gray"/>
 
-        <TextBlock Text="No data" Visibility="{Binding OwnedAssets, Converter={StaticResource InvertedCollectionToVisibilityConverter}}" 
-                   Margin="5,5,5,5"/>
+        <ListView ItemsSource="{Binding OwnedAssets}"
+                  Visibility="{Binding OwnedAssets, Converter={StaticResource CollectionToVisibilityConverter}}"
+                  Margin="5,5,5,5"
+                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                  VirtualizingPanel.IsVirtualizing="True"
+                  VirtualizingPanel.VirtualizationMode="Recycling"
+                  Background="Transparent"
+                  BorderThickness="0"
+                  ItemContainerStyle="{StaticResource ListViewItemStyle}">
 
-        <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <ItemsControl ItemsSource="{Binding OwnedAssets}"
-                          Visibility="{Binding OwnedAssets, Converter={StaticResource CollectionToVisibilityConverter}}"
-                          Margin="5,5,5,5">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <!-- Use the correct style for Border -->
-                        <Border Style="{StaticResource ListItemBorderStyle}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" MinWidth="220"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <!-- Icon Column -->
-                                <StackPanel Grid.Column="0" Margin="0,0,12,0" VerticalAlignment="Top">
+            <ListView.View>
+                <GridView>
+                    <!-- Asset Column -->
+                    <GridViewColumn Width="220" Header="Asset" HeaderContainerStyle="{StaticResource SortableColumnHeaderStyle}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel>
                                     <Image Source="{Binding ImageUrl}" 
-                                       Width="64" 
-                                       Height="64" 
-                                       Stretch="Uniform"
-                                       HorizontalAlignment="Center"/>
+                                           Width="64" 
+                                           Height="64" 
+                                           Stretch="Uniform"
+                                           HorizontalAlignment="Center"/>
                                     <TextBlock Text="{Binding AssetType}" 
-                                           HorizontalAlignment="Center"
-                                           Margin="0,4,0,0"
-                                           FontSize="10"
-                                           Foreground="Gray"/>
+                                               HorizontalAlignment="Center"
+                                               Margin="0,4,0,0"
+                                               FontSize="10"
+                                               Foreground="Gray"/>
                                     <TextBlock Text="{Binding MarketplaceUid}" 
-                                            HorizontalAlignment="Center"
-                                            Margin="0,4,0,0"
-                                            FontSize="10"
-                                            Foreground="Gray"/>
+                                                HorizontalAlignment="Center"
+                                                Margin="0,4,0,0"
+                                                FontSize="10"
+                                                Foreground="Gray"/>
                                 </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
 
-                                <!-- Main Content Column -->
-                                <StackPanel Grid.Column="1" Margin="0">
-                                    <TextBlock Text="{Binding Name}" 
-                                           FontWeight="Bold" 
-                                           FontSize="14"
-                                           TextWrapping="Wrap"/>
+                    <!-- Name Column -->
+                    <GridViewColumn Width="200" Header="Name" HeaderContainerStyle="{StaticResource SortableColumnHeaderStyle}"
+                                   DisplayMemberBinding="{Binding Name}"/>
 
-                                    <!-- Publishers -->
-                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                        <TextBlock Text="Publishers: " FontWeight="SemiBold" Foreground="DarkGray"/>
-                                        <ItemsControl ItemsSource="{Binding Publishers}">
-                                            <ItemsControl.ItemsPanel>
-                                                <ItemsPanelTemplate>
-                                                    <StackPanel Orientation="Horizontal"/>
-                                                </ItemsPanelTemplate>
-                                            </ItemsControl.ItemsPanel>
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding Name}" Margin="2,0"/>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
-                                    </StackPanel>
+                    <!-- Publishers Column -->
+                    <GridViewColumn Width="150" Header="Publishers" HeaderContainerStyle="{StaticResource SortableColumnHeaderStyle}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <ItemsControl ItemsSource="{Binding Publishers}" BorderThickness="0" Padding="0" Background="Transparent">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Vertical"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Name}" Margin="0,1"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
 
-                                    <!-- Developers -->
-                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                                        <TextBlock Text="Developers: " FontWeight="SemiBold" Foreground="DarkGray"/>
-                                        <ItemsControl ItemsSource="{Binding Developers}">
-                                            <ItemsControl.ItemsPanel>
-                                                <ItemsPanelTemplate>
-                                                    <StackPanel Orientation="Horizontal"/>
-                                                </ItemsPanelTemplate>
-                                            </ItemsControl.ItemsPanel>
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding Name}" Margin="2,0"/>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
-                                    </StackPanel>
+                    <!-- Developers Column -->
+                    <GridViewColumn Width="150" Header="Developers" HeaderContainerStyle="{StaticResource SortableColumnHeaderStyle}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <ItemsControl ItemsSource="{Binding Developers}" BorderThickness="0" Padding="0" Background="Transparent">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Vertical"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Name}" Margin="0,1"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
 
-                                    <!-- Tags -->
-                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                        <TextBlock Text="Tags: " FontWeight="SemiBold" Foreground="DarkGray"/>
-                                        <ItemsControl ItemsSource="{Binding Tags}">
-                                            <ItemsControl.ItemsPanel>
-                                                <ItemsPanelTemplate>
-                                                    <WrapPanel Orientation="Horizontal"/>
-                                                </ItemsPanelTemplate>
-                                            </ItemsControl.ItemsPanel>
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Border Background="#F0F0F0" 
-                                                        CornerRadius="10" 
-                                                        Padding="6,2" 
-                                                        Margin="2,1">
-                                                        <TextBlock Text="{Binding}" 
-                                                               FontSize="10" 
-                                                               Foreground="#555"/>
-                                                    </Border>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
-                                    </StackPanel>
-                                </StackPanel>
+                    <!-- Tags Column -->
+                    <GridViewColumn Width="200" Header="Tags" HeaderContainerStyle="{StaticResource SortableColumnHeaderStyle}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <ItemsControl ItemsSource="{Binding Tags}" BorderThickness="0" Padding="0" Background="Transparent">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel Orientation="Horizontal"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="#F0F0F0" 
+                                                    CornerRadius="10" 
+                                                    Padding="6,2" 
+                                                    Margin="2,1">
+                                                <TextBlock Text="{Binding}" 
+                                                           FontSize="10" 
+                                                           Foreground="#555"/>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
 
-                                <!-- Marketplace Link Column -->
-                                <StackPanel Grid.Column="2" Margin="12,0,0,0" VerticalAlignment="Top">
+                    <!-- Marketplace Column -->
+                    <GridViewColumn Width="120" Header="Marketplace" HeaderContainerStyle="{StaticResource SortableColumnHeaderStyle}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel>
                                     <TextBlock Text="{Binding MarketplaceName}" 
-                                           FontSize="11" 
-                                           Foreground="DarkBlue"
-                                           FontWeight="SemiBold"
-                                           HorizontalAlignment="Right"/>
-                                    <Button Content="View in Marketplace" 
-                                        Command="{Binding DataContext.ViewMarketplaceCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                        CommandParameter="{Binding AssetUrl}"
-                                        Style="{StaticResource LinkButtonStyle}"
-                                        HorizontalAlignment="Right"
-                                        Margin="0,4,0,0"/>
+                                               FontSize="11" 
+                                               Foreground="DarkBlue"
+                                               FontWeight="SemiBold"/>
+                                    <Button Content="View" 
+                                            Command="{Binding DataContext.ViewMarketplaceCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding AssetUrl}"
+                                            Style="{StaticResource LinkButtonStyle}"
+                                            Margin="0,4,0,0"/>
                                 </StackPanel>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
-
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
     </Grid>
 </UserControl>

@@ -1,4 +1,5 @@
-﻿using AssetTracker.WpfApp.Common.Commands;
+﻿using AssetTracker.Core.Services;
+using AssetTracker.WpfApp.Common.Commands;
 using AssetTracker.WpfApp.Common.Events;
 using AssetTracker.WpfApp.Common.Models;
 
@@ -7,12 +8,16 @@ namespace AssetTracker.WpfApp.Common.ViewModels
     public abstract class ScraperServiceListItemViewModel<TModel> : ViewModelBase, IScraperServiceViewModel where TModel : ScraperServiceDataModel, new()
     {
         protected readonly IEventAggregator _eventAggregator;
+        protected readonly IAssetDatabase _assetDatabase;
         protected TModel _model;
-        public ScraperServiceListItemViewModel(IEventAggregator eventAggregator)
+        public ScraperServiceListItemViewModel(IEventAggregator eventAggregator, IAssetDatabase assetDatabase)
         {
             _eventAggregator = eventAggregator;
             _eventAggregator.Subscribe<ServiceCommandExecutedEvent>(OnServiceCommandExecuted);
             _eventAggregator.Subscribe<ServiceDataChangedEvent>(OnServiceDataChanged);
+            _assetDatabase = assetDatabase;
+            _assetDatabase.AssetDatabaseChanged += AssetDatabase_AssetDatabaseChanged;
+            _assetDatabase.AssetDatabaseLoaded += AssetDatabase_AssetDatabaseLoaded;
             _model = new TModel();
 
             // Initialize commands
@@ -20,6 +25,14 @@ namespace AssetTracker.WpfApp.Common.ViewModels
             OpenFileCommand = new RelayCommand(ExecuteOpenFileCommand, CanExecuteOpenFileCommand);
             SaveFileCommand = new RelayCommand(ExecuteSaveFileCommand, CanExecuteSaveFileCommand);
             ViewDataCommand = new RelayCommand(ExecuteViewDataCommand, CanExecuteViewDataCommand);
+        }
+
+        protected virtual void AssetDatabase_AssetDatabaseLoaded(object? sender, EventArgs e)
+        {
+        }
+
+        protected virtual void AssetDatabase_AssetDatabaseChanged(object? sender, EventArgs e)
+        {
         }
 
         // Expose model properties to View

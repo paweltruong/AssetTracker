@@ -19,7 +19,7 @@
         </Grid.RowDefinitions>
 
         <StackPanel Orientation="Horizontal">
-            <Button Content="Save Changes" Command="{Binding CheckLinkCommand}" Margin="10" Padding="10,5"
+            <Button Content="Save Changes" Command="{Binding SaveCommand}" Margin="10" Padding="10,5"
                     IsEnabled="{Binding IsDirty, Mode=OneWay}"/>
         </StackPanel>
         

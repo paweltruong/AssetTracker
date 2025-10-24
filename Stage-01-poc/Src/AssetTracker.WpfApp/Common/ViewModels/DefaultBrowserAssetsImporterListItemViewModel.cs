@@ -1,4 +1,5 @@
-﻿using AssetTracker.Core.Services.Plugins;
+﻿using AssetTracker.Core.Services;
+using AssetTracker.Core.Services.Plugins;
 using AssetTracker.WpfApp.Common.Events;
 using AssetTracker.WpfApp.Common.Models;
 using AssetTracker.WpfApp.Common.Models.Enums;
@@ -11,7 +12,10 @@ namespace AssetTracker.WpfApp.Common.ViewModels
         IAssetsImporterPlugin _plugin;
         IScraperServiceMasterModel _masterModel;
 
-        public DefaultBrowserAssetsImporterListItemViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
+        public DefaultBrowserAssetsImporterListItemViewModel(
+            IEventAggregator eventAggregator,
+            IAssetDatabase assetDatabase)
+            : base(eventAggregator, assetDatabase)
         {
             Model.Title = "Plugin";
             Model.Description = "Get owned assets";
@@ -20,6 +24,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
         }
 
         public string PluginKey => _plugin?.PluginKey ?? string.Empty;
+        public string PluginMarketplaceKey => _plugin.MarketplaceKey ?? string.Empty;
 
         public void SetListItemProperties(IAssetsImporterPlugin plugin, IScraperServiceMasterModel masterModel)
         {
@@ -29,6 +34,9 @@ namespace AssetTracker.WpfApp.Common.ViewModels
             Model.Title = plugin.DisplayName;
             Model.Description = plugin.Description;
             Model.IconUrl = plugin.IconUrl;
+
+            UpdateViewButtonText();
+
             OnPropertyChanged(nameof(Model));
         }
 
@@ -45,7 +53,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
         protected override bool CanExecuteSaveFileCommand(object parameter) => true;
         protected override void ExecuteSaveFileCommand(object parameter)
         {
-           throw new NotImplementedException();
+            throw new NotImplementedException();
         }
 
         protected override bool CanExecuteViewDataCommand(object parameter)
@@ -56,7 +64,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
 
         protected override void ExecuteViewDataCommand(object parameter)
         {
-            _eventAggregator.Publish(new ChangeMainViewEvent(_plugin,  typeof(AssetsDataView)));
+            _eventAggregator.Publish(new ChangeMainViewEvent(_plugin, typeof(AssetsDataView)));
         }
 
         protected override void OnServiceCommandExecuted(ServiceCommandExecutedEvent eventData)
@@ -102,11 +110,30 @@ namespace AssetTracker.WpfApp.Common.ViewModels
             if (eventData != null
                 && eventData.ServiceName.Equals(PluginKey))
             {
-                Model.ViewDataButtonText = eventData.DataCount > 0 ? 
-                    string.Format(ScraperServiceDataModel.ViewDataButtonTextFormatted, eventData.DataCount)
-                    : ScraperServiceDataModel.ViewDataButtonTextDefault;
-                OnPropertyChanged(nameof(Model));
+                UpdateViewButtonText(eventData.DataCount);
             }
+        }
+
+
+        protected override void AssetDatabase_AssetDatabaseLoaded(object? sender, EventArgs e)
+        {
+            base.AssetDatabase_AssetDatabaseLoaded(sender, e);
+
+            UpdateViewButtonText();
+        }
+
+        void UpdateViewButtonText(int? count = null)
+        {
+            if (!count.HasValue)
+            {
+                var assetsForPlugin = _assetDatabase.GetAssetsForMarketplace(PluginMarketplaceKey);
+                count = assetsForPlugin.Count();
+            }
+            Model.ViewDataButtonText = count > 0 ?
+                    string.Format(ScraperServiceDataModel.ViewDataButtonTextFormatted, count)
+                    : ScraperServiceDataModel.ViewDataButtonTextDefault;
+
+            OnPropertyChanged(nameof(Model));
         }
     }
 }

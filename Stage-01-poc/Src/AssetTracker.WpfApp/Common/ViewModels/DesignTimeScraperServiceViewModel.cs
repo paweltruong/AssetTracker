@@ -5,12 +5,12 @@ namespace AssetTracker.WpfApp.Common.ViewModels
 {
     public class DesignTimeScraperServiceViewModel : ScraperServiceListItemViewModel<ScraperServiceDataModel>
     {
-        public DesignTimeScraperServiceViewModel() : base(null)
+        public DesignTimeScraperServiceViewModel() : base(null, null)
         {
             // Set design-time data
             Model.Title = "Design Time Scraper Service";
             Model.Description = "This is a description for design time.";
-            Model.Status =  ScraperServiceStatus.Running;
+            Model.Status = ScraperServiceStatus.Running;
             Model.DateImported = DateTime.Now;
             Model.IconUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Emblem-unreadable.svg/40px-Emblem-unreadable.svg.png";
             Model.ScrapeDataButtonText = "Scrape Data";
