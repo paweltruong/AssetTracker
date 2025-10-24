@@ -1,21 +1,9 @@
-﻿using AssetTracker.Core.Models.Enums;
+﻿using AssetTracker.Core.Services;
 using AssetTracker.Core.Services.AssetsComparer;
-using AssetTracker.Core.Services.AssetsResolver;
-using AssetTracker.Core.Services.AssetsResolver.Definitions;
-using AssetTracker.Core.Services.Plugins;
-using AssetTracker.WpfApp.Common;
 using AssetTracker.WpfApp.Common.Commands;
 using AssetTracker.WpfApp.Common.Events;
-using AssetTracker.WpfApp.Common.Models;
-using AssetTracker.WpfApp.Common.Utils;
 using AssetTracker.WpfApp.Common.ViewModels;
-using AssetTracker.WpfApp.Common.Views;
-using AssetTracker.WpfApp.Modules.Main.Views;
-using AssetTracker.WpfApp.Modules.SteamScraper;
 using Microsoft.Extensions.DependencyInjection;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Windows.Input;
 
 namespace AssetTracker.WpfApp.Modules.Main.ViewModels
 {
@@ -26,6 +14,9 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
         public const string CheckAssetsViewKey = "CheckAssets";
         public const string SettingsViewKey = "Settings";
 
+        public const string MyAssetsButtonTextDefault = "My Assets";
+        public const string ButtonTextDirtySuffix = "*";
+
         // Expose as instance properties for binding
         public string MyAssetsViewName => MyAssetsViewKey;
         public string ImportsViewName => ImportsViewKey;
@@ -34,28 +25,27 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
 
         private readonly IServiceProvider _serviceProvider;
         private readonly IEventAggregator _eventAggregator;
+        private readonly IAssetDatabase _assetDatabase;
 
+        private string _myAssetsButtonText = MyAssetsButtonTextDefault;
+        public string MyAssetsButtonText
+        {
+            get => _myAssetsButtonText;
+            set => SetProperty(ref _myAssetsButtonText, value);
+        }
 
         private ViewModelBase _currentView;
         public ViewModelBase CurrentView
         {
             get => _currentView;
-            set
-            {
-                _currentView = value;
-                OnPropertyChanged();
-            }
+            set => SetProperty(ref _currentView, value);
         }
 
         private string _selectedView;
         public string SelectedView
         {
             get => _selectedView;
-            set
-            {
-                _selectedView = value;
-                OnPropertyChanged();
-            }
+            set => SetProperty(ref _selectedView, value);
         }
         public IRelayCommand NavigateCommand { get; }
 
@@ -72,14 +62,24 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
             };
         }
 
-        public MainWindowViewModel(IServiceProvider serviceProvider, IEventAggregator eventAggregator, IAssetsComparer assetsComparer)
+        public MainWindowViewModel(IServiceProvider serviceProvider,
+            IEventAggregator eventAggregator,
+            IAssetsComparer assetsComparer,
+            IAssetDatabase assetDatabase)
         {
             _serviceProvider = serviceProvider;
             _eventAggregator = eventAggregator;
+            _assetDatabase = assetDatabase;
+            _assetDatabase.AssetDatabaseChanged += AssetDatabase_AssetDatabaseChanged;
 
-            NavigateCommand = new RelayCommand<string>(ExecuteNavigateCommand);           
+            NavigateCommand = new RelayCommand<string>(ExecuteNavigateCommand);
 
             NavigateCommand.Execute("MyAssets");
+        }
+
+        private void AssetDatabase_AssetDatabaseChanged(object? sender, EventArgs e)
+        {
+            MyAssetsButtonText = MyAssetsButtonTextDefault + (_assetDatabase.IsDirty ? ButtonTextDirtySuffix : string.Empty);            
         }
     }
 }

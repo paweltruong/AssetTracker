@@ -5,20 +5,30 @@ namespace AssetTracker.Application.Services
 {
     public class FilesAssetDatabase : IAssetDatabase
     {
+
         private readonly IList<OwnedAsset> _assets = new List<OwnedAsset>();
+        private readonly object _lock = new object();
+
+        public bool IsDirty { get; private set; }
 
         public event EventHandler AssetDatabaseChanged;
 
         public Task AddAssetsAsync(IEnumerable<OwnedAsset> assets)
         {
-            foreach (var asset in assets)
+            lock (_lock)
             {
-                if (!_assets.Contains(asset))
+                foreach (var asset in assets)
                 {
-                    _assets.Add(asset);
+                    if (!_assets.Contains(asset))
+                    {
+                        asset.IsDirty = true;
+                        _assets.Add(asset);
+                        IsDirty = true;
+                    }
                 }
+
+                RaiseAssetDatabaseChangedEvent();
             }
-            RaiseAssetDatabaseChangedEvent();
             return Task.CompletedTask;
         }
 
@@ -47,9 +57,20 @@ namespace AssetTracker.Application.Services
             return Enumerable.Empty<OwnedAsset>();
         }
 
-        public Task<IEnumerable<OwnedAsset>> GetAssetsForMarketplaceAsync(string marketplaceKey)
+        public async Task<IEnumerable<OwnedAsset>> GetAllAssetsAsync()
         {
-            return Task.FromResult(_assets.Where(a=>a.MarketplaceKey.Equals(marketplaceKey)));
+            lock (_lock)
+            {
+                return _assets;
+            }
+        }
+
+        public async Task<IEnumerable<OwnedAsset>> GetAssetsForMarketplaceAsync(string marketplaceKey)
+        {
+            lock (_lock)
+            {
+                return _assets.Where(a => a.MarketplaceKey.Equals(marketplaceKey));
+            }
         }
 
         public void RaiseAssetDatabaseChangedEvent()

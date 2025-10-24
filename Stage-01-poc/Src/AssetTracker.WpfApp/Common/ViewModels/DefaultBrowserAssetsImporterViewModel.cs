@@ -5,6 +5,7 @@ using AssetTracker.Core.Services.AssetsImporter.Definitions;
 using AssetTracker.Core.Services.Plugins;
 using AssetTracker.WpfApp.Common.Commands;
 using AssetTracker.WpfApp.Common.Events;
+using AssetTracker.WpfApp.Common.Utils;
 using Microsoft.Web.WebView2.Core;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -28,7 +29,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
             IAssetsImporter assetImporter,
             IAssetDatabase assetDatabase) : base(eventAggregator, plugin, assetImporter, assetDatabase)
         {
-            OpenLinkCommand = new RelayCommand<string>(OpenLink);
+            OpenLinkCommand = new RelayCommand<string>(url => WpfHelpers.OpenUrl(url));
         }
 
         public string ImportSourceUrl => _plugin.ImportSourceUrl;
@@ -269,18 +270,6 @@ namespace AssetTracker.WpfApp.Common.ViewModels
             }
             finally
             {
-            }
-        }
-
-        private void OpenLink(string url)
-        {
-            if (!string.IsNullOrEmpty(url))
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = url,
-                    UseShellExecute = true
-                });
             }
         }
     }

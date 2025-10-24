@@ -99,7 +99,7 @@
         <DockPanel>
             <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
                 <RadioButton Style="{StaticResource TabHeaderRadioButtonStyle}"
-                             Content="My Assets" 
+                             Content="{Binding MyAssetsButtonText}" 
                              GroupName="TabGroup"
                              IsChecked="True"
                              Command="{Binding NavigateCommand}"

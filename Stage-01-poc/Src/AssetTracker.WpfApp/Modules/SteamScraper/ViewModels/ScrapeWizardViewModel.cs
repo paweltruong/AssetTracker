@@ -1,5 +1,6 @@
 ﻿using AssetTracker.WpfApp.Common.Commands;
 using AssetTracker.WpfApp.Common.Events;
+using AssetTracker.WpfApp.Common.Utils;
 using AssetTracker.WpfApp.Common.ViewModels;
 using AssetTracker.WpfApp.Modules.SteamScraper.Models;
 using AssetTracker.WpfApp.Modules.SteamScraper.Services;
@@ -24,7 +25,7 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
             _eventAggregator = eventAggregator;
             _steamService = steamService;
 
-            OpenLinkCommand = new RelayCommand<string>(OpenLink);
+            OpenLinkCommand = new RelayCommand<string>(url => WpfHelpers.OpenUrl(url));
             StartCommand = new AsyncRelayCommand(StartScrape, CanStartScrape);
             StopCommand = new AsyncRelayCommand(StopScrape, CanStopScrape);
         }
@@ -162,18 +163,6 @@ namespace AssetTracker.WpfApp.Modules.SteamScraper.ViewModels
             finally
             {
                 IsProcessing = false;
-            }
-        }
-
-        private void OpenLink(string url)
-        {
-            if (!string.IsNullOrEmpty(url))
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = url,
-                    UseShellExecute = true
-                });
             }
         }
     }

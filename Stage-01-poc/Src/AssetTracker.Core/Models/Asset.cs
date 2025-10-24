@@ -1,9 +1,10 @@
 ﻿using AssetTracker.Core.Models.Enums;
+using System;
 using System.Runtime.InteropServices;
 
 namespace AssetTracker.Core.Models
 {
-    public class Asset
+    public class Asset : IEquatable<Asset>
     {
         private Asset()
         {
@@ -55,6 +56,14 @@ namespace AssetTracker.Core.Models
                 AssetUrl = assetUrl
             };
             return asset;
+        }
+
+        public bool Equals(Asset? other)
+        {      
+            if (other == null)
+                return false;
+
+            return MarketplaceUid == other.MarketplaceUid && MarketplaceKey == other.MarketplaceKey;
         }
     }
 }

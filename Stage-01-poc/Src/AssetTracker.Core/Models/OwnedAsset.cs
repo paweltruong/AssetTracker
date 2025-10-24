@@ -1,5 +1,5 @@
 ﻿using AssetTracker.Core.Models.Enums;
-using System.Xml.Linq;
+using System.Text.Json.Serialization;
 
 namespace AssetTracker.Core.Models
 {
@@ -27,5 +27,11 @@ namespace AssetTracker.Core.Models
         public string MarketplaceName { get; set; }
         public string MarketplaceAccountId { get; set; }
         public string MarketplaceUrl { get; set; }
+
+        [JsonIgnore]
+        /// <summary>
+        /// Is object has changed that was not applied into the persistend <see cref="AssetTracker.Core.Services.IAssetDatabase">
+        /// </summary>
+        public bool IsDirty { get; set; }
     }
 }

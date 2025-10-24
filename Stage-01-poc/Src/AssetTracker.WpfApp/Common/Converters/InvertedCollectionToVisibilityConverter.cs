@@ -4,7 +4,7 @@ using System.Windows.Data;
 
 namespace AssetTracker.WpfApp.Common.Converters
 {
-    public class CollectionToVisibilityConverter : IValueConverter
+    public class InvertedCollectionToVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -18,7 +18,7 @@ namespace AssetTracker.WpfApp.Common.Converters
                 if (enumerator is IDisposable disposable)
                     disposable.Dispose();
 
-                return hasItems ? Visibility.Visible : Visibility.Collapsed;
+                return hasItems ? Visibility.Collapsed : Visibility.Visible;
             }
 
             return Visibility.Collapsed;
@@ -26,7 +26,7 @@ namespace AssetTracker.WpfApp.Common.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotSupportedException("CollectionToVisibilityConverter is a one-way converter");
+            throw new NotSupportedException("InvertedCollectionToVisibilityConverter is a one-way converter");
         }
     }
 }

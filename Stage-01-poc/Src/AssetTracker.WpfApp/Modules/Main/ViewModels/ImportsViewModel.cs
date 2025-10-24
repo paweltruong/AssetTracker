@@ -26,18 +26,7 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
 
             _scraperServices = new ObservableCollection<IScraperServiceMasterModel>();
 
-            OpenLinkCommand = new RelayCommand<string>(url =>
-            {
-                if (!string.IsNullOrEmpty(url))
-                {
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = url,
-                        UseShellExecute = true
-                    });
-                }
-            });
-
+            OpenLinkCommand = new RelayCommand<string>(url => WpfHelpers.OpenUrl(url));
 
             LoadAssetsImporterPlugins(App.Modules, App.Plugins);
         }

@@ -1,5 +1,4 @@
 ﻿using AssetTracker.Core.Models;
-using System.Collections.ObjectModel;
 
 namespace AssetTracker.Core.Services
 {
@@ -12,6 +11,9 @@ namespace AssetTracker.Core.Services
         event EventHandler AssetDatabaseChanged;
 
         void RaiseAssetDatabaseChangedEvent();
+        Task<IEnumerable<OwnedAsset>> GetAllAssetsAsync();
         Task<IEnumerable<OwnedAsset>> GetAssetsForMarketplaceAsync(string marketplaceKey);
+
+        bool IsDirty { get; }
     }
 }

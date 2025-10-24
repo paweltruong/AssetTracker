@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace AssetTracker.WpfApp.Common.Models
 {
-    public class BindableBase : INotifyPropertyChanged, IWpfModel
+    public class BindableBase : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
 

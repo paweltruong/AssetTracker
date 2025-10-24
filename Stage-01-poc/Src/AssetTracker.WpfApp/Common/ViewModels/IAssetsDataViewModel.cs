@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AssetTracker.Core.Models;
+using AssetTracker.WpfApp.Common.Commands;
+using System.Collections.ObjectModel;
 
 namespace AssetTracker.WpfApp.Common.ViewModels
 {
     public interface IAssetsDataViewModel
     {
+        ObservableCollection<OwnedAsset> OwnedAssets { get; set; }
+
+        IRelayCommand ViewMarketplaceCommand { get; }
     }
 }

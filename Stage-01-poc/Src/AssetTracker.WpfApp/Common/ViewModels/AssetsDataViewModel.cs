@@ -2,9 +2,9 @@
 using AssetTracker.Core.Services;
 using AssetTracker.Core.Services.Plugins;
 using AssetTracker.WpfApp.Common.Commands;
+using AssetTracker.WpfApp.Common.Utils;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Windows;
 
 namespace AssetTracker.WpfApp.Common.ViewModels
@@ -24,26 +24,16 @@ namespace AssetTracker.WpfApp.Common.ViewModels
             _assetDatabase = assetDatabase;
             _assetDatabase.AssetDatabaseChanged += AssetDatabase_AssetDatabaseChanged;
 
-            _ = InitializeAsync();
+            ViewMarketplaceCommand = new RelayCommand<string>(url => WpfHelpers.OpenUrl(url));
 
-            ViewMarketplaceCommand = new RelayCommand<string>(url =>
-            {
-                if (!string.IsNullOrEmpty(url))
-                {
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = url,
-                        UseShellExecute = true
-                    });
-                }
-            });
+            _ = InitializeAsync();
         }
 
         private async Task InitializeAsync()
         {
             try
             {
-                await UpdateAssets();
+                await UpdateAssetsAsync();
             }
             catch (Exception ex)
             {
@@ -56,10 +46,10 @@ namespace AssetTracker.WpfApp.Common.ViewModels
 
         private async void AssetDatabase_AssetDatabaseChanged(object? sender, EventArgs e)
         {
-            await UpdateAssets();
+            await UpdateAssetsAsync();
         }
 
-        async Task UpdateAssets()
+        async Task UpdateAssetsAsync()
         {
             OwnedAssets = new ObservableCollection<OwnedAsset>(await _assetDatabase.GetAssetsForMarketplaceAsync(PluginMarketplaceKey));
         }
