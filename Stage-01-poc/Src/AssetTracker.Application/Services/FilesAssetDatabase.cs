@@ -10,6 +10,8 @@ namespace AssetTracker.Application.Services
         private IList<OwnedAsset> _assets = new List<OwnedAsset>();
         private readonly object _lock = new object();
 
+        Dictionary<string, DateTime?> _pluginImportDates = new Dictionary<string, DateTime?>();
+
 
         public FilesAssetDatabase(ICacheManager cacheManager)
         {
@@ -76,7 +78,9 @@ namespace AssetTracker.Application.Services
         public async Task LoadAllAssetsAsync()
         {
             var assetDatabaseDatas = await _cacheManager.LoadAllMarketplaceDataAsync();
-            _assets = assetDatabaseDatas.SelectMany(add=> add.OwnedAssets).ToList();
+            _pluginImportDates = assetDatabaseDatas.Select(adb => 
+                new KeyValuePair<string, DateTime?>(adb.MarketplaceKey, adb.LastImportData)).ToDictionary();
+            _assets = assetDatabaseDatas.SelectMany(add => add.OwnedAssets).ToList();
             RaiseAssetDatabaseLoadedEvent();
         }
 
@@ -108,6 +112,13 @@ namespace AssetTracker.Application.Services
         public async Task SaveAsync()
         {
             await _cacheManager.SaveOwnedAssetsAsync(_assets);
+        }
+
+        public DateTime? GetImportDate(string pluginMarketplaceKey)
+        {
+            if(_pluginImportDates.ContainsKey(pluginMarketplaceKey))
+                return _pluginImportDates[pluginMarketplaceKey];
+            throw new KeyNotFoundException(nameof(pluginMarketplaceKey));
         }
     }
 }

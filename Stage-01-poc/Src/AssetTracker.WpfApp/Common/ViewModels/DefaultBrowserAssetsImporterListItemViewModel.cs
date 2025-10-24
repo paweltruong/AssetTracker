@@ -36,8 +36,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
             Model.IconUrl = plugin.IconUrl;
 
             UpdateViewButtonText();
-
-            OnPropertyChanged(nameof(Model));
+            UpdateStatusWhenLoaded();
         }
 
         // Command methods
@@ -120,6 +119,14 @@ namespace AssetTracker.WpfApp.Common.ViewModels
             base.AssetDatabase_AssetDatabaseLoaded(sender, e);
 
             UpdateViewButtonText();
+            UpdateStatusWhenLoaded();            
+        }
+
+        private void UpdateStatusWhenLoaded()
+        {
+            Model.Status = ScraperServiceStatus.DataLoaded;
+            Model.DateImported = _assetDatabase.GetImportDate(PluginMarketplaceKey);
+            OnPropertyChanged(nameof(Model));
         }
 
         void UpdateViewButtonText(int? count = null)

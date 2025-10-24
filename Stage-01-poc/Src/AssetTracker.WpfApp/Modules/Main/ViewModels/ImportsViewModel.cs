@@ -7,7 +7,6 @@ using AssetTracker.WpfApp.Common.ViewModels;
 using AssetTracker.WpfApp.Common.Views;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 
 namespace AssetTracker.WpfApp.Modules.Main.ViewModels
 {

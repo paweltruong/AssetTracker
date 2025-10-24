@@ -17,6 +17,7 @@ namespace AssetTracker.Core.Services
         IEnumerable<OwnedAsset> GetAssetsForMarketplace(string marketplaceKey);
         Task LoadAllAssetsAsync();
         Task SaveAsync();
+        DateTime? GetImportDate(string pluginMarketplaceKey);
 
         bool IsDirty { get; }
     }
