@@ -25,7 +25,7 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
                 _sortDirection = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(SortSymbol));
-                //OnPropertyChanged(nameof(SortIconAngle));
+                OnPropertyChanged(nameof(SortIconAngle));
             }
         }
         string _sortedColumn = "Name";
@@ -37,12 +37,14 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
                 _sortedColumn = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(SortSymbol));
-                //OnPropertyChanged(nameof(SortIconAngle));
+                OnPropertyChanged(nameof(SortIconAngle));
             }
         }
 
         // For character symbols (▲ ▼)
         public string SortSymbol => SortDirection == ListSortDirection.Ascending ? "▲" : "▼";
+        // For icon rotation (0° for ascending, 180° for descending)
+        public double SortIconAngle => SortDirection == ListSortDirection.Ascending ? 0 : 180;
 
         public MyAssetsViewModel(IAssetDatabase assetDatabase)
         {
@@ -61,36 +63,48 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
         {
             if (parameter is GridViewColumnHeader columnHeader)
             {
-                string propertyName = columnHeader.Content.ToString();
+                string columnName = columnHeader.Column?.Header?.ToString();
 
-                ListSortDirection direction = ListSortDirection.Ascending;
-
-                // Your sorting logic here
-                switch (propertyName)
+                if (columnName == SortedColumn)
                 {
-                    case "Name":
-                        // Sort by Name property
-                        if (_sortedColumn == "Name")
-                        {
-                            direction = _sortDirection == ListSortDirection.Descending ?
-                                ListSortDirection.Ascending : ListSortDirection.Descending;
-                        }
-                        OwnedAssets = new ObservableCollection<OwnedAsset>(direction == ListSortDirection.Ascending ? OwnedAssets.OrderBy(a => a.Name) : OwnedAssets.OrderByDescending(a => a.Name));
-
-                        SortDirection = direction;
-                        SortedColumn = "Name";
-                        break;
-                    case "Asset":
-                        // Sort by AssetType property
-                        OwnedAssets = new ObservableCollection<OwnedAsset>(OwnedAssets.OrderBy(a => a.AssetType));
-                        break;
-                    case "Publishers":
-                        // Sort by first publisher name or count
-                        OwnedAssets = new ObservableCollection<OwnedAsset>(OwnedAssets.OrderBy(a => a.Publishers.FirstOrDefault()?.Name ?? ""));
-                        break;
-                        // Add other cases as needed
+                    // Toggle direction if same column
+                    SortDirection = SortDirection == ListSortDirection.Ascending
+                        ? ListSortDirection.Descending
+                        : ListSortDirection.Ascending;
                 }
+                else
+                {
+                    SortedColumn = columnName;
+                    SortDirection = ListSortDirection.Ascending;
+                }
+
+                // Apply sorting based on current SortedColumn and SortDirection
+                ApplySorting();
             }
+        }
+        private void ApplySorting()
+        {
+            if (OwnedAssets == null || !OwnedAssets.Any()) return;
+
+            var sortedAssets = SortDirection == ListSortDirection.Ascending
+                ? OwnedAssets.OrderBy(GetSortProperty).ToList()
+                : OwnedAssets.OrderByDescending(GetSortProperty).ToList();
+
+            OwnedAssets = new ObservableCollection<OwnedAsset>(sortedAssets);
+        }
+
+        private object GetSortProperty(OwnedAsset asset)
+        {
+            return SortedColumn switch
+            {
+                "Name" => asset.Name,
+                "Asset" => asset.AssetType,
+                "Publishers" => asset.Publishers?.FirstOrDefault()?.Name ?? "",
+                "Developers" => asset.Developers?.FirstOrDefault()?.Name ?? "",
+                "Tags" => asset.Tags?.FirstOrDefault() ?? "",
+                "Marketplace" => asset.MarketplaceName,
+                _ => asset.Name
+            };
         }
 
         private bool CanExecuteSaveCommand() => IsDirty;
