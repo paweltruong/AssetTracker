@@ -25,5 +25,12 @@
             get => _description;
             set => SetProperty(ref _description, value);
         }
+
+        string _value;
+        public string Value
+        {
+            get => _value;
+            set => SetProperty(ref _value, value);
+        }
     }
 }

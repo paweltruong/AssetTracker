@@ -4,7 +4,6 @@ using AssetTracker.Core.Services.AssetsImporter;
 using AssetTracker.Core.Services.Plugins;
 using AssetTracker.WpfApp.Common.Events;
 using AssetTracker.WpfApp.Common.Models;
-using AssetTracker.WpfApp.Modules.SteamScraper;
 using System.Collections.ObjectModel;
 
 namespace AssetTracker.WpfApp.Common.ViewModels
@@ -53,13 +52,18 @@ namespace AssetTracker.WpfApp.Common.ViewModels
 
         private void InitializeCallParameters()
         {
+            //TODO:get import parameters int Password inputs
+            var loadedParameters = _assetDatabase.LoadImportParameters(PluginKey);
+            _parameterValues = loadedParameters;
+
             foreach (var param in _plugin.UseHttpClientCallParams)
             {
                 CallParameters.Add(new CallParameter
                 {
                     Key = param.Key,
                     Label =param.Key,
-                    Description = param.Value
+                    Description = param.Value,
+                    Value = _parameterValues[param.Key]
                 });
             }
         }
@@ -146,6 +150,8 @@ namespace AssetTracker.WpfApp.Common.ViewModels
                     ServiceName = PluginKey,
                     DataCount = Games.Count()
                 });
+
+                await _assetDatabase.SaveImportParametersAsync(_plugin.PluginKey, _parameterValues);
             }
             catch (OperationCanceledException ocex)
             {

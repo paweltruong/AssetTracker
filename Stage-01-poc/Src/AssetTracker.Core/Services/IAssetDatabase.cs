@@ -18,6 +18,8 @@ namespace AssetTracker.Core.Services
         Task LoadAllAssetsAsync();
         Task SaveAsync();
         DateTime? GetImportDate(string pluginMarketplaceKey);
+        Task SaveImportParametersAsync(string pluginKey, Dictionary<string, string> parameterValues);
+        Dictionary<string, string> LoadImportParameters(string pluginKey);
 
         bool IsDirty { get; }
     }

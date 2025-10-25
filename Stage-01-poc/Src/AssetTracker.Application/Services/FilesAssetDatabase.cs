@@ -10,6 +10,9 @@ namespace AssetTracker.Application.Services
         private IList<OwnedAsset> _assets = new List<OwnedAsset>();
         private readonly object _lock = new object();
 
+        /// <summary>
+        /// MarketplaceKey and DateTime
+        /// </summary>
         Dictionary<string, DateTime?> _pluginImportDates = new Dictionary<string, DateTime?>();
 
 
@@ -78,7 +81,7 @@ namespace AssetTracker.Application.Services
         public async Task LoadAllAssetsAsync()
         {
             var assetDatabaseDatas = await _cacheManager.LoadAllMarketplaceDataAsync();
-            _pluginImportDates = assetDatabaseDatas.Select(adb => 
+            _pluginImportDates = assetDatabaseDatas.Select(adb =>
                 new KeyValuePair<string, DateTime?>(adb.MarketplaceKey, adb.LastImportData)).ToDictionary();
             _assets = assetDatabaseDatas.SelectMany(add => add.OwnedAssets).ToList();
             RaiseAssetDatabaseLoadedEvent();
@@ -111,14 +114,29 @@ namespace AssetTracker.Application.Services
 
         public async Task SaveAsync()
         {
-            await _cacheManager.SaveOwnedAssetsAsync(_assets);
+            var assetTmp = new List<OwnedAsset>(_assets);
+            await _cacheManager.SaveOwnedAssetsAsync(_assets, _pluginImportDates);
+            assetTmp.ForEach(a => a.IsDirty = false);
+            IsDirty = false;
+            _assets = assetTmp;
+            RaiseAssetDatabaseChangedEvent();
         }
 
         public DateTime? GetImportDate(string pluginMarketplaceKey)
         {
-            if(_pluginImportDates.ContainsKey(pluginMarketplaceKey))
+            if (_pluginImportDates.ContainsKey(pluginMarketplaceKey))
                 return _pluginImportDates[pluginMarketplaceKey];
             throw new KeyNotFoundException(nameof(pluginMarketplaceKey));
+        }
+
+        public async Task SaveImportParametersAsync(string pluginKey, Dictionary<string, string> parameterValues)
+        {
+            await _cacheManager.SaveImportParametersAsync(pluginKey, parameterValues);
+        }
+
+        public Dictionary<string, string> LoadImportParameters(string pluginKey)
+        {
+            return _cacheManager.LoadImportParameters(pluginKey);
         }
     }
 }
