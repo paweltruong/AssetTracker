@@ -4,6 +4,7 @@ using AssetTracker.Core.Models;
 using AssetTracker.Core.Models.Enums;
 using AssetTracker.Core.Services.AssetsImporter;
 using AssetTracker.Core.Services.AssetsImporter.Definitions;
+using System.Linq;
 
 namespace AssetTracker.AssetsImporter.SyntyStore
 {
@@ -78,10 +79,38 @@ namespace AssetTracker.AssetsImporter.SyntyStore
                     marketplaceKey: SyntyStoreAssetsImporterPlugin.PluginMarketplaceKeyConst,
                     marketplaceName: SyntyStoreAssetsImporterPlugin.PluginMarketplaceKeyConst,
                     marketplaceAccountId: string.Empty,
-                    marketplaceUrl: "https://syntystore.com/")
+                    marketplaceUrl: "https://syntystore.com/",
+                    searchKeywords: GetKeywordsFromName(asset.Title))
                 ),
                 NextPageUrl = result.NextPageUrl
             };
+        }
+
+        string GetNameForSearch(string nameFromDownloads)
+        {
+            return nameFromDownloads.Replace("Pack", "", StringComparison.OrdinalIgnoreCase)
+                .Replace("-", " ")
+                .Replace("(Unity only)", "", StringComparison.OrdinalIgnoreCase);
+        }
+
+
+        HashSet<string> GetKeywordsFromName(string name)
+        {
+            string nameFromDownloads = name.Replace("Pack", "", StringComparison.OrdinalIgnoreCase)
+                .Replace("-", " ")
+                .Replace("(Unity only)", "", StringComparison.OrdinalIgnoreCase);
+
+            HashSet<string> keywords = new HashSet<string>();
+            var items = name.Split(new char[] { ' ', '-', '_', ':' });
+            foreach (var item in items)
+            {
+                var trimmedItem = item.Trim().ToLower();
+                if (!string.IsNullOrEmpty(trimmedItem))
+                {
+                    keywords.Add(trimmedItem);
+                }
+            }
+            return keywords;
         }
 
         public Task<IEnumerable<OwnedAsset>> ImportAssetsFromHttpClientAsync(string importApiCallMethod, string importApiUrl, Dictionary<string, string> parameterValues, CancellationToken token)

@@ -5,7 +5,7 @@ namespace AssetTracker.UnitTests.Modules.SteamScraper.Helpers
 {
     public static class TestDataHelper
     {
-        public static string GetSteamGamesRequestUrl(string steamApiKey, string steamId) => $"/IPlayerService/GetOwnedGames/v1/?key={steamApiKey}&steamid={steamId}&include_appinfo=1&include_played_free_games=1";
+        public static string GetSteamGamesRequestUrl(string steamApiKey, string steamId) => $"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key={steamApiKey}&steamid={steamId}&include_appinfo=1&include_played_free_games=1";
 
         public static List<SteamGame> CreateTestGames()
         {

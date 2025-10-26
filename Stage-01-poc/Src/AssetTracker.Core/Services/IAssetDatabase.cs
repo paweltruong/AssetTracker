@@ -4,7 +4,7 @@ namespace AssetTracker.Core.Services
 {
     public interface IAssetDatabase
     {
-        Task<IEnumerable<OwnedAsset>> FindAsync(Asset asset, CancellationToken cancellationToken);
+        Task<IEnumerable<OwnedAssetMatch>> FindAsync(Asset asset, CancellationToken cancellationToken);
         Task FindAssetAsync();
         Task AddAssetsAsync(IEnumerable<OwnedAsset> assets);
 

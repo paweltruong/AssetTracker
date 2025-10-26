@@ -73,8 +73,24 @@ namespace AssetTracker.AssetsImporter.Steam
                     marketplaceKey: SteamAssetsImporterPlugin.PluginMarketplaceKeyConst,
                     marketplaceName: SteamAssetsImporterPlugin.PluginMarketplaceKeyConst,
                     marketplaceAccountId: parameterValues[SteamAssetsImporterPlugin.ApiCallParamSteamId],
-                    marketplaceUrl: SteamStoreUrl)
+                    marketplaceUrl: SteamStoreUrl,
+                    searchKeywords: GetKeywordsFromName(game.Name))
             );
+        }
+
+        HashSet<string> GetKeywordsFromName(string name)
+        {
+            HashSet<string> keywords = new HashSet<string>();
+            var items = name.Split(new char[] { ' ', '-', '_', ':' });
+            foreach (var item in items)
+            {
+                var trimmedItem = item.Trim().ToLower();
+                if (!string.IsNullOrEmpty(trimmedItem))
+                {
+                    keywords.Add(trimmedItem);
+                }
+            }
+            return keywords;
         }
     }
 }

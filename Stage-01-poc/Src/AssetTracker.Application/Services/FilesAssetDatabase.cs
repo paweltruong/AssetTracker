@@ -59,24 +59,21 @@ namespace AssetTracker.Application.Services
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<OwnedAsset>> FindAsync(Asset asset, CancellationToken cancellationToken)
+        public async Task<IEnumerable<OwnedAssetMatch>> FindAsync(Asset asset, CancellationToken cancellationToken)
         {
-            //if (asset.Name.Equals("POLYGON - Casino"))
-            //{
-            //    // Return the result directly - no Task creation needed
-            //    return new List<OwnedAsset>
-            //    {
-            //        new OwnedAsset(
-            //            name: "POLYGON - Casino",
-            //            marketplaceAccountId: "paweltruong@o2.pl",
-            //            MarketplaceName = "Synty Store",
-            //            MarketplaceUrl = "https://syntystore.com/collections/polygon-sci-fi-city-pack/products/polygon-casino",
-            //            SourcePluginKey
-            //        }
-            //    };
-            //}
-
-            return Enumerable.Empty<OwnedAsset>();
+            List<OwnedAssetMatch> matches = new List<OwnedAssetMatch>();
+            var potentialMatches = _assets.Where(
+                a => a.SearchKeywords != null && asset.SearchKeywords != null 
+                && a.SearchKeywords.Intersect(asset.SearchKeywords).Any());
+            foreach (var match in potentialMatches)
+            {
+                matches.Add(new OwnedAssetMatch(
+                    searchKeywords: asset.SearchKeywords,
+                    match: match,
+                    matchPercentage: (double)match.SearchKeywords.Intersect(asset.SearchKeywords).Count() / (double)asset.SearchKeywords.Count
+                    ));
+            }
+            return matches;
         }
 
         public async Task<IEnumerable<OwnedAsset>> GetAllAssetsAsync()

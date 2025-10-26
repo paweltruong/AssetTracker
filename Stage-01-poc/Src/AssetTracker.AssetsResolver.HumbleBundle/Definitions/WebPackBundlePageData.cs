@@ -150,6 +150,64 @@ namespace AssetTracker.AssetsResolver.HumbleBundle.Definitions
             //TODO: get steam store link for game if it could be redeemed on steam (look for availability_icons)
             return "TODO";
         }
+
+        internal HashSet<String> GetNameForSearch()
+        {
+            string productName = HumanName;
+            if (Developers.Any(d => d.Name.Equals(WebPackBundlePageData.DeveloperSyntyStudios)))
+            {
+                //extract name from developer url Human Names sometimes are invalid
+                productName = ExtractLastPartFromUrl(Developers.First(
+                    d => d.Name.Equals(WebPackBundlePageData.DeveloperSyntyStudios)).Url);
+                
+
+            }
+
+            return GetKeywordsFromName(productName);
+
+
+        }
+
+        HashSet<string> GetKeywordsFromName(string name)
+        {
+            HashSet<string> keywords = new HashSet<string>();
+            var items = name.Split(new char[] { ' ', '-', '_', ':' });
+            foreach (var item in items)
+            {
+                var trimmedItem = item.Trim().ToLower();
+                if (!string.IsNullOrEmpty(trimmedItem))
+                {
+                    keywords.Add(trimmedItem);
+                }
+            }
+            return keywords;
+        }
+
+
+        public static string ExtractLastPartFromUrl(string url)
+        {
+            if (string.IsNullOrEmpty(url))
+                return string.Empty;
+
+            try
+            {
+                Uri uri = new Uri(url);
+                string lastSegment = uri.Segments.Last();
+
+                // Remove trailing slashes if any
+                lastSegment = lastSegment.Trim('/');
+
+                // Replace hyphens with spaces and return
+                return lastSegment.Replace('-', ' ');
+            }
+            catch (UriFormatException)
+            {
+                // Fallback: try to extract manually
+                string[] parts = url.Split('/');
+                string lastPart = parts.Last().Trim('/');
+                return lastPart.Replace('-', ' ');
+            }
+        }
     }
 
     public class AvailabilityIcons

@@ -22,7 +22,7 @@ namespace AssetTracker.WpfApp.Common.Services
             OwnedAssetCompareResult result = new OwnedAssetCompareResult
             {
                 WasSuccessful = false,
-                MatchingOwnedAssets = new List<OwnedAsset>(),
+                MatchingOwnedAssets = new List<OwnedAssetMatch>(),
             };
 
             try

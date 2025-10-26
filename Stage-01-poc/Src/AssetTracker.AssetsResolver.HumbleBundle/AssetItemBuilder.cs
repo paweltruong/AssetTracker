@@ -39,7 +39,8 @@ namespace AssetTracker.AssetsResolver.HumbleBundle
                 imageUrl: tierItem.ResolvedPaths.FeaturedImage ?? tierItem.ResolvedPaths.FrontPageArtImgixRetina,
                 developers: ConvertToDeveloperItems(tierItem.Developers),
                 publishers: ConvertToPublisherItems(tierItem.Publishers),
-                assetUrl: tierItem.GetAssetUrl()
+                assetUrl: tierItem.GetAssetUrl(),
+                searchKeywords: tierItem.GetNameForSearch()
                 );
 
             return assetItem;

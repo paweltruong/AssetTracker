@@ -92,7 +92,7 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
                 ComparisonResults = new ObservableCollection<AssetComparisonResult>(
                     successfullResolvers.SelectMany(t => t.Result.Items.Select(a => new AssetComparisonResult(a)))
                 );
-                //await _assetsComparer.CompareAsync(_lastCheckLinkCancellationTokenSource.Token);
+                //await _assetsComparer.CompareAssetAsync(_lastCheckLinkCancellationTokenSource.Token);
 
                 _eventAggregator.Publish(new CheckLinkStatusChangedEvent
                 {
@@ -148,8 +148,13 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
                         {
                             if (compareResult.WasSuccessful)
                             {
-                                result.Status = compareResult.MatchingOwnedAssets.Any() ?
-                                    AssetComparisonStatus.Exists : AssetComparisonStatus.NotExists;
+                                var bestMatch = compareResult.MatchingOwnedAssets
+                                    .OrderByDescending(x => x.MatchPercentage)
+                                    .FirstOrDefault();
+                                //result.Status = compareResult.MatchingOwnedAssets.Any() ?
+                                //    AssetComparisonStatus.Exists : AssetComparisonStatus.NotExists;
+
+                                result.Status = bestMatch == null ? AssetComparisonStatus.NotExists : AssetComparisonStatus.Exists;
                             }
                             else
                             {

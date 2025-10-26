@@ -19,7 +19,8 @@ namespace AssetTracker.Core.Models
             IList<Publisher> publishers,
             IList<Developer> developers,
             string sourcePluginKey,
-            string marketplaceKey
+            string marketplaceKey,
+            HashSet<string> searchKeywords
             )
         {
             MarketplaceUid = marketplaceUid;
@@ -32,6 +33,7 @@ namespace AssetTracker.Core.Models
             Publishers = publishers;
             SourcePluginKey = sourcePluginKey;
             MarketplaceKey = marketplaceKey;
+            SearchKeywords = searchKeywords;
         }
 
         public string MarketplaceUid { get; set; }
@@ -44,11 +46,13 @@ namespace AssetTracker.Core.Models
         public string? AssetUrl { get; set; }
         public string SourcePluginKey { get; set; }
         public string MarketplaceKey { get; set; }
+        public HashSet<string> SearchKeywords { get; set; } = new HashSet<string>();
 
         public static Asset Create(string name, AssetType assetType, HashSet<string> tags, string imageUrl,
             IList<Publisher> publishers,
             IList<Developer> developers,
-            string assetUrl)
+            string assetUrl,
+            HashSet<string> searchKeywords)
         {
             var asset = new Asset()
             {
@@ -58,7 +62,8 @@ namespace AssetTracker.Core.Models
                 ImageUrl = imageUrl,
                 Developers = developers,
                 Publishers = publishers,
-                AssetUrl = assetUrl
+                AssetUrl = assetUrl,
+                SearchKeywords = searchKeywords
             };
             return asset;
         }
@@ -93,6 +98,7 @@ namespace AssetTracker.Core.Models
             if (AssetUrl != asset.AssetUrl) return true;
             if (SourcePluginKey != asset.SourcePluginKey) return true;
             if (MarketplaceKey != asset.MarketplaceKey) return true;
+            if (SearchKeywords != asset.SearchKeywords) return false;
 
             return false;
         }

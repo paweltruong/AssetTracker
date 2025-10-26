@@ -18,7 +18,8 @@ namespace AssetTracker.Core.Models
            string marketplaceKey,
            string marketplaceName,
            string marketplaceAccountId,
-           string marketplaceUrl) : base(
+           string marketplaceUrl,
+           HashSet<string> searchKeywords) : base(
                         marketplaceUid,
                         name,
                         assetType,
@@ -28,7 +29,8 @@ namespace AssetTracker.Core.Models
                         publishers,
                         developers,
                         sourcePluginKey,
-                        marketplaceKey)
+                        marketplaceKey,
+                        searchKeywords)
         {
             MarketplaceName = marketplaceName;
             MarketplaceAccountId = marketplaceAccountId;
