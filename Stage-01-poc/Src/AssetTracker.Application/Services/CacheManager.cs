@@ -44,11 +44,20 @@ namespace AssetTracker.Application.Services
             {
                 try
                 {
-                    var oldImportData = oldImportDates[group.Key];
+                    DateTime? oldImportData = null;
+                    if (oldImportDates.ContainsKey(group.Key))
+                    {
+                        oldImportData = oldImportDates[group.Key];
+                    }
+                    else
+                    {
+                        oldImportData = DateTime.Now;
+                    }
+
                     var databaseData = new AssetDatabaseData
                     {
                         MarketplaceKey = group.Key,
-                        LastImportData = group.Any(a=>a.IsDirty)? DateTime.Now : oldImportData!.Value,
+                        LastImportData = oldImportData!.Value,
                         OwnedAssets = group.ToArray() // Materialize the group
                     };
 

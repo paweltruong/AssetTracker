@@ -1,6 +1,4 @@
 ﻿using AssetTracker.Core.Models.Enums;
-using System;
-using System.Runtime.InteropServices;
 
 namespace AssetTracker.Core.Models
 {
@@ -11,23 +9,30 @@ namespace AssetTracker.Core.Models
 
         }
 
-        public Asset(string marketplaceUid,
+        public Asset(
+            string marketplaceUid,
             string name,
             AssetType assetType,
+            HashSet<string> tags,
             string imageUrl,
             string assetUrl,
+            IList<Publisher> publishers,
+            IList<Developer> developers,
             string sourcePluginKey,
-            string marketplaceKey)
+            string marketplaceKey
+            )
         {
             MarketplaceUid = marketplaceUid;
             Name = name;
             AssetType = assetType;
+            Tags = tags;
             ImageUrl = imageUrl;
             AssetUrl = assetUrl;
+            Developers = developers;
+            Publishers = publishers;
             SourcePluginKey = sourcePluginKey;
             MarketplaceKey = marketplaceKey;
         }
-
 
         public string MarketplaceUid { get; set; }
         public string Name { get; set; }
@@ -59,11 +64,37 @@ namespace AssetTracker.Core.Models
         }
 
         public bool Equals(Asset? other)
-        {      
+        {
             if (other == null)
                 return false;
 
             return MarketplaceUid == other.MarketplaceUid && MarketplaceKey == other.MarketplaceKey;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return Equals(obj as Asset);
+        }
+
+        public override int GetHashCode()
+        {
+            return $"{MarketplaceKey}_{MarketplaceUid}".GetHashCode();
+        }
+
+        public bool Differs(Asset asset)
+        {
+            if (MarketplaceUid != asset.MarketplaceUid) return true;
+            if (Name != asset.Name) return true;
+            if (AssetType != asset.AssetType) return true;
+            if (Tags.SetEquals(asset.Tags)) return true;
+            if (ImageUrl != asset.ImageUrl) return true;
+            if (Publishers.SequenceEqual(asset.Publishers)) return true;
+            if (Developers.SequenceEqual(asset.Developers)) return true;
+            if (AssetUrl != asset.AssetUrl) return true;
+            if (SourcePluginKey != asset.SourcePluginKey) return true;
+            if (MarketplaceKey != asset.MarketplaceKey) return true;
+
+            return false;
         }
     }
 }

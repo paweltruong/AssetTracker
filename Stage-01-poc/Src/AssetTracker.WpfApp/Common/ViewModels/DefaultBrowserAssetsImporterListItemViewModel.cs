@@ -124,9 +124,12 @@ namespace AssetTracker.WpfApp.Common.ViewModels
 
         private void UpdateStatusWhenLoaded()
         {
-            Model.Status = ScraperServiceStatus.DataLoaded;
-            Model.DateImported = _assetDatabase.GetImportDate(PluginMarketplaceKey);
-            OnPropertyChanged(nameof(Model));
+            if (_assetDatabase.HasAnyAssetsFromMarketplace(PluginMarketplaceKey))
+            {
+                Model.Status = ScraperServiceStatus.DataLoaded;
+                Model.DateImported = _assetDatabase.GetImportDate(PluginMarketplaceKey);
+                OnPropertyChanged(nameof(Model));
+            }
         }
 
         void UpdateViewButtonText(int? count = null)

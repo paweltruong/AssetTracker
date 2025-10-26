@@ -49,20 +49,36 @@ namespace AssetTracker.AssetsImporter.SyntyStore
         public async Task<WebScrapingResult> ImportAssetsFromHtmlSourceAsync(string url, int pageNumber, string htmlSource, CancellationToken cancellationToken = default)
         {
             var result = await _syntyStoreScraper.ScrapeAllProductsAsync(url, htmlSource, cancellationToken);
+
+            var defaultTags = AssetTags.GetDefaultTags(AssetType.Software);
+            var finalTags = new HashSet<string>();
+            finalTags.Add(defaultTags);
+
             return new WebScrapingResult
             {
                 SourceUrl = url,
                 PageNumber = pageNumber,
                 Success = result.Success,
                 ErrorMessage = result.ErrorMessage,
-                OwnedAssets = result.Products.Select(p => new OwnedAsset(
-                    marketplaceUid: p.Title?.ToLowerInvariant()?.Replace(" ", "-")?.Trim(),
-                    name: p.Title,
+                OwnedAssets = result.Products.Select(asset => new OwnedAsset(
+                    marketplaceUid: asset.Title?.ToLowerInvariant()?.Replace(" ", "-")?.Trim(),
+                    name: asset.Title,
                     assetType: AssetType.Software,
-                    imageUrl: p.ThumbnailUrl,
-                    assetUrl: p.FullDownloadUrl,
+                    tags: finalTags,
+                    imageUrl: asset.ThumbnailUrl,
+                    assetUrl: asset.FullDownloadUrl,
+                    publishers: new List<Publisher>(),
+                    developers: new List<Developer>() { new Developer
+                        {
+                            Name = "Synty Studios",
+                            Url = "https://syntystore.com/"
+                        }
+                    },
                     sourcePluginKey: SyntyStoreAssetsImporterPlugin.PluginKeyConst,
-                    SyntyStoreAssetsImporterPlugin.PluginMarketplaceKeyConst)
+                    marketplaceKey: SyntyStoreAssetsImporterPlugin.PluginMarketplaceKeyConst,
+                    marketplaceName: SyntyStoreAssetsImporterPlugin.PluginMarketplaceKeyConst,
+                    marketplaceAccountId: string.Empty,
+                    marketplaceUrl: "https://syntystore.com/")
                 ),
                 NextPageUrl = result.NextPageUrl
             };

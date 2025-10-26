@@ -32,10 +32,19 @@ namespace AssetTracker.Application.Services
             {
                 foreach (var asset in assets)
                 {
-                    if (!_assets.Contains(asset))
+                    var existingAsset = _assets.FirstOrDefault(a => a.Equals(asset));
+                    var indexOfExistingAsset = _assets.IndexOf(existingAsset);
+                    if (existingAsset == null)
                     {
                         asset.IsDirty = true;
                         _assets.Add(asset);
+                        IsDirty = true;
+                    }
+                    else if(existingAsset.Differs(asset))
+                    {
+                        asset.IsDirty = true;
+                        existingAsset = asset;
+                        _assets[indexOfExistingAsset] = asset;
                         IsDirty = true;
                     }
                 }
@@ -116,6 +125,7 @@ namespace AssetTracker.Application.Services
         {
             var assetTmp = new List<OwnedAsset>(_assets);
             await _cacheManager.SaveOwnedAssetsAsync(_assets, _pluginImportDates);
+            //TODO:add missing plugin to _pluginImportDates
             assetTmp.ForEach(a => a.IsDirty = false);
             IsDirty = false;
             _assets = assetTmp;
@@ -126,7 +136,7 @@ namespace AssetTracker.Application.Services
         {
             if (_pluginImportDates.ContainsKey(pluginMarketplaceKey))
                 return _pluginImportDates[pluginMarketplaceKey];
-            throw new KeyNotFoundException(nameof(pluginMarketplaceKey));
+            return null;
         }
 
         public async Task SaveImportParametersAsync(string pluginKey, Dictionary<string, string> parameterValues)
@@ -137,6 +147,11 @@ namespace AssetTracker.Application.Services
         public Dictionary<string, string> LoadImportParameters(string pluginKey)
         {
             return _cacheManager.LoadImportParameters(pluginKey);
+        }
+
+        public bool HasAnyAssetsFromMarketplace(string pluginMarketplaceKey)
+        {
+            return _assets.Any(a => a.MarketplaceKey == pluginMarketplaceKey);
         }
     }
 }
