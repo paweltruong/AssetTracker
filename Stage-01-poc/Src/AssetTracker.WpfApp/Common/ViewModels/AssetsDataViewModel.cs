@@ -2,6 +2,7 @@
 using AssetTracker.Core.Services;
 using AssetTracker.Core.Services.Plugins;
 using AssetTracker.WpfApp.Common.Commands;
+using AssetTracker.WpfApp.Common.Models;
 using AssetTracker.WpfApp.Common.Utils;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -51,7 +52,8 @@ namespace AssetTracker.WpfApp.Common.ViewModels
 
         async Task UpdateAssetsAsync()
         {
-            OwnedAssets = new ObservableCollection<OwnedAsset>(await _assetDatabase.GetAssetsForMarketplaceAsync(PluginMarketplaceKey));
+            var assets = await _assetDatabase.GetAssetsForMarketplaceAsync(PluginMarketplaceKey);
+            OwnedAssets = new ObservableCollection<AssetItem>(assets.Select(asset => new AssetItem(asset)));
         }
 
         public void Dispose()
@@ -63,8 +65,8 @@ namespace AssetTracker.WpfApp.Common.ViewModels
         private string _sortColumn = "Name";
         private ListSortDirection _sortDirection = ListSortDirection.Ascending;
 
-        private ObservableCollection<OwnedAsset> _ownedAssets = new ObservableCollection<OwnedAsset>();
-        public ObservableCollection<OwnedAsset> OwnedAssets
+        private ObservableCollection<AssetItem> _ownedAssets = new ObservableCollection<AssetItem>();
+        public ObservableCollection<AssetItem> OwnedAssets
         {
             get => _ownedAssets;
             set => SetProperty(ref _ownedAssets, value);

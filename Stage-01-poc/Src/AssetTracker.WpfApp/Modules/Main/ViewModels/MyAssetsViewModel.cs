@@ -1,12 +1,16 @@
 ﻿using AssetTracker.Core.Models;
 using AssetTracker.Core.Services;
 using AssetTracker.WpfApp.Common.Commands;
+using AssetTracker.WpfApp.Common.Models;
 using AssetTracker.WpfApp.Common.Utils;
 using AssetTracker.WpfApp.Common.ViewModels;
+using System.Collections;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Input;
 
 namespace AssetTracker.WpfApp.Modules.Main.ViewModels
 {
@@ -34,6 +38,17 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
                 _sortedColumn = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(SortIconAngle));
+            }
+        }
+
+        string _filterText;
+        public string FilterText
+        {
+            get => _filterText;
+            set
+            {
+                SetProperty(ref _filterText, value);
+                UpdateAssetsAsync();
             }
         }
 
@@ -84,7 +99,7 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
                 ? OwnedAssets.OrderBy(GetSortProperty).ToList()
                 : OwnedAssets.OrderByDescending(GetSortProperty).ToList();
 
-            OwnedAssets = new ObservableCollection<OwnedAsset>(sortedAssets);
+            OwnedAssets = new ObservableCollection<AssetItem>(sortedAssets);
         }
 
         private object GetSortProperty(OwnedAsset asset)
@@ -132,12 +147,40 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
         }
         async Task UpdateAssetsAsync()
         {
+            //TODO:opmtimization
             var assetsFromDb = await _assetDatabase.GetAllAssetsAsync();
-            OwnedAssets = new ObservableCollection<OwnedAsset>(assetsFromDb.OrderBy(x => x.Name).ToList());
+
+            //Store selected items before refresh
+            HashSet<int> selectedAssets = new HashSet<int>();
+            foreach (var asset in OwnedAssets.Where(a => a.Selected))
+            {
+                selectedAssets.Add(asset.GetHashCode());
+            }
+
+            if (string.IsNullOrEmpty(FilterText))
+            {
+                OwnedAssets = new ObservableCollection<AssetItem>(assetsFromDb.OrderBy(x => x.Name).Select(asset => new AssetItem(asset)));
+            }
+            else
+            {
+                OwnedAssets = new ObservableCollection<AssetItem>(
+                    assetsFromDb.Where(x => x.Name.Contains(FilterText, StringComparison.OrdinalIgnoreCase)
+                    || x.MarketplaceName.Contains(FilterText, StringComparison.OrdinalIgnoreCase)
+                    || x.Developers.Any(d => d.Name.Contains(FilterText, StringComparison.OrdinalIgnoreCase))
+                    || x.Publishers.Any(p => p.Name.Contains(FilterText, StringComparison.OrdinalIgnoreCase))
+                    )
+                    .OrderBy(x => x.Name).Select(asset => new AssetItem(asset)));
+            }
+
+            //Restore selections
+            foreach (var item in OwnedAssets)
+            {
+                if (selectedAssets.Contains(item.GetHashCode())) item.Selected = true;
+            }
         }
 
-        private ObservableCollection<OwnedAsset> _ownedAssets = new ObservableCollection<OwnedAsset>();
-        public ObservableCollection<OwnedAsset> OwnedAssets
+        private ObservableCollection<AssetItem> _ownedAssets = new ObservableCollection<AssetItem>();
+        public ObservableCollection<AssetItem> OwnedAssets
         {
             get => _ownedAssets;
             set => SetProperty(ref _ownedAssets, value);

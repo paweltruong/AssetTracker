@@ -168,6 +168,18 @@
 
             <ListView.View>
                 <GridView>
+
+                    <!-- Selection Checkbox Column -->
+                    <GridViewColumn Width="40" Header="">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <CheckBox IsChecked="{Binding Selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
                     <!-- Asset Column -->
                     <GridViewColumn Width="250" Header="Asset" 
                                    HeaderContainerStyle="{StaticResource SortableColumnHeaderWithIconsStyle}">

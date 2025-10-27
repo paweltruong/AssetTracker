@@ -1,86 +1,87 @@
 ﻿using AssetTracker.Core.Models;
 using AssetTracker.Core.Models.Enums;
-using AssetTracker.WpfApp.Common.Models.Enums;
-using System.Collections.Generic;
-using System.IO.Pipes;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace AssetTracker.WpfApp.Common.Models
 {
-    //TODO:split plain domain and WPF models
-    public class AssetItem : BindableBase
+    public class AssetItem : OwnedAsset, INotifyPropertyChanged
     {
-        public AssetItem()
+        private bool _selected;
+
+        public AssetItem(
+            string marketplaceUid,
+            string name,
+            AssetType assetType,
+            HashSet<string> tags,
+            string imageUrl,
+            string assetUrl,
+            IList<Publisher> publishers,
+            IList<Developer> developers,
+            string sourcePluginKey,
+            string marketplaceKey,
+            string marketplaceName,
+            string marketplaceAccountId,
+            string marketplaceUrl,
+            HashSet<string> searchKeywords) 
+            : base(
+                  marketplaceUid,
+                  name,
+                  assetType,
+                  tags,
+                  imageUrl,
+                  assetUrl,
+                  publishers,
+                  developers,
+                  sourcePluginKey,
+                  marketplaceKey,
+                  marketplaceName,
+                  marketplaceAccountId,
+                  marketplaceUrl,
+                  searchKeywords)
         {
         }
 
-        public AssetItem(OwnedAsset ownedAsset)
-        {
-            Name = ownedAsset.Name;
-            AssetType = ownedAsset.AssetType;
-            Tags = new HashSet<string>(ownedAsset.Tags ?? Enumerable.Empty<string>());
-            ImageUrl = ownedAsset.ImageUrl;
-            Publishers = ownedAsset.Publishers?.Select(p => new PublisherItem { Name = p.Name, Url = p.Url }).ToArray() ?? Array.Empty<PublisherItem>();
-            Developers = ownedAsset.Developers?.Select(d => new DeveloperItem { Name = d.Name, Url = d.Url }).ToArray() ?? Array.Empty<DeveloperItem>();
-            AssetUrl = ownedAsset.AssetUrl;
-
+        public AssetItem(OwnedAsset asset)
+        : base(
+                  asset.MarketplaceUid,
+                  asset.Name,
+                  asset.AssetType,
+                  asset.Tags,
+                  asset.ImageUrl,
+                  asset.AssetUrl,
+                  asset.Publishers,
+                  asset.Developers,
+                  asset.SourcePluginKey,
+                  asset.MarketplaceKey,
+                  asset.MarketplaceName,
+                  asset.MarketplaceAccountId,
+                  asset.MarketplaceUrl,
+                  asset.SearchKeywords)
+        {            
         }
 
-        private string _name;
-        public string Name
+        public bool Selected
         {
-            get => _name;
-            set => SetProperty(ref _name, value);
-        }
-        private AssetType _assetType;
-        public AssetType AssetType
-        {
-            get => _assetType;
-            set => SetProperty(ref _assetType, value);
-        }
-        private HashSet<string> _tags;
-        public HashSet<string> Tags
-        {
-            get => _tags;
-            set => SetProperty(ref _tags, value);
+            get => _selected;
+            set => SetProperty(ref _selected, value);
         }
 
-        private string _imageUrl;
-        public string ImageUrl
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
         {
-            get => _imageUrl;
-            set => SetProperty(ref _imageUrl, value);
+            if (EqualityComparer<T>.Default.Equals(storage, value))
+                return false;
+
+            storage = value;
+            OnPropertyChanged(propertyName);
+            return true;
         }
 
-        private PublisherItem[] _publishers;
-        public PublisherItem[] Publishers
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            get => _publishers;
-            set => SetProperty(ref _publishers, value);
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-        private DeveloperItem[] _developers;
-        public DeveloperItem[] Developers
-        {
-            get => _developers;
-            set => SetProperty(ref _developers, value);
-        }
-        private string _assetUrl;
-        public string AssetUrl
-        {
-            get => _assetUrl;
-            set => SetProperty(ref _assetUrl, value);
-        }
-
-    }
-
-    public class PublisherItem
-    {
-        public string? Name { get; set; }
-        public string? Url { get; set; }
-    }
-
-    public class DeveloperItem
-    {
-        public string? Name { get; set; }
-        public string? Url { get; set; }
     }
 }

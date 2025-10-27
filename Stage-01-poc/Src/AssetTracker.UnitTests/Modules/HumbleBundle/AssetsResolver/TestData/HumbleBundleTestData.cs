@@ -1,7 +1,5 @@
-﻿using AssetTracker.Core.Models.Enums;
-using AssetTracker.WpfApp.Common.Models;
-using AssetTracker.WpfApp.Common.Models.Enums;
-
+﻿using AssetTracker.Core.Models;
+using AssetTracker.Core.Models.Enums;
 namespace AssetTracker.UnitTests.Modules.HumbleBundle.AssetsResolver.TestData
 {
     public static class HumbleBundleTestData
@@ -73,8 +71,8 @@ namespace AssetTracker.UnitTests.Modules.HumbleBundle.AssetsResolver.TestData
 
         public HashSet<string> Tags { get; set; } = new();
 
-        public PublisherItem[] Publishers { get; set; } = Array.Empty<PublisherItem>();
-        public DeveloperItem[] Developers { get; set; } = Array.Empty<DeveloperItem>();
+        public Publisher[] Publishers { get; set; } = Array.Empty<Publisher>();
+        public Developer[] Developers { get; set; } = Array.Empty<Developer>();
     }
 }
 
