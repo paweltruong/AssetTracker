@@ -6,8 +6,40 @@
              xmlns:local="clr-namespace:AssetTracker.WpfApp.Modules.Main.Views"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="Width" Value="180"/>
+            <Setter Property="TextAlignment" Value="Right"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+
+        <Style x:Key="InputStyle" TargetType="TextBox">
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Width" Value="450"/>
+        </Style>
+    </UserControl.Resources>
+
     <Grid>
-        <TextBlock Text="Settings"/>
-            
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Settings"
+                   FontWeight="Bold"
+                   FontSize="21"
+                   Margin="10"/>
+        <StackPanel Grid.Row="1" Orientation="Vertical">
+            <StackPanel Orientation="Horizontal" >
+                <TextBlock Text="Cache Path:" Style="{StaticResource LabelStyle}"></TextBlock>
+                <TextBox Text="{Binding ConfigPath}" Style="{StaticResource InputStyle}"/>
+                <Button Content="Open" 
+                        Command="{Binding OpenLocationCommand}" 
+                        CommandParameter="{Binding ConfigPath}" />
+            </StackPanel>
+        </StackPanel>
+
     </Grid>
 </UserControl>

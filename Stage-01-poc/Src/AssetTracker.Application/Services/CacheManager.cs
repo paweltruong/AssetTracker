@@ -20,6 +20,8 @@ namespace AssetTracker.Application.Services
         const string AssetRegisterDirName = "AssetRegister";
         const string ImportersDirName = "Importers";
 
+        public string CacheFolderPath =>_cacheFolderPath;
+
         public CacheManager(ILogger<CacheManager> logger)
         {
             _logger = logger;
