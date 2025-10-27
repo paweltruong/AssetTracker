@@ -101,7 +101,7 @@ namespace AssetTracker.AssetsImporter.SyntyStore
                 .Replace("(Unity only)", "", StringComparison.OrdinalIgnoreCase);
 
             HashSet<string> keywords = new HashSet<string>();
-            var items = name.Split(new char[] { ' ', '-', '_', ':' });
+            var items = name.Split(new char[] { ' ', '-', '_', ':','/' });
             foreach (var item in items)
             {
                 var trimmedItem = item.Trim().ToLower();

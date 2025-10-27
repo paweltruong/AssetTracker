@@ -6,18 +6,11 @@ using AssetTracker.Core.Services.Plugins;
 using AssetTracker.WpfApp.Common.Commands;
 using AssetTracker.WpfApp.Common.Events;
 using AssetTracker.WpfApp.Common.Models;
-using AssetTracker.WpfApp.Common.Services;
 using AssetTracker.WpfApp.Common.Utils;
 using AssetTracker.WpfApp.Common.ViewModels;
-using AssetTracker.WpfApp.Modules.SteamScraper;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AssetTracker.WpfApp.Modules.Main.ViewModels
 {
@@ -38,14 +31,14 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
 
             CheckLinkCommand = new AsyncRelayCommand(ExecuteCheckLinkCommand, CanExecuteCheckLinkCommand);
             CancelCheckLinkCommand = new AsyncRelayCommand(ExecuteCancelCheckLinkCommand, CanExecuteCancelCheckLinkCommand);
-            _eventAggregator = eventAggregator;
-            _assetsComparer = assetsComparer;
+            OpenLinkCommand = new RelayCommand<string>(url => WpfHelpers.OpenUrl(url));
         }
 
         #region Propeties and Commands
 
         public IRelayCommand CheckLinkCommand { get; }
         public IRelayCommand CancelCheckLinkCommand { get; }
+        public IRelayCommand OpenLinkCommand { get; }
 
         #endregion Properties and Commands
 
@@ -151,9 +144,8 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
                                 var bestMatch = compareResult.MatchingOwnedAssets
                                     .OrderByDescending(x => x.MatchPercentage)
                                     .FirstOrDefault();
-                                //result.Status = compareResult.MatchingOwnedAssets.Any() ?
-                                //    AssetComparisonStatus.Exists : AssetComparisonStatus.NotExists;
 
+                                result.BestMatch = bestMatch;
                                 result.Status = bestMatch == null ? AssetComparisonStatus.NotExists : AssetComparisonStatus.Exists;
                             }
                             else
@@ -173,7 +165,7 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
                 });
 
                 await Task.WhenAll(tasks);
-                CheckLinkStatusMessage = "All comparisons completed.";
+                CheckLinkStatusMessage = $"All comparisons completed. [{ComparisonResults.Count}]";
 
             }
             else if (@event.CheckLinkProcessStatus == GenericProcessStatus.Failed)
@@ -206,9 +198,9 @@ namespace AssetTracker.WpfApp.Modules.Main.ViewModels
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error while cancelling scraping {SteamScraperModule.ModuleName}: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error while cancelling link check: {ex.Message}");
             }
-            CheckLinkStatusMessage = "Scraping cancelled by user.";
+            CheckLinkStatusMessage = "Link check cancelled by user.";
             _eventAggregator.Publish(new CheckLinkStatusChangedEvent
             {
                 CheckLinkProcessStatus = GenericProcessStatus.Canceled,

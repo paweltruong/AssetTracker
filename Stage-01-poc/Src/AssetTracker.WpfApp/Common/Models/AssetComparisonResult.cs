@@ -8,7 +8,7 @@ namespace AssetTracker.WpfApp.Common.Models
 
         public AssetComparisonResult(Asset innerItem)
         {
-               _innerItem = innerItem;
+            _innerItem = innerItem;
         }
 
         Asset _innerItem;
@@ -24,6 +24,13 @@ namespace AssetTracker.WpfApp.Common.Models
         {
             get => _status;
             set => SetProperty(ref _status, value);
+        }
+
+        OwnedAssetMatch? _bestMatch;
+        public OwnedAssetMatch? BestMatch
+        {
+            get => _bestMatch;
+            set => SetProperty(ref _bestMatch, value);
         }
     }
 }

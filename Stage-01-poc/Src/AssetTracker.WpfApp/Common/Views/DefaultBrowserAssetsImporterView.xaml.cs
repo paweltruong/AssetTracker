@@ -1,12 +1,8 @@
-﻿using AssetTracker.WpfApp.Modules.SteamScraper.ViewModels;
+﻿using AssetTracker.WpfApp.Common.ViewModels;
+using Microsoft.Extensions.Logging;
 using Microsoft.Web.WebView2.Core;
-using System.Net.Http;
-using System.Net;
 using System.Windows;
 using System.Windows.Controls;
-using System.IO;
-using AssetTracker.WpfApp.Common.ViewModels;
-using Microsoft.Extensions.Logging;
 
 namespace AssetTracker.WpfApp.Common.Views
 {

@@ -6,7 +6,6 @@ using AssetTracker.Core.Services.Plugins;
 using AssetTracker.WpfApp.Common;
 using AssetTracker.WpfApp.Common.Views;
 using AssetTracker.WpfApp.Modules.Main.Extensions;
-using AssetTracker.WpfApp.Modules.SteamScraper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Windows;

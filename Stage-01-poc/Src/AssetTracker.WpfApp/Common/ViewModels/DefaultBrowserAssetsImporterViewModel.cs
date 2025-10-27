@@ -8,9 +8,7 @@ using AssetTracker.WpfApp.Common.Events;
 using AssetTracker.WpfApp.Common.Utils;
 using Microsoft.Web.WebView2.Core;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Text;
-using System.Windows.Input;
 
 namespace AssetTracker.WpfApp.Common.ViewModels
 {
@@ -20,7 +18,7 @@ namespace AssetTracker.WpfApp.Common.ViewModels
         int pageNumber = 1;
 
 
-        public ICommand OpenLinkCommand { get; }
+        public IRelayCommand OpenLinkCommand { get; }
 
         Microsoft.Web.WebView2.Wpf.WebView2 _browser;
 
