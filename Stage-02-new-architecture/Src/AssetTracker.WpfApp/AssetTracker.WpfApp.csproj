@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\appIcon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Common\Controls\" />
+    <Folder Include="Modules\GenericBrowserAssetsImporter\Views\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Extended.Wpf.Toolkit" Version="5.0.0" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3537.50" />
+    <PackageReference Include="Scrutor" Version="6.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AssetsTracker.Wpf.Core\AssetsTracker.Wpf.Core.csproj" />
+    <ProjectReference Include="..\AssetTracker.Application\AssetTracker.Application.csproj" />
+    <ProjectReference Include="..\AssetTracker.AssetsImporter.Steam\AssetTracker.AssetsImporter.Steam.csproj" />
+    <ProjectReference Include="..\AssetTracker.AssetsImporter.SyntyStore\AssetTracker.AssetsImporter.SyntyStore.csproj" />
+    <ProjectReference Include="..\AssetTracker.AssetsResolver.HumbleBundle\AssetTracker.AssetsResolver.HumbleBundle.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\appIcon.png" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,323 @@
+﻿<UserControl x:Class="AssetTracker.WpfApp.Common.Views.AssetsDataView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:AssetTracker.WpfApp.Common.Views"
+             xmlns:converters="clr-namespace:AssetTracker.WpfApp.Common.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <converters:CollectionToVisibilityConverter x:Key="CollectionToVisibilityConverter"/>
+        <converters:InvertedCollectionToVisibilityConverter x:Key="InvertedCollectionToVisibilityConverter"/>
+        <converters:HeaderToVisibilityMultiConverter x:Key="HeaderToVisibilityMultiConverter"/>
+
+        <!-- Style for sortable column headers -->
+        <Style x:Key="SortableColumnHeaderStyle" TargetType="GridViewColumnHeader">
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Command" Value="{Binding DataContext.SortCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+            <Setter Property="CommandParameter" Value="{Binding RelativeSource={RelativeSource Self}}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GridViewColumnHeader">
+                        <Border Background="Transparent" Padding="{TemplateBinding Padding}">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="{TemplateBinding Content}" 
+                                           VerticalAlignment="Center"/>                                
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#E0E0E0"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Alternative style using icons -->
+        <Style x:Key="SortableColumnHeaderWithIconsStyle" TargetType="GridViewColumnHeader" BasedOn="{StaticResource SortableColumnHeaderStyle}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GridViewColumnHeader">
+                        <Border Background="Transparent" Padding="{TemplateBinding Padding}">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="{TemplateBinding Content}" 
+                                           VerticalAlignment="Center"/>
+                                <Path x:Name="SortIcon"
+                                      Data="M0,0 L1,0 0.5,1 z"
+                                      Stretch="Uniform"
+                                      Fill="DarkGray"
+                                      Width="8"
+                                      Height="8"
+                                      Margin="4,0,0,0"
+                                      VerticalAlignment="Center"
+                                      RenderTransformOrigin="0.5,0.5">
+                                    <Path.Visibility>
+                                        <MultiBinding Converter="{StaticResource HeaderToVisibilityMultiConverter}">
+                                            <Binding Path="DataContext.SortedColumn"
+                     RelativeSource="{RelativeSource AncestorType=UserControl}"/>
+                                            <Binding Path="Content"
+                     RelativeSource="{RelativeSource TemplatedParent}"/>
+                                        </MultiBinding>
+                                    </Path.Visibility>
+                                    <Path.RenderTransform>
+                                        <RotateTransform Angle="{Binding DataContext.SortIconAngle,
+                                         RelativeSource={RelativeSource AncestorType=UserControl}}"
+                         CenterX="0.5"
+                         CenterY="0.5"/>
+                                        <!-- optional: redundant with RenderTransformOrigin -->
+                                    </Path.RenderTransform>
+                                </Path>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#E0E0E0"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Style for list view items -->
+        <Style x:Key="ListViewItemStyle" TargetType="ListViewItem">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+            <Setter Property="Padding" Value="12"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <!-- Important: Allow text selection in items -->
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border Name="Bd"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        Padding="{TemplateBinding Padding}"
+                        CornerRadius="4">
+                            <GridViewRowPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#F0F0F0"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Add this style for selectable text -->
+        <Style x:Key="SelectableTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="Focusable" Value="True"/>
+            <!--<Setter Property="IsTextSelectionEnabled" Value="True"/>-->
+            <Setter Property="Padding" Value="2"/>
+        </Style>
+
+        <!-- Link Button Style -->
+        <Style x:Key="LinkButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="#0078D4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <TextBlock Text="{TemplateBinding Content}" 
+                                   Foreground="{TemplateBinding Foreground}"
+                                   TextDecorations="Underline"
+                                   Padding="{TemplateBinding Padding}"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="#005A9E"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <TextBlock Text="No data" 
+                   Visibility="{Binding OwnedAssets, Converter={StaticResource InvertedCollectionToVisibilityConverter}}" 
+                   Margin="5,5,5,5"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Center"
+                   FontSize="16"
+                   Foreground="Gray"/>
+
+        <ListView ItemsSource="{Binding OwnedAssets}"
+                  Visibility="{Binding OwnedAssets, Converter={StaticResource CollectionToVisibilityConverter}}"
+                  Margin="5,5,5,5"
+                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                  VirtualizingPanel.IsVirtualizing="True"
+                  VirtualizingPanel.VirtualizationMode="Recycling"
+                  Background="Transparent"
+                  BorderThickness="0"
+                  ItemContainerStyle="{StaticResource ListViewItemStyle}">
+
+            <ListView.View>
+                <GridView>
+
+                    <!-- Selection Checkbox Column -->
+                    <GridViewColumn Width="40" Header="">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <CheckBox IsChecked="{Binding Selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <!-- Asset Column -->
+                    <GridViewColumn Width="250" Header="Asset" 
+                                   HeaderContainerStyle="{StaticResource SortableColumnHeaderWithIconsStyle}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel HorizontalAlignment="Center">
+                                    <Image Source="{Binding ImageUrl}" 
+                                           Width="64" 
+                                           Height="64" 
+                                           Stretch="Uniform"
+                                           HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding AssetType}" 
+                                               HorizontalAlignment="Center"
+                                               Margin="0,4,0,0"
+                                               FontSize="10"
+                                               Foreground="Gray"/>
+                                    <TextBlock Text="{Binding MarketplaceUid}" 
+                                                HorizontalAlignment="Center"
+                                                Margin="0,4,0,0"
+                                                FontSize="10"
+                                                Foreground="Gray"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <!-- Name Column -->
+                    <!--<GridViewColumn Width="200" Header="Name" 
+                                   HeaderContainerStyle="{StaticResource SortableColumnHeaderWithIconsStyle}"
+                                   DisplayMemberBinding="{Binding Name}"/>-->
+                    <GridViewColumn Width="200" Header="Name" 
+                                    HeaderContainerStyle="{StaticResource SortableColumnHeaderWithIconsStyle}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <!--<TextBlock Text="{Binding Name}" 
+                                            Style="{StaticResource SelectableTextBlockStyle}"/>-->
+                                <TextBox Text="{Binding Name}" 
+                                         IsReadOnly="True"
+                                         BorderThickness="0"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <!-- Publishers Column -->
+                    <GridViewColumn Width="150" Header="Publishers" 
+                                   HeaderContainerStyle="{StaticResource SortableColumnHeaderWithIconsStyle}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <ItemsControl ItemsSource="{Binding Publishers}" BorderThickness="0" Padding="0" Background="Transparent">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Vertical"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Name}" Margin="0,1"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <!-- Developers Column -->
+                    <GridViewColumn Width="150" Header="Developers" 
+                                   HeaderContainerStyle="{StaticResource SortableColumnHeaderWithIconsStyle}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <ItemsControl ItemsSource="{Binding Developers}" BorderThickness="0" Padding="0" Background="Transparent">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Vertical"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Name}" Margin="0,1"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <!-- Tags Column -->
+                    <GridViewColumn Width="200" Header="Tags" 
+                                   HeaderContainerStyle="{StaticResource SortableColumnHeaderWithIconsStyle}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <ItemsControl ItemsSource="{Binding Tags}" BorderThickness="0" Padding="0" Background="Transparent">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel Orientation="Horizontal"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="#F0F0F0" 
+                                                    CornerRadius="10" 
+                                                    Padding="6,2" 
+                                                    Margin="2,1">
+                                                <TextBlock Text="{Binding}" 
+                                                           FontSize="10" 
+                                                           Foreground="#555"/>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <!-- Marketplace Column -->
+                    <GridViewColumn Width="120" Header="Marketplace" 
+                                   HeaderContainerStyle="{StaticResource SortableColumnHeaderWithIconsStyle}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding MarketplaceName}" 
+                                               FontSize="11" 
+                                               Foreground="DarkBlue"
+                                               FontWeight="SemiBold"/>
+                                    <Button Content="View" 
+                                            Command="{Binding DataContext.ViewMarketplaceCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding AssetUrl}"
+                                            Style="{StaticResource LinkButtonStyle}"
+                                            Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
+</UserControl>
