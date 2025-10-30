@@ -4,9 +4,15 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:AssetTracker.WpfApp.Modules.Main.Views"
+             xmlns:converters="clr-namespace:AssetTracker.WpfApp.Common.Converters"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
+
+        <converters:CollectionToVisibilityConverter x:Key="CollectionToVisibilityConverter"/>
+        <converters:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
+
         <Style x:Key="LabelStyle" TargetType="TextBlock">
             <Setter Property="Width" Value="180"/>
             <Setter Property="TextAlignment" Value="Right"/>
@@ -39,6 +45,53 @@
                         Command="{Binding OpenLocationCommand}" 
                         CommandParameter="{Binding ConfigPath}" />
             </StackPanel>
+
+            <!--Tags-->
+            <TextBlock Text="Tags"
+                       FontWeight="Bold"
+                        FontSize="18"
+                        Margin="10"/>
+
+            <Grid >
+                <DataGrid ItemsSource="{Binding SystemTags}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          IsReadOnly="True"
+                          Margin="10"
+                            Visibility="{Binding SystemTags, Converter={StaticResource CollectionToVisibilityConverter}}">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="System Tag" Width="200">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="{Binding Name}" 
+                                             Command="{Binding DataContext.OpenLinkCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                             CommandParameter="{Binding Name}"
+                                             Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
+                                             Background="Transparent"
+                                             BorderThickness="0"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="Tag Color" Width="120">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <xctk:ColorPicker SelectedColor="{Binding Color, Mode=TwoWay}"
+                              UsingAlphaChannel="False"
+                              ShowRecentColors="True"
+                              Height="25"
+                              Width="80"
+                              Margin="2"
+                              BorderThickness="1"
+                              ToolTip="Click to change tag color"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+
         </StackPanel>
 
     </Grid>

@@ -51,4 +51,13 @@ First I've focused on the happy path and used Vibe coding approach. This would g
 * UX - I have to store data used for importing assets, like authentication cookies for web scrapping, API keys etc. It is very inconvenient to provide this data every time I want to import my assets. So I have to build some kind of user profile management.
 * Security - storing sensitive data like authentication cookies or API keys requires proper security measures. I have to make sure this data is stored securely or not in plain text at least.
 * UX - there should be features for managing imported assets (sorting, filtering, tagging etc.)
+* Caching - after importing assets I would like to avoid re-importing them every time I open the application. So some kind of caching mechanism is required.
+* New use cases that emerged while building the POC should be implemented using abstractions so I am able to replace fast and basic implementations with more advanced ones later if needed.
+* UX - I gain some insights about how the user interface should look like and what features are essential for the user.
+* Architecture - I have insight about the project (structure, coupling, abstractions) to design the application architecture in a way that allows me to easily add new asset sources in the future without major changes to the existing codebase.
+* I've gained insights and experience with scrapping data from websites, handling authentication cookies, parsing HTML content etc.
+
  
+== Stage 2 Polishing the Application
+
+After building the POC and validating my idea I decided to polish the application and make it more user friendly, put more focus into architecture and technical debt, testing and CI/CD. Finally I want to add more asset sources to make the application more useful and test the new approach with insights after POC stage.

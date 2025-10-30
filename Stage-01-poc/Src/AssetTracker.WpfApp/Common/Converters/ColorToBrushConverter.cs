@@ -6,6 +6,8 @@ namespace AssetTracker.WpfApp.Common.Converters
 {
     public class ColorToBrushConverter : IValueConverter
     {
+        public static ColorToBrushConverter Instance { get; } = new ColorToBrushConverter();
+
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is string colorString)
@@ -18,6 +20,10 @@ namespace AssetTracker.WpfApp.Common.Converters
                 {
                     return new SolidColorBrush(Colors.Gray);
                 }
+            }
+            if(value is Color color)
+            {
+                return new SolidColorBrush(color);
             }
             return new SolidColorBrush(Colors.Gray);
         }
