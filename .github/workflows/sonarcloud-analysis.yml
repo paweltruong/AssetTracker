@@ -1,0 +1,62 @@
+name: SonarCloud Analysis - Stage 02
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Step 1: Checkout code
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Required for SonarCloud analysis
+
+    # Step 2: Setup .NET 8
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.x'
+
+    # Step 3: Restore dependencies for Stage-02
+    - name: Restore dependencies
+      run: dotnet restore Stage-02-new-architecture
+
+    # Step 4: Build Stage-02 projects
+    - name: Build Stage-02
+      run: dotnet build Stage-02-new-architecture --configuration Release --no-restore --verbosity minimal
+
+    # Step 5: Run tests with coverage for Stage-02
+    - name: Run tests with coverage
+      run: |
+        dotnet test Stage-02-new-architecture \
+          --configuration Release \
+          --no-build \
+          --collect:"XPlat Code Coverage" \
+          --results-directory ./coverage \
+          --logger "trx;LogFileName=test-results.trx" \
+          --verbosity normal \
+          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+
+    # Step 6: SonarCloud analysis
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarcloud-github-action@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Auto-provided by GitHub
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    # From your secrets
+      with:
+        args: >
+          /d:sonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+          /d:sonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+          /d:sonar.sources=Stage-02-new-architecture/Src
+          /d:sonar.tests=Stage-02-new-architecture
+          /d:sonar.exclusions=**/Stage-01-poc/**,**/bin/**,**/obj/**,**/*.csproj,**/*.config
+          /d:sonar.coverage.exclusions=**/Stage-01-poc/**,**/Test/**/*,**/*Test/*,**/*.Tests/*,**/Migrations/*,**/Program.cs
+          /d:sonar.cs.vscoveragexml.reportsPaths=./coverage/**/coverage.cobertura.xml
+          /d:sonar.cpd.exclusions=**/Stage-01-poc/**
+          /d:sonar.coverageReportPaths=./coverage
