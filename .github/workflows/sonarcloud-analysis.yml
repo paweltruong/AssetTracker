@@ -76,12 +76,13 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       with:
+        projectBaseDir: .
         args: >
-          /d:sonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
-          /d:sonar.organization=${{ secrets.SONAR_ORGANIZATION }}
-          /d:sonar.sources=Stage-02-new-architecture/Src
-          /d:sonar.tests=Stage-02-new-architecture/Src
-          /d:sonar.exclusions=**/Stage-01-poc/**,**/bin/**,**/obj/**,**/*.csproj,**/*.config,**/AssetsTracker.Wpf.Core/**,**/AssetTracker.WpfApp/**
-          /d:sonar.coverage.exclusions=**/Stage-01-poc/**,**/Test/**/*,**/*Test/*,**/*.Tests/*,**/Migrations/*,**/Program.cs,**/AssetsTracker.Wpf.Core/**,**/AssetTracker.WpfApp/**
-          /d:sonar.cs.vscoveragexml.reportsPaths=./coverage/**/coverage.cobertura.xml
-          /d:sonar.cpd.exclusions=**/Stage-01-poc/**,**/AssetsTracker.Wpf.Core/**,**/AssetTracker.WpfApp/**
+          -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+          -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+          -Dsonar.sources=Stage-02-new-architecture/Src
+          -Dsonar.tests=Stage-02-new-architecture/Src
+          -Dsonar.exclusions=**/Stage-01-poc/**,**/bin/**,**/obj/**,**/*.csproj,**/*.config,**/AssetsTracker.Wpf.Core/**,**/AssetTracker.WpfApp/**
+          -Dsonar.coverage.exclusions=**/Stage-01-poc/**,**/Test/**/*,**/*Test/*,**/*.Tests/*,**/Migrations/*,**/Program.cs,**/AssetsTracker.Wpf.Core/**,**/AssetTracker.WpfApp/**
+          -Dsonar.cs.vscoveragexml.reportsPaths=./coverage/**/coverage.cobertura.xml
+          -Dsonar.cpd.exclusions=**/Stage-01-poc/**,**/AssetsTracker.Wpf.Core/**,**/AssetTracker.WpfApp/**
