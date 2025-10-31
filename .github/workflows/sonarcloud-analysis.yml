@@ -12,7 +12,7 @@ env:
 
 jobs:
   analyze:
-    runs-on: windows-latest  # Changed to Windows
+    runs-on: windows-latest
     
     steps:
     - name: Checkout repository
@@ -40,14 +40,23 @@ jobs:
       run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release --no-restore
 
     - name: Run tests with coverage
+      shell: bash  # Force bash to use Linux-style line continuation
       run: |
-        dotnet test ${{ env.SOLUTION_PATH }} \
+        dotnet test Stage-02-new-architecture/Src/AssetTracker.sln \
           --configuration Release \
           --no-build \
           --collect:"XPlat Code Coverage" \
           --results-directory ./coverage \
           --logger "trx;LogFileName=test-results.trx" \
           -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+
+    - name: Verify coverage files
+      run: |
+        if (Test-Path "./coverage") {
+          Get-ChildItem "./coverage" -Recurse -Filter "*.cobertura.xml" | ForEach-Object { Write-Host "Found coverage file: $($_.FullName)" }
+        } else {
+          Write-Host "No coverage directory found"
+        }
 
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@v2
