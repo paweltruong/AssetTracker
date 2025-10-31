@@ -6,35 +6,44 @@ on:
   pull_request:
     branches: [ main ]
 
+env:
+  DOTNET_VERSION: '8.0.x'
+  SOLUTION_PATH: 'Stage-02-new-architecture/Src/AssetTracker.sln'
+
 jobs:
   analyze:
     runs-on: ubuntu-latest
     
     steps:
-    # Step 1: Checkout code
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Required for SonarCloud analysis
+        fetch-depth: 0
 
-    # Step 2: Setup .NET 8
-    - name: Setup .NET 8
+    - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '8.x'
+        dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    # Step 3: Restore dependencies for Stage-02
+    - name: Verify solution file exists
+      run: |
+        if [ ! -f "${{ env.SOLUTION_PATH }}" ]; then
+          echo "❌ Solution file not found at: ${{ env.SOLUTION_PATH }}"
+          echo "Current directory structure:"
+          find . -name "*.sln" -o -name "*.csproj" | head -20
+          exit 1
+        fi
+        echo "✅ Solution file found: ${{ env.SOLUTION_PATH }}"
+
     - name: Restore dependencies
-      run: dotnet restore Stage-02-new-architecture
+      run: dotnet restore ${{ env.SOLUTION_PATH }}
 
-    # Step 4: Build Stage-02 projects
     - name: Build Stage-02
-      run: dotnet build Stage-02-new-architecture --configuration Release --no-restore --verbosity minimal
+      run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release --no-restore
 
-    # Step 5: Run tests with coverage for Stage-02
     - name: Run tests with coverage
       run: |
-        dotnet test Stage-02-new-architecture \
+        dotnet test ${{ env.SOLUTION_PATH }} \
           --configuration Release \
           --no-build \
           --collect:"XPlat Code Coverage" \
@@ -43,20 +52,18 @@ jobs:
           --verbosity normal \
           -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
 
-    # Step 6: SonarCloud analysis
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@v2
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Auto-provided by GitHub
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    # From your secrets
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       with:
         args: >
           /d:sonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
           /d:sonar.organization=${{ secrets.SONAR_ORGANIZATION }}
           /d:sonar.sources=Stage-02-new-architecture/Src
-          /d:sonar.tests=Stage-02-new-architecture
+          /d:sonar.tests=Stage-02-new-architecture/Src
           /d:sonar.exclusions=**/Stage-01-poc/**,**/bin/**,**/obj/**,**/*.csproj,**/*.config
           /d:sonar.coverage.exclusions=**/Stage-01-poc/**,**/Test/**/*,**/*Test/*,**/*.Tests/*,**/Migrations/*,**/Program.cs
           /d:sonar.cs.vscoveragexml.reportsPaths=./coverage/**/coverage.cobertura.xml
           /d:sonar.cpd.exclusions=**/Stage-01-poc/**
-          /d:sonar.coverageReportPaths=./coverage
