@@ -55,24 +55,14 @@ jobs:
           --results-directory ./coverage \
           --logger "trx;LogFileName=test-results.trx"
 
-    - name: Debug raw coverage
+    - name: Generate SonarQube report with correct paths
       run: |
-        echo "=== Coverage files found ==="
-        find ./coverage -name "*.xml" -type f
-        echo "=== Sample coverage file structure ==="
-        if find ./coverage -name "*.xml" | head -1 | grep -q .; then
-          sample_file=$(find ./coverage -name "*.xml" | head -1)
-          echo "First 20 lines of $sample_file:"
-          head -20 "$sample_file"
-        fi
-
-    - name: Generate optimized SonarQube report
-      run: |
+        # Use current directory as base
         reportgenerator \
           -reports:"./coverage/**/*.xml" \
           -targetdir:"./sonar-coverage" \
           -reporttypes:"SonarQube" \
-          -sourcedirs:"/github/workspace/Stage-02-new-architecture/Src" \
+          -sourcedirs:"." \
           -classfilters:"+AssetTracker.*" \
           -verbosity:"Warning"
         
