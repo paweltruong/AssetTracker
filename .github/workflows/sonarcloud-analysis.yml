@@ -12,7 +12,7 @@ env:
 
 jobs:
   analyze:
-    runs-on: ubuntu-latest  # Switch back to Linux
+    runs-on: ubuntu-latest
     
     steps:
     - name: Checkout repository
@@ -25,17 +25,8 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    - name: Verify solution file exists
-      run: |
-        if [ ! -f "${{ env.SOLUTION_PATH }}" ]; then
-          echo "❌ Solution file not found at: ${{ env.SOLUTION_PATH }}"
-          exit 1
-        fi
-        echo "✅ Solution file found: ${{ env.SOLUTION_PATH }}"
-
     - name: Build non-WPF projects only
       run: |
-        # Build only non-WPF projects
         find Stage-02-new-architecture/Src -name "*.csproj" \
           ! -path "*/AssetsTracker.Wpf.Core/*" \
           ! -path "*/AssetTracker.WpfApp/*" \
@@ -46,9 +37,13 @@ jobs:
           ! -path "*/AssetTracker.WpfApp/*" \
           ! -name "*Wpf*" | xargs -I {} dotnet build {} --configuration Release --no-restore
 
-    - name: Run tests with coverage (non-WPF only)
+    - name: Run tests with proper coverage format
       run: |
-        # Find and run tests from non-WPF projects only
+        # Clean coverage directory
+        rm -rf ./coverage
+        mkdir -p ./coverage
+        
+        # Run tests and generate coverage
         find Stage-02-new-architecture/Src -name "*Tests.csproj" -o -name "*Test.csproj" \
           ! -path "*/AssetsTracker.Wpf.Core/*" \
           ! -path "*/AssetTracker.WpfApp/*" \
@@ -57,26 +52,28 @@ jobs:
           --no-build \
           --collect:"XPlat Code Coverage" \
           --results-directory ./coverage \
-          --logger "trx;LogFileName=test-results.trx" \
-          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+          --logger "trx;LogFileName=test-results.trx"
 
-    - name: Verify coverage files
+    - name: Verify and debug coverage files
       run: |
-        if find ./coverage -name "*.cobertura.xml" | grep -q .; then
-          echo "✅ Coverage files found:"
-          find ./coverage -name "*.cobertura.xml" -exec echo "  - {}" \;
-        else
-          echo "❌ No coverage files found!"
-          # Don't exit with error, SonarCloud can still analyze code quality
+        echo "=== Coverage files found ==="
+        find ./coverage -name "*.xml" -type f
+        echo "=== Sample coverage file content ==="
+        if find ./coverage -name "*.xml" | head -1 | grep -q .; then
+          sample_file=$(find ./coverage -name "*.xml" | head -1)
+          echo "First 5 lines of $sample_file:"
+          head -5 "$sample_file"
+          echo "File format:"
+          grep -oP '<\?xml[^>]*\?>' "$sample_file" || echo "No XML declaration found"
+          grep -oP '<[^!][^>]*>' "$sample_file" | head -5
         fi
 
-    - name: SonarCloud Scan
+    - name: SonarCloud Scan with correct coverage property
       uses: SonarSource/sonarcloud-github-action@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       with:
-        projectBaseDir: .
         args: >
           -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
           -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
@@ -84,5 +81,5 @@ jobs:
           -Dsonar.tests=Stage-02-new-architecture/Src
           -Dsonar.exclusions=**/Stage-01-poc/**,**/bin/**,**/obj/**,**/*.csproj,**/*.config,**/AssetsTracker.Wpf.Core/**,**/AssetTracker.WpfApp/**
           -Dsonar.coverage.exclusions=**/Stage-01-poc/**,**/Test/**/*,**/*Test/*,**/*.Tests/*,**/Migrations/*,**/Program.cs,**/AssetsTracker.Wpf.Core/**,**/AssetTracker.WpfApp/**
-          -Dsonar.cs.vscoveragexml.reportsPaths=./coverage/**/coverage.cobertura.xml
+          -Dsonar.coverageReportPaths=./coverage/**/*.xml
           -Dsonar.cpd.exclusions=**/Stage-01-poc/**,**/AssetsTracker.Wpf.Core/**,**/AssetTracker.WpfApp/**
