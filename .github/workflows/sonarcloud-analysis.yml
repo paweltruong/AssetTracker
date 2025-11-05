@@ -30,7 +30,12 @@ jobs:
       - name: Build and analyze
         run: |
           cd ${{ env.SOLUTION_DIR }}
-          dotnet sonarscanner begin /k:"${{ secrets.SONAR_PROJECT_KEY }}" /o:"${{ secrets.SONAR_ORGANIZATION }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:"sonar.verbose=true" /d:sonar.cs.opencover.reportsPaths="${{ env.SOLUTION_DIR }}/coverage.opencover.xml" /d:sonar.coverage.exclusions="**Test*.cs,Program.cs"
+          dotnet sonarscanner begin /k:"${{ secrets.SONAR_PROJECT_KEY }}" /o:"${{ secrets.SONAR_ORGANIZATION }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:"sonar.verbose=true" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" /d:sonar.coverage.exclusions="**Test*.cs,Program.cs"
           dotnet build
           dotnet test --configuration Release /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
           dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+
+      - name: Check coverage files
+        run: |
+          find . -name "coverage.*.xml" -type f
+          ls -la ./ # or whatever directory you're using
