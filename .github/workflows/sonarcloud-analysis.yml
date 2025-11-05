@@ -1,90 +1,64 @@
-name: SonarCloud Analysis - Stage 02
+name: SonarCloud Analysis
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ main ]
-
-env:
-  DOTNET_VERSION: '8.0.x'
-  SOLUTION_PATH: 'Stage-02-new-architecture/Src/AssetTracker.sln'
+    types: [opened, synchronize, reopened]
 
 jobs:
-  analyze:
+  # --- Linux job for building, testing, and SonarCloud analysis ---
+  build-test-sonar:
+    name: Build, Test & Analyze (.NET projects)
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # required for SonarCloud analysis
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
 
-    - name: Install tools
-      run: dotnet tool install --global dotnet-reportgenerator-globaltool
+      - name: Install dependencies
+        run: dotnet restore
 
-    - name: Build non-WPF projects only
-      run: |
-        find Stage-02-new-architecture/Src -name "*.csproj" \
-          ! -path "*/AssetsTracker.Wpf.Core/*" \
-          ! -path "*/AssetTracker.WpfApp/*" \
-          ! -name "*Wpf*" | xargs -I {} dotnet restore {}
-        
-        find Stage-02-new-architecture/Src -name "*.csproj" \
-          ! -path "*/AssetsTracker.Wpf.Core/*" \
-          ! -path "*/AssetTracker.WpfApp/*" \
-          ! -name "*Wpf*" | xargs -I {} dotnet build {} --configuration Release --no-restore
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
 
-    - name: Run tests with coverage
-      run: |
-        rm -rf ./coverage
-        mkdir -p ./coverage
-        
-        find Stage-02-new-architecture/Src -name "*Tests.csproj" -o -name "*Test.csproj" \
-          ! -path "*/AssetsTracker.Wpf.Core/*" \
-          ! -path "*/AssetTracker.WpfApp/*" \
-          ! -name "*Wpf*" | xargs -I {} dotnet test {} \
-          --configuration Release \
-          --no-build \
-          --collect:"XPlat Code Coverage" \
-          --results-directory ./coverage \
-          --logger "trx;LogFileName=test-results.trx"
+      - name: Run tests and collect coverage
+        run: dotnet test --no-build --configuration Release /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=TestResults/coverage.opencover.xml
 
-    - name: Generate SonarQube report with correct paths
-      run: |
-        # Use current directory as base
-        reportgenerator \
-          -reports:"./coverage/**/*.xml" \
-          -targetdir:"./sonar-coverage" \
-          -reporttypes:"SonarQube" \
-          -sourcedirs:"." \
-          -classfilters:"+AssetTracker.*" \
-          -verbosity:"Warning"
-        
-        echo "=== Generated report info ==="
-        ls -la ./sonar-coverage/
-        echo "=== File paths in SonarQube.xml ==="
-        grep -c 'filePath=' ./sonar-coverage/SonarQube.xml || echo "No filePath attributes found"
-        grep -o 'filePath="[^"]*"' ./sonar-coverage/SonarQube.xml | head -5
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR info, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+            -Dsonar.cs.opencover.reportsPaths=**/coverage.opencover.xml
+            -Dsonar.coverage.exclusions=**/Migrations/**
+            -Dsonar.verbose=true
 
-    - name: SonarCloud Scan
-      uses: SonarSource/sonarcloud-github-action@v2
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      with:
-        args: >
-          -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
-          -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
-          -Dsonar.sources=Stage-02-new-architecture/Src
-          -Dsonar.tests=Stage-02-new-architecture/Src
-          -Dsonar.exclusions=**/Stage-01-poc/**,**/bin/**,**/obj/**,**/*.csproj,**/*.config,**/AssetsTracker.Wpf.Core/**,**/AssetTracker.WpfApp/**
-          -Dsonar.coverage.exclusions=**/Stage-01-poc/**,**/Test/**/*,**/*Test/*,**/*.Tests/*,**/Migrations/*,**/Program.cs,**/AssetsTracker.Wpf.Core/**,**/AssetTracker.WpfApp/**
-          -Dsonar.coverageReportPaths=./sonar-coverage/SonarQube.xml
-          -Dsonar.cpd.exclusions=**/Stage-01-poc/**,**/AssetsTracker.Wpf.Core/**,**/AssetTracker.WpfApp/**
-          -Dsonar.scm.disabled=true
+  # --- Optional Windows job for WPF build only ---
+  build-wpf:
+    name: Build WPF App (.NET 8)
+    runs-on: windows-latest
+    needs: build-test-sonar
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Build WPF project
+        run: dotnet build path/to/YourWpfProject.csproj --configuration Release
