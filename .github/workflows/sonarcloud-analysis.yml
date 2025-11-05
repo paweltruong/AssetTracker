@@ -42,11 +42,9 @@ jobs:
 
     - name: Run tests with coverage
       run: |
-        # Clean previous coverage
         rm -rf ./coverage
         mkdir -p ./coverage
         
-        # Run tests with coverage
         find Stage-02-new-architecture/Src -name "*Tests.csproj" -o -name "*Test.csproj" \
           ! -path "*/AssetsTracker.Wpf.Core/*" \
           ! -path "*/AssetTracker.WpfApp/*" \
@@ -57,26 +55,32 @@ jobs:
           --results-directory ./coverage \
           --logger "trx;LogFileName=test-results.trx"
 
-    - name: Generate combined SonarQube report
+    - name: Debug raw coverage
       run: |
-        # Check if coverage files exist
-        if find ./coverage -name "*.xml" | grep -q .; then
-          echo "Found coverage files:"
-          find ./coverage -name "*.xml"
-          
-          # Generate combined report
-          reportgenerator \
-            -reports:"./coverage/**/*.xml" \
-            -targetdir:"./sonar-coverage" \
-            -reporttypes:"SonarQube"
-          
-          echo "Generated SonarQube report:"
-          ls -la ./sonar-coverage/
-        else
-          echo "No coverage files found"
-          # Create empty directory to avoid errors
-          mkdir -p ./sonar-coverage
+        echo "=== Coverage files found ==="
+        find ./coverage -name "*.xml" -type f
+        echo "=== Sample coverage file structure ==="
+        if find ./coverage -name "*.xml" | head -1 | grep -q .; then
+          sample_file=$(find ./coverage -name "*.xml" | head -1)
+          echo "First 20 lines of $sample_file:"
+          head -20 "$sample_file"
         fi
+
+    - name: Generate optimized SonarQube report
+      run: |
+        reportgenerator \
+          -reports:"./coverage/**/*.xml" \
+          -targetdir:"./sonar-coverage" \
+          -reporttypes:"SonarQube" \
+          -sourcedirs:"/github/workspace/Stage-02-new-architecture/Src" \
+          -classfilters:"+AssetTracker.*" \
+          -verbosity:"Warning"
+        
+        echo "=== Generated report info ==="
+        ls -la ./sonar-coverage/
+        echo "=== File paths in SonarQube.xml ==="
+        grep -c 'filePath=' ./sonar-coverage/SonarQube.xml || echo "No filePath attributes found"
+        grep -o 'filePath="[^"]*"' ./sonar-coverage/SonarQube.xml | head -5
 
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@v2
@@ -93,3 +97,4 @@ jobs:
           -Dsonar.coverage.exclusions=**/Stage-01-poc/**,**/Test/**/*,**/*Test/*,**/*.Tests/*,**/Migrations/*,**/Program.cs,**/AssetsTracker.Wpf.Core/**,**/AssetTracker.WpfApp/**
           -Dsonar.coverageReportPaths=./sonar-coverage/SonarQube.xml
           -Dsonar.cpd.exclusions=**/Stage-01-poc/**,**/AssetsTracker.Wpf.Core/**,**/AssetTracker.WpfApp/**
+          -Dsonar.scm.disabled=true
