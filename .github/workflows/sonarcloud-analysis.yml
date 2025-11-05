@@ -25,6 +25,9 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
+    - name: Install tools
+      run: dotnet tool install --global dotnet-reportgenerator-globaltool
+
     - name: Build non-WPF projects only
       run: |
         find Stage-02-new-architecture/Src -name "*.csproj" \
@@ -37,13 +40,13 @@ jobs:
           ! -path "*/AssetTracker.WpfApp/*" \
           ! -name "*Wpf*" | xargs -I {} dotnet build {} --configuration Release --no-restore
 
-    - name: Run tests with proper coverage format
+    - name: Run tests with coverage
       run: |
-        # Clean coverage directory
+        # Clean previous coverage
         rm -rf ./coverage
         mkdir -p ./coverage
         
-        # Run tests and generate coverage
+        # Run tests with coverage
         find Stage-02-new-architecture/Src -name "*Tests.csproj" -o -name "*Test.csproj" \
           ! -path "*/AssetsTracker.Wpf.Core/*" \
           ! -path "*/AssetTracker.WpfApp/*" \
@@ -54,21 +57,28 @@ jobs:
           --results-directory ./coverage \
           --logger "trx;LogFileName=test-results.trx"
 
-    - name: Verify and debug coverage files
+    - name: Generate combined SonarQube report
       run: |
-        echo "=== Coverage files found ==="
-        find ./coverage -name "*.xml" -type f
-        echo "=== Sample coverage file content ==="
-        if find ./coverage -name "*.xml" | head -1 | grep -q .; then
-          sample_file=$(find ./coverage -name "*.xml" | head -1)
-          echo "First 5 lines of $sample_file:"
-          head -5 "$sample_file"
-          echo "File format:"
-          grep -oP '<\?xml[^>]*\?>' "$sample_file" || echo "No XML declaration found"
-          grep -oP '<[^!][^>]*>' "$sample_file" | head -5
+        # Check if coverage files exist
+        if find ./coverage -name "*.xml" | grep -q .; then
+          echo "Found coverage files:"
+          find ./coverage -name "*.xml"
+          
+          # Generate combined report
+          reportgenerator \
+            -reports:"./coverage/**/*.xml" \
+            -targetdir:"./sonar-coverage" \
+            -reporttypes:"SonarQube"
+          
+          echo "Generated SonarQube report:"
+          ls -la ./sonar-coverage/
+        else
+          echo "No coverage files found"
+          # Create empty directory to avoid errors
+          mkdir -p ./sonar-coverage
         fi
 
-    - name: SonarCloud Scan with correct coverage property
+    - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -81,5 +91,5 @@ jobs:
           -Dsonar.tests=Stage-02-new-architecture/Src
           -Dsonar.exclusions=**/Stage-01-poc/**,**/bin/**,**/obj/**,**/*.csproj,**/*.config,**/AssetsTracker.Wpf.Core/**,**/AssetTracker.WpfApp/**
           -Dsonar.coverage.exclusions=**/Stage-01-poc/**,**/Test/**/*,**/*Test/*,**/*.Tests/*,**/Migrations/*,**/Program.cs,**/AssetsTracker.Wpf.Core/**,**/AssetTracker.WpfApp/**
-          -Dsonar.coverageReportPaths=./coverage/**/*.xml
+          -Dsonar.coverageReportPaths=./sonar-coverage/SonarQube.xml
           -Dsonar.cpd.exclusions=**/Stage-01-poc/**,**/AssetsTracker.Wpf.Core/**,**/AssetTracker.WpfApp/**
