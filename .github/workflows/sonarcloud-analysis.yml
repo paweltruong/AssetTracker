@@ -65,8 +65,3 @@ jobs:
           dotnet build AssetTracker.sln --no-restore --configuration Release /p:EnableWindowsTargeting=true
           dotnet test AssetTracker.sln --no-restore --configuration Release --collect:"XPlat Code Coverage;Format=opencover"
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
-
-      - name: Verify coverage output
-        run: |
-          echo "=== Searching for coverage files ==="
-          find . -type f -name "coverage*.xml" || echo "No coverage files found!"
