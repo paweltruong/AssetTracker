@@ -58,7 +58,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"${{ secrets.SONAR_PROJECT_KEY }}" /o:"${{ secrets.SONAR_ORGANIZATION }}" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:"sonar.verbose=true" /d:"sonar.dotnet.excludeTestProjects=true" /d:"sonar.cs.opencover.reportsPaths=${{ env.SOLUTION_DIR }}/**/coverage.opencover.xml" /d:sonar.host.url="https://sonarcloud.io"
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"${{ secrets.SONAR_PROJECT_KEY }}" /o:"${{ secrets.SONAR_ORGANIZATION }}" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:"sonar.verbose=true" /d:"sonar.dotnet.excludeTestProjects=true" /d:"sonar.cs.opencover.reportsPaths=${{ env.SOLUTION_DIR }}**/coverage.opencover.xml" /d:sonar.host.url="https://sonarcloud.io"
           dotnet restore ${{ env.SOLUTION_DIR }}AssetTracker.sln /p:EnableWindowsTargeting=true
           dotnet build ${{ env.SOLUTION_DIR }}AssetTracker.sln --no-restore --configuration Release /p:EnableWindowsTargeting=true
           dotnet test ${{ env.SOLUTION_DIR }}AssetTracker.sln --no-restore --configuration Release --collect:"XPlat Code Coverage;Format=opencover"
