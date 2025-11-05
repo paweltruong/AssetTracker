@@ -14,7 +14,7 @@ jobs:
   # --- Linux job: build, test, coverage, SonarCloud analysis ---
   build-test-sonar:
     name: Build, Test & Analyze (.NET projects)
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     defaults:
       run:
@@ -26,6 +26,26 @@ jobs:
         with:
           fetch-depth: 0  # required for SonarCloud analysis
 
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~\sonar\cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Cache SonarCloud scanner
+        id: cache-sonar-scanner
+        uses: actions/cache@v3
+        with:
+          path: .\.sonar\scanner
+          key: ${{ runner.os }}-sonar-scanner
+          restore-keys: ${{ runner.os }}-sonar-scanner
+      - name: Install SonarCloud scanner
+        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+        shell: powershell
+        run: |
+          New-Item -Path .\.sonar\scanner -ItemType Directory
+          dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -34,25 +54,19 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore AssetTracker.sln /p:EnableWindowsTargeting=true
 
-      - name: Build solution
-        run: dotnet build AssetTracker.sln --no-restore --configuration Release /p:EnableWindowsTargeting=true
-
-      - name: Run tests and collect coverage
-        run: dotnet test AssetTracker.sln --no-build --configuration Release /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=TestResults/coverage.opencover.xml /p:EnableWindowsTargeting=true
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        shell: powershell
+        run: |
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"${{ secrets.SONAR_PROJECT_KEY }}" /o:"${{ secrets.SONAR_ORGANIZATION }}" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:"sonar.verbose=true" /d:"sonar.dotnet.excludeTestProjects=true" /d:"sonar.cs.opencover.reportsPaths=**/coverage.opencover.xml" /d:sonar.host.url="https://sonarcloud.io"
+          dotnet restore AssetTracker.sln /p:EnableWindowsTargeting=true
+          dotnet build AssetTracker.sln --no-restore --configuration Release /p:EnableWindowsTargeting=true
+          dotnet test AssetTracker.sln --no-restore --configuration Release --collect:"XPlat Code Coverage;Format=opencover"
+          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
       - name: Verify coverage output
         run: |
           echo "=== Searching for coverage files ==="
           find . -type f -name "coverage*.xml" || echo "No coverage files found!"
-
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed for PR info
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
-            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
-            -Dsonar.cs.opencover.reportsPaths=**/coverage.opencover.xml
-            -Dsonar.coverage.ex
