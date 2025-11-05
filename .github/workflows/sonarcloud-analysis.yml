@@ -24,7 +24,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # required for SonarCloud analysis
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -34,44 +34,25 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore AssetTracker.sln /p:EnableWindowsTargeting=true
 
-      - name: Build non-WPF projects
+      - name: Build solution
         run: dotnet build AssetTracker.sln --no-restore --configuration Release /p:EnableWindowsTargeting=true
 
       - name: Run tests and collect coverage
         run: dotnet test AssetTracker.sln --no-build --configuration Release /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=TestResults/coverage.opencover.xml /p:EnableWindowsTargeting=true
 
+      - name: Verify coverage output
+        run: |
+          echo "=== Searching for coverage files ==="
+          find . -type f -name "coverage*.xml" || echo "No coverage files found!"
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v3
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed for PR info
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
-            -Dsonar.cs.opencover.reportsPaths=**/coverage.cobertura.xml
-            -Dsonar.coverage.exclusions=**/Migrations/**
-            -Dsonar.exclusions=Stage-01-poc/**
-            -Dsonar.verbose=true
-
-  # --- Optional Windows job: build WPF project ---
-  build-wpf:
-    name: Build WPF App (.NET 8)
-    runs-on: windows-latest
-    needs: build-test-sonar
-
-    defaults:
-      run:
-        working-directory: Stage-02-new-architecture/Src
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-
-      - name: Build WPF project
-        run: dotnet build AssetTracker.WpfApp/AssetTracker.WpfApp.csproj --configuration Release
+            -Dsonar.cs.opencover.reportsPaths=**/coverage.opencover.xml
+            -Dsonar.coverage.ex
