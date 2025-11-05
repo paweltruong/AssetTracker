@@ -10,7 +10,7 @@ on:
     paths-ignore:
       - 'Stage-01-poc/**'
 env:
-  SOLUTION_DIR: "Stage-02-new-architecture/Src"
+  SOLUTION_DIR: "Stage-02-new-architecture/Src/"
 
 jobs:
   # --- Linux job: build, test, coverage, SonarCloud analysis ---
@@ -54,7 +54,7 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore $SOLUTION_DIR/AssetTracker.sln /p:EnableWindowsTargeting=true
+        run: dotnet restore ${{ env.$SOLUTION_DIR }}AssetTracker.sln /p:EnableWindowsTargeting=true
 
       - name: Build and analyze
         env:
@@ -63,7 +63,7 @@ jobs:
         shell: powershell
         run: |
           .\.sonar\scanner\dotnet-sonarscanner begin /k:"${{ secrets.SONAR_PROJECT_KEY }}" /o:"${{ secrets.SONAR_ORGANIZATION }}" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:"sonar.verbose=true" /d:"sonar.dotnet.excludeTestProjects=true" /d:"sonar.cs.opencover.reportsPaths=**/coverage.opencover.xml" /d:sonar.host.url="https://sonarcloud.io"
-          dotnet restore $SOLUTION_DIR/AssetTracker.sln /p:EnableWindowsTargeting=true
-          dotnet build $SOLUTION_DIR/AssetTracker.sln --no-restore --configuration Release /p:EnableWindowsTargeting=true
-          dotnet test $SOLUTION_DIR/AssetTracker.sln --no-restore --configuration Release --collect:"XPlat Code Coverage;Format=opencover"
+          dotnet restore ${{ env.$SOLUTION_DIR }}AssetTracker.sln /p:EnableWindowsTargeting=true
+          dotnet build ${{ env.$SOLUTION_DIR }}AssetTracker.sln --no-restore --configuration Release /p:EnableWindowsTargeting=true
+          dotnet test ${{ env.$SOLUTION_DIR }}AssetTracker.sln --no-restore --configuration Release --collect:"XPlat Code Coverage;Format=opencover"
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
