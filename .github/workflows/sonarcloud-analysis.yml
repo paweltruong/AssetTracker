@@ -137,11 +137,11 @@ jobs:
         shell: pwsh
         run: |
           Write-Host "=== Checking SonarQube.xml ==="
-          Get-ChildItem -Path "${{ env.SOLUTION_DIR }}/TestResults/CoverageReport" -Recurse
-          Get-Content "${{ env.SOLUTION_DIR }}/TestResults/CoverageReport/SonarQube.xml" -Head 30
+          Get-ChildItem -Path "Stage-02-new-architecture/Src/TestResults/CoverageReport" -Recurse
+          Get-Content "Stage-02-new-architecture/Src/TestResults/CoverageReport/SonarQube.xml" -Head 30
       
-            - name: SonarCloud End (Analyze)
-              shell: powershell
-              run: |
-                .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+      - name: SonarCloud End (Analyze)
+        shell: powershell
+        run: |
+          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
