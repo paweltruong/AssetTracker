@@ -114,6 +114,29 @@ jobs:
               Write-Host "✅ Coverage generated: $($_.FullName)"
             }
           }
+
+      - name: Debug Sonar properties
+        shell: pwsh
+        run: |
+          Write-Host "=== Contents of .sonarqube/out/sonar-project.properties ==="
+          Get-Content ".sonarqube/out/sonar-project.properties" | Out-String
+
+      - name: List generated OpenCover reports
+        shell: pwsh
+        run: |
+          Write-Host "=== Listing all coverage.opencover.xml files ==="
+          Get-ChildItem -Path "${{ env.SOLUTION_DIR }}" -Recurse -Filter "coverage.opencover.xml" | ForEach-Object {
+            Write-Host "Found: $($_.FullName)"
+          }
+
+      - name: Inspect OpenCover XML contents
+        shell: pwsh
+        run: |
+          $coverageFiles = Get-ChildItem -Path "${{ env.SOLUTION_DIR }}" -Recurse -Filter "coverage.opencover.xml"
+          foreach ($file in $coverageFiles) {
+              Write-Host "`n=== Showing first lines of: $($file.FullName) ==="
+              Get-Content $file -Head 100 | Out-String
+          }
       
       - name: SonarCloud End (Analyze)
         shell: powershell
