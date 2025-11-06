@@ -129,6 +129,9 @@ jobs:
           targetdir: '${{ env.SOLUTION_DIR }}/TestResults/CoverageReport'
           reporttypes: 'SonarQube'
           sourcedirs: '${{ github.workspace }}/Stage-02-new-architecture/Src'
+          filefilters: '+*'
+          assemblyfilters: '+*'
+          verbosity: 'Verbose'
 
       - name: SonarCloud End (Analyze)
         shell: powershell
