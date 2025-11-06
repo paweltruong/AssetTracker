@@ -128,6 +128,7 @@ jobs:
           reports: '${{ env.SOLUTION_DIR }}/TestResults/*.coverage.cobertura.xml'
           targetdir: '${{ env.SOLUTION_DIR }}/TestResults/CoverageReport'
           reporttypes: 'SonarQube'
+          sourcedirs: '${{ github.workspace }}/Stage-02-new-architecture/Src'
 
       - name: SonarCloud End (Analyze)
         shell: powershell
