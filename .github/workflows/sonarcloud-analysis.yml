@@ -22,20 +22,50 @@ jobs:
         with:
           fetch-depth: 0  # required for SonarCloud analysis
           
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'zulu' # Alternative distribution options are available.
+          
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~\.sonar\cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+          
+      - name: Cache SonarQube scanner
+        id: cache-sonar-scanner
+        uses: actions/cache@v4
+        with:
+          path: .\.sonar\scanner
+          key: ${{ runner.os }}-sonar-scanner
+          restore-keys: ${{ runner.os }}-sonar-scanner
+          
       - name: Install SonarQube scanner
-        run: dotnet tool install --global dotnet-sonarscanner
-
-        
-
-      - name: Build and analyze
+        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+        shell: powershell
         run: |
-          cd ${{ env.SOLUTION_DIR }}
-          dotnet sonarscanner begin /k:"${{ secrets.SONAR_PROJECT_KEY }}" /o:"${{ secrets.SONAR_ORGANIZATION }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:"sonar.verbose=true" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" /d:sonar.coverage.exclusions="**Test*.cs,Program.cs"
+          New-Item -Path .\.sonar\scanner -ItemType Directory
+          dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanne
+          r
+      - name: Build and test
+        shell: powershell
+        run: |
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"${{ secrets.SONAR_PROJECT_KEY }}" /o:"${{ secrets.SONAR_ORGANIZATION }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:"sonar.verbose=true" /d:"sonar.coverageReportPaths=SonarQube.xml"
           dotnet build
-          dotnet test --configuration Release /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
-          dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
-
-      - name: Check coverage files
+          dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
+          
+      - name: Convert coverage report using ReportGenerator
+        uses: danielpalme/ReportGenerator-GitHub-Action@v5.3.11
+        with:
+          reports: '*/coverage.cobertura.xml'
+          targetdir: '.'
+          reporttypes: 'SonarQube'
+          
+      - name: Analyze
+        shell: powershell
         run: |
-          find . -name "coverage.*.xml" -type f
-          ls -la ./ # or whatever directory you're using
+          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+
