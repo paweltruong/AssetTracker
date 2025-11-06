@@ -56,7 +56,7 @@ jobs:
           .\.sonar\scanner\dotnet-sonarscanner begin /k:"${{ secrets.SONAR_PROJECT_KEY }}" /o:"${{ secrets.SONAR_ORGANIZATION }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:"sonar.verbose=true" /d:"sonar.coverageReportPaths=SonarQube.xml"
           dotnet build ${{ env.SOLUTION_DIR }}/AssetTracker.sln
           dotnet test ${{ env.SOLUTION_DIR }}/AssetTracker.sln `
-            --no-build --configuration Release `
+            --configuration Release `
             /p:CollectCoverage=true `
             /p:CoverletOutputFormat=cobertura `
             '/p:CoverletOutput=../../TestResults/$(MSBuildProjectName).coverage.cobertura.xml' `
