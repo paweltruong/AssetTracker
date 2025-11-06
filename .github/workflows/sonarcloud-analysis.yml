@@ -122,7 +122,7 @@ jobs:
             Write-Host "Found: $($_.FullName)"
           }
 
-      - name: Convert coverage reports to SonarQube format
+      - name: Convert coverage report using ReportGenerator
         uses: danielpalme/ReportGenerator-GitHub-Action@v5.3.11
         with:
           reports: '${{ env.SOLUTION_DIR }}/TestResults/*.coverage.cobertura.xml'
@@ -132,6 +132,7 @@ jobs:
           filefilters: '+*'
           assemblyfilters: '+*'
           verbosity: 'Verbose'
+          param: '-reporttypes:SonarQube;HtmlInline_AzurePipelines -relativizePaths true -targetdir:${{ env.SOLUTION_DIR }}/TestResults/CoverageReport'
 
       - name: Debug generated coverage report
         shell: pwsh
