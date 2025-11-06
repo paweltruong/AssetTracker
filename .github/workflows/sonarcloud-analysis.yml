@@ -61,6 +61,8 @@ jobs:
             /d:sonar.verbose=true `
             /d:"sonar.projectBaseDir=${{ github.workspace }}/Stage-02-new-architecture" `
             /d:"sonar.cs.opencover.reportsPaths=${{ env.SOLUTION_DIR }}/**/TestResults/*.opencover.xml" `
+            /d:"sonar.sources=${{ env.SOLUTION_DIR }}" `
+            /d:"sonar.tests=${{ env.SOLUTION_DIR }}/**/*.Tests.csproj" `
             /d:"sonar.coverage.exclusions=**/Migrations/**" `
             /d:"sonar.exclusions=Stage-01-poc/**"
 
