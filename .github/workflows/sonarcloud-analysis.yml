@@ -55,12 +55,17 @@ jobs:
         run: |
           .\.sonar\scanner\dotnet-sonarscanner begin /k:"${{ secrets.SONAR_PROJECT_KEY }}" /o:"${{ secrets.SONAR_ORGANIZATION }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:"sonar.verbose=true" /d:"sonar.coverageReportPaths=SonarQube.xml"
           dotnet build ${{ env.SOLUTION_DIR }}/AssetTracker.sln
-          dotnet test ${{ env.SOLUTION_DIR }}/AssetTracker.sln /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=${{ env.SOLUTION_DIR }}/TestResults/coverage.cobertura.xml
+          dotnet test ${{ env.SOLUTION_DIR }}/AssetTracker.sln `
+            --no-build --configuration Release `
+            /p:CollectCoverage=true `
+            /p:CoverletOutputFormat=cobertura `
+            '/p:CoverletOutput=../../TestResults/$(MSBuildProjectName).coverage.cobertura.xml' `
+            /p:EnableWindowsTargeting=true
           
       - name: Convert coverage report using ReportGenerator
         uses: danielpalme/ReportGenerator-GitHub-Action@v5.3.11
         with:
-          reports: '${{ env.SOLUTION_DIR }}/TestResults/coverage.cobertura.xml'
+          reports: '${{ env.SOLUTION_DIR }}/TestResults/*.coverage.cobertura.xml'
           targetdir: '${{ env.SOLUTION_DIR }}/TestResults/CoverageReport'
           reporttypes: 'SonarQube'
           
@@ -71,4 +76,9 @@ jobs:
         env:
           SONAR_SCANNER_OPTS: >
             -Dsonar.coverageReportPaths=${{ env.SOLUTION_DIR }}/TestResults/CoverageReport/SonarQube.xml
+
+      - name: Verify coverage outputs
+        run: |
+          echo "=== Listing generated coverage reports ==="
+          dir Stage-02-new-architecture\Src\TestResults /s
 
