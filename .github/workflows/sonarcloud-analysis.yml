@@ -134,6 +134,17 @@ jobs:
           verbosity: 'Verbose'
           param: '-reporttypes:SonarQube;HtmlInline_AzurePipelines -relativizePaths true -targetdir:${{ env.SOLUTION_DIR }}/TestResults/CoverageReport'
 
+      - name: Normalize paths in coverage report
+        shell: pwsh
+        run: |
+          $report = "Stage-02-new-architecture/Src/TestResults/CoverageReport/SonarQube.xml"
+          Write-Host "Normalizing file paths inside $report"
+          $content = Get-Content $report -Raw
+          # Remove the absolute workspace prefix and switch backslashes to slashes
+          $normalized = $content -replace [regex]::Escape("${{ github.workspace }}\"), "" -replace '\\', '/'
+          Set-Content -Path $report -Value $normalized -Encoding UTF8
+          Write-Host "Rewrote absolute paths to relative paths in SonarQube.xml"
+
       - name: Debug generated coverage report
         shell: pwsh
         run: |
