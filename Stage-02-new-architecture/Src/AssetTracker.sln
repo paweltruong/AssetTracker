@@ -33,6 +33,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssetTracker.AssetsResolver
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssetTracker.AssetsImporter.Steam.Tests", "AssetTracker.AssetsImporter.Steam.Tests\AssetTracker.AssetsImporter.Steam.Tests.csproj", "{E454CE6C-E4D2-4B3A-9938-6836D1D0CD19}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssetTracker.Application.Tests", "AssetTracker.Application.Tests\AssetTracker.Application.Tests.csproj", "{DBCAF65D-57BC-43C2-8D1D-E17D9085839F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,6 +77,10 @@ Global
 		{E454CE6C-E4D2-4B3A-9938-6836D1D0CD19}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E454CE6C-E4D2-4B3A-9938-6836D1D0CD19}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E454CE6C-E4D2-4B3A-9938-6836D1D0CD19}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBCAF65D-57BC-43C2-8D1D-E17D9085839F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBCAF65D-57BC-43C2-8D1D-E17D9085839F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBCAF65D-57BC-43C2-8D1D-E17D9085839F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBCAF65D-57BC-43C2-8D1D-E17D9085839F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -92,6 +98,7 @@ Global
 		{351A2765-23A0-4A2D-BB64-52EB449F6D38} = {06E3D993-BD28-4D6F-AA1C-2BFD87E74E3D}
 		{0E860E24-DC78-43EA-862E-B40F5B51DC71} = {351A2765-23A0-4A2D-BB64-52EB449F6D38}
 		{E454CE6C-E4D2-4B3A-9938-6836D1D0CD19} = {14D5BFD1-A8D0-4523-9C77-4E0C550B3210}
+		{DBCAF65D-57BC-43C2-8D1D-E17D9085839F} = {16EB2C3B-9C4E-4686-8EE8-BCE72068B2E0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {080F2C35-83C8-43AD-95D2-42EC3AC62627}
