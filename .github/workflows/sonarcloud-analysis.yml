@@ -60,14 +60,14 @@ jobs:
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
             /d:sonar.verbose=true `
             /d:"sonar.projectBaseDir=${{ github.workspace }}/Stage-02-new-architecture" `
-            /d:"sonar.cs.cobertura.reportsPaths=${{ env.SOLUTION_DIR }}/**/TestResults/*/coverage.cobertura.xml" `
+            /d:"sonar.cs.opencover.reportsPaths=${{ env.SOLUTION_DIR }}/**/TestResults/*.opencover.xml" `
             /d:"sonar.coverage.exclusions=**/Migrations/**" `
             /d:"sonar.exclusions=Stage-01-poc/**"
 
       - name: Build solution
         run: dotnet build ${{ env.SOLUTION_DIR }}/AssetTracker.sln --configuration Release /p:EnableWindowsTargeting=true
 
-      - name: Run tests per test-project (generate per-project cobertura files)
+      - name: Run tests per test-project (generate per-project OpenCover files)
         shell: powershell
         run: |
           $solutionDir = (Resolve-Path "${{ env.SOLUTION_DIR }}").Path
@@ -86,12 +86,30 @@ jobs:
             $projName = [System.IO.Path]::GetFileNameWithoutExtension($proj)
             Write-Host "=== Running tests for: $projName ==="
       
-            # Run tests for this project
-            dotnet test $proj --configuration Release --collect:"XPlat Code Coverage" /p:EnableWindowsTargeting=true
+            # Determine per-project output directory
+            $projDir = Split-Path $proj
+            $projResults = Join-Path $projDir "TestResults"
+            if (-Not (Test-Path $projResults)) {
+              New-Item -ItemType Directory -Path $projResults | Out-Null
+            }
+      
+            # Run tests for this project with OpenCover format (for SonarCloud)
+            dotnet test $proj `
+              --configuration Release `
+              /p:CollectCoverage=true `
+              /p:CoverletOutput="$projResults/" `
+              /p:CoverletOutputFormat=opencover `
+              /p:Exclude="[xunit.*]*" `
+              /p:ExcludeByFile="**/Migrations/*.cs"
       
             if ($LASTEXITCODE -ne 0) {
               Write-Error "dotnet test failed for $projName"
               exit $LASTEXITCODE
+            }
+      
+            # Show generated file
+            Get-ChildItem -Path $projResults -Recurse -Filter "*.opencover.xml" | ForEach-Object {
+              Write-Host "✅ Coverage generated: $($_.FullName)"
             }
           }
       
