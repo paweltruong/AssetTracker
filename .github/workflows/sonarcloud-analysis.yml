@@ -69,9 +69,11 @@ jobs:
       - name: Run tests per test-project (generate per-project cobertura files)
         shell: powershell
         run: |
-          $solutionDir = "${{ env.SOLUTION_DIR }}"
+          $solutionDir = (Resolve-Path "${{ env.SOLUTION_DIR }}").Path
           $testResultsDir = Join-Path $solutionDir "TestResults"
-          if (-Not (Test-Path $testResultsDir)) { New-Item -ItemType Directory -Path $testResultsDir | Out-Null }
+          if (-Not (Test-Path $testResultsDir)) {
+            New-Item -ItemType Directory -Path $testResultsDir | Out-Null
+          }
       
           $testProjects = Get-ChildItem -Path $solutionDir -Recurse -Filter "*.Tests.csproj" | Select-Object -ExpandProperty FullName
           if (-Not $testProjects) {
@@ -83,8 +85,11 @@ jobs:
             $projName = [System.IO.Path]::GetFileNameWithoutExtension($proj)
             Write-Host "=== Running tests for: $projName ==="
       
+            # ✅ Build an absolute output path
             $outFile = Join-Path $testResultsDir "$projName.coverage.cobertura.xml"
+            Write-Host "Coverage output: $outFile"
       
+            # Run tests for this project
             dotnet test $proj `
               --configuration Release `
               /p:CollectCoverage=true `
