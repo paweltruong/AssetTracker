@@ -59,7 +59,7 @@ jobs:
             /d:sonar.host.url="https://sonarcloud.io" `
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
             /d:sonar.verbose=true `
-            /d:"sonar.cs.cobertura.reportsPaths=${{ env.SOLUTION_DIR }}/TestResults/*.coverage.cobertura.xml" `
+            /d:"sonar.cs.cobertura.reportsPaths=${{ env.SOLUTION_DIR }}/**/TestResults/**/*.cobertura.xml" `
             /d:"sonar.coverage.exclusions=**/Migrations/**" `
             /d:"sonar.exclusions=Stage-01-poc/**"
 
@@ -85,23 +85,18 @@ jobs:
             $projName = [System.IO.Path]::GetFileNameWithoutExtension($proj)
             Write-Host "=== Running tests for: $projName ==="
       
-            # ✅ Build an absolute output path
-            $outFile = Join-Path $testResultsDir "$projName.coverage.cobertura.xml"
-            Write-Host "Coverage output: $outFile"
-      
             # Run tests for this project
-            dotnet test $proj `
-              --configuration Release `
-              /p:CollectCoverage=true `
-              /p:CoverletOutputFormat=cobertura `
-              "/p:CoverletOutput=$outFile" `
-              /p:EnableWindowsTargeting=true
+            dotnet test $proj --configuration Release --collect:"XPlat Code Coverage" /p:EnableWindowsTargeting=true
       
             if ($LASTEXITCODE -ne 0) {
               Write-Error "dotnet test failed for $projName"
               exit $LASTEXITCODE
             }
           }
+
+          # after running tests for all projects
+          Get-ChildItem -Path $solutionDir -Filter "coverage.cobertura.xml" -Recurse |
+            Copy-Item -Destination $testResultsDir
 
       - name: Verify coverage files
         shell: powershell
@@ -123,16 +118,4 @@ jobs:
         shell: powershell
         run: |
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
-            
-            - name: Build and test
-              shell: powershell
-              run: |
-                .\.sonar\scanner\dotnet-sonarscanner begin /k:"${{ secrets.SONAR_PROJECT_KEY }}" /o:"${{ secrets.SONAR_ORGANIZATION }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:"sonar.verbose=true" /d:"sonar.coverageReportPaths=SonarQube.xml"
-                dotnet build ${{ env.SOLUTION_DIR }}/AssetTracker.sln
-                dotnet test ${{ env.SOLUTION_DIR }}/AssetTracker.sln `
-                  --configuration Release `
-                  /p:CollectCoverage=true `
-                  /p:CoverletOutputFormat=cobertura `
-                  '/p:CoverletOutput=../../TestResults/$(MSBuildProjectName).coverage.cobertura.xml' `
-                  /p:EnableWindowsTargeting=true
 
