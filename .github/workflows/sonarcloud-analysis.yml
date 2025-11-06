@@ -133,8 +133,15 @@ jobs:
           assemblyfilters: '+*'
           verbosity: 'Verbose'
 
-      - name: SonarCloud End (Analyze)
-        shell: powershell
+      - name: Debug generated coverage report
+        shell: pwsh
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+          Write-Host "=== Checking SonarQube.xml ==="
+          Get-ChildItem -Path "${{ env.SOLUTION_DIR }}/TestResults/CoverageReport" -Recurse
+          Get-Content "${{ env.SOLUTION_DIR }}/TestResults/CoverageReport/SonarQube.xml" -Head 30
+      
+            - name: SonarCloud End (Analyze)
+              shell: powershell
+              run: |
+                .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
