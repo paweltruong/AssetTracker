@@ -59,7 +59,8 @@ jobs:
             /d:sonar.host.url="https://sonarcloud.io" `
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
             /d:sonar.verbose=true `
-            /d:sonar.coverageReportPaths=${{ env.SOLUTION_DIR }}/TestResults/CoverageReport/SonarQube.xml `
+            /d:"sonar.projectBaseDir=${{ github.workspace }}/Stage-02-new-architecture" `
+            /d:"sonar.cs.cobertura.reportsPaths=${{ env.SOLUTION_DIR }}/**/TestResults/*/coverage.cobertura.xml" `
             /d:"sonar.coverage.exclusions=**/Migrations/**" `
             /d:"sonar.exclusions=Stage-01-poc/**"
 
@@ -93,64 +94,6 @@ jobs:
               exit $LASTEXITCODE
             }
           }
-
-      - name: Collect coverage reports
-        shell: pwsh
-        run: |
-          $testResultsDir = "${{ env.SOLUTION_DIR }}/TestResults"
-          New-Item -ItemType Directory -Force -Path $testResultsDir | Out-Null
-          
-          # Find all coverage.cobertura.xml files recursively
-          $coverageFiles = Get-ChildItem -Path ${{ env.SOLUTION_DIR }} -Recurse -Filter "coverage.cobertura.xml"
-      
-          foreach ($file in $coverageFiles) {
-              $destFile = Join-Path $testResultsDir "$($file.Directory.Name).coverage.cobertura.xml"
-              if ($file.FullName -ne $destFile) {
-                  Copy-Item -Path $file.FullName -Destination $destFile -Force
-                  Write-Host "Copied coverage from $($file.FullName) to $destFile"
-              } else {
-                  Write-Host "Skipping copy for $($file.FullName) (already at destination)"
-              }
-          }
-
-      - name: Verify coverage files
-        shell: powershell
-        run: |
-          $pattern = "${{ env.SOLUTION_DIR }}\TestResults\*.coverage.cobertura.xml"
-          Write-Host "Looking for coverage files..."
-          Get-ChildItem -Path "${{ env.SOLUTION_DIR }}\TestResults" -Filter "*.coverage.cobertura.xml" -Recurse | ForEach-Object {
-            Write-Host "Found: $($_.FullName)"
-          }
-
-      - name: Convert coverage report using ReportGenerator
-        uses: danielpalme/ReportGenerator-GitHub-Action@v5.3.11
-        with:
-          reports: '${{ env.SOLUTION_DIR }}/TestResults/*.coverage.cobertura.xml'
-          targetdir: '${{ env.SOLUTION_DIR }}/TestResults/CoverageReport'
-          reporttypes: 'SonarQube'
-          sourcedirs: '${{ github.workspace }}/Stage-02-new-architecture/Src'
-          filefilters: '+*'
-          assemblyfilters: '+*'
-          verbosity: 'Verbose'
-          param: '-reporttypes:SonarQube;HtmlInline_AzurePipelines -relativizePaths true -targetdir:${{ env.SOLUTION_DIR }}/TestResults/CoverageReport'
-
-      - name: Normalize paths in coverage report
-        shell: pwsh
-        run: |
-          $report = "Stage-02-new-architecture/Src/TestResults/CoverageReport/SonarQube.xml"
-          Write-Host "Normalizing file paths inside $report"
-          $content = Get-Content $report -Raw
-          # Remove the absolute workspace prefix and switch backslashes to slashes
-          $normalized = $content -replace [regex]::Escape("${{ github.workspace }}\"), "" -replace '\\', '/'
-          Set-Content -Path $report -Value $normalized -Encoding UTF8
-          Write-Host "Rewrote absolute paths to relative paths in SonarQube.xml"
-
-      - name: Debug generated coverage report
-        shell: pwsh
-        run: |
-          Write-Host "=== Checking SonarQube.xml ==="
-          Get-ChildItem -Path "Stage-02-new-architecture/Src/TestResults/CoverageReport" -Recurse
-          Get-Content "Stage-02-new-architecture/Src/TestResults/CoverageReport/SonarQube.xml" -Head 30
       
       - name: SonarCloud End (Analyze)
         shell: powershell
