@@ -1,11 +1,10 @@
 ﻿using AssetTracker.Core.Models;
-using AssetTracker.Core.Models.Enums;
 using AssetTracker.Core.Services;
 using AssetTracker.Core.Services.AssetsComparer;
 using AssetTracker.Core.Services.AssetsComparer.Definitions;
 using Microsoft.Extensions.Logging;
 
-namespace AssetTracker.WpfApp.Common.Services
+namespace AssetTracker.Application.Services
 {
     public class DefaultAssetsComparer : IAssetsComparer
     {
