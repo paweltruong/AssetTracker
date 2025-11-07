@@ -121,12 +121,6 @@ jobs:
           Write-Host "=== Current Directory: $(Get-Location) ==="
           tree "$(Get-Location)" /F /A
 
-      - name: Debug Sonar properties
-        shell: pwsh
-        run: |
-          Write-Host "=== Contents of .sonarqube/out/sonar-project.properties ==="
-          Get-Content ".sonarqube/out/sonar-project.properties" | Out-String
-
       - name: List generated OpenCover reports
         shell: pwsh
         run: |
@@ -148,4 +142,10 @@ jobs:
         shell: powershell
         run: |
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+      
+      - name: Debug Sonar properties
+        shell: pwsh
+        run: |
+          Write-Host "=== Contents of .sonarqube/out/sonar-project.properties ==="
+          Get-Content ".sonarqube/out/sonar-project.properties" | Out-String
 
