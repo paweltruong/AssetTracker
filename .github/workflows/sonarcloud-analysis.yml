@@ -48,37 +48,104 @@ jobs:
         shell: powershell
         run: |
           New-Item -Path .\.sonar\scanner -ItemType Directory
-          dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanne
-          r
-      - name: Build and test
+          dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
+
+      - name: SonarCloud Begin
         shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"${{ secrets.SONAR_PROJECT_KEY }}" /o:"${{ secrets.SONAR_ORGANIZATION }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:"sonar.verbose=true" /d:"sonar.coverageReportPaths=SonarQube.xml"
-          dotnet build ${{ env.SOLUTION_DIR }}/AssetTracker.sln
-          dotnet test ${{ env.SOLUTION_DIR }}/AssetTracker.sln `
-            --no-build --configuration Release `
-            /p:CollectCoverage=true `
-            /p:CoverletOutputFormat=cobertura `
-            '/p:CoverletOutput=../../TestResults/$(MSBuildProjectName).coverage.cobertura.xml' `
-            /p:EnableWindowsTargeting=true
-          
-      - name: Convert coverage report using ReportGenerator
-        uses: danielpalme/ReportGenerator-GitHub-Action@v5.3.11
-        with:
-          reports: '${{ env.SOLUTION_DIR }}/TestResults/*.coverage.cobertura.xml'
-          targetdir: '${{ env.SOLUTION_DIR }}/TestResults/CoverageReport'
-          reporttypes: 'SonarQube'
-          
-      - name: Analyze
+          .\.sonar\scanner\dotnet-sonarscanner begin `
+            /k:"${{ secrets.SONAR_PROJECT_KEY }}" `
+            /o:"${{ secrets.SONAR_ORGANIZATION }}" `
+            /d:sonar.host.url="https://sonarcloud.io" `
+            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
+            /d:sonar.verbose=true `
+            /d:"sonar.projectBaseDir=${{ github.workspace }}/Stage-02-new-architecture" `
+            /d:"sonar.cs.opencover.reportsPaths=${{ env.SOLUTION_DIR }}/**/TestResults/**/*.opencover.xml" `
+            /d:"sonar.sources=${{ env.SOLUTION_DIR }}" `
+            /d:"sonar.tests=${{ env.SOLUTION_DIR }}/**/*.Tests.csproj" `
+            /d:"sonar.coverage.exclusions=**/Migrations/**" `
+            /d:"sonar.exclusions=Stage-01-poc/**"
+
+      - name: Build solution
+        run: dotnet build ${{ env.SOLUTION_DIR }}/AssetTracker.sln --configuration Release /p:EnableWindowsTargeting=true
+
+      - name: Run tests per test-project (generate per-project OpenCover files)
+        shell: powershell
+        run: |
+            $solutionDir = (Resolve-Path "${{ env.SOLUTION_DIR }}").Path
+            $testResultsDir = Join-Path $solutionDir "TestResults"
+            if (-Not (Test-Path $testResultsDir)) {
+              New-Item -ItemType Directory -Path $testResultsDir | Out-Null
+            }
+        
+            $testProjects = Get-ChildItem -Path $solutionDir -Recurse -Filter "*.Tests.csproj" | Select-Object -ExpandProperty FullName
+            if (-Not $testProjects) {
+              Write-Error "No test projects found under $solutionDir"
+              exit 1
+            }
+  
+            foreach ($proj in $testProjects) {
+              $projName = [System.IO.Path]::GetFileNameWithoutExtension($proj)
+              Write-Host "=== Running tests for: $projName ==="
+  
+              # Determine per-project output directory
+              $projDir = Split-Path $proj
+              $projResults = Join-Path $projDir "TestResults"
+              if (-Not (Test-Path $projResults)) {
+                New-Item -ItemType Directory -Path $projResults | Out-Null
+              }
+  
+              # Run tests for this project with OpenCover format (for SonarCloud)
+              dotnet test $proj `
+                --configuration Release `
+                /p:CollectCoverage=true `
+                /p:CoverletOutput="$projResults/" `
+                /p:CoverletOutputFormat=opencover `
+                /p:Exclude="[xunit.*]*" `
+                /p:ExcludeByFile="**/Migrations/*.cs"
+  
+              if ($LASTEXITCODE -ne 0) {
+                Write-Error "dotnet test failed for $projName"
+                exit $LASTEXITCODE
+              }
+  
+              # Show generated file
+              Get-ChildItem -Path $projResults -Recurse -Filter "*.opencover.xml" | ForEach-Object {
+                Write-Host "✅ Coverage generated: $($_.FullName)"
+              }
+            }
+
+      - name: Print directory tree
+        shell: pwsh
+        run: |
+          Write-Host "=== Current Directory: $(Get-Location) ==="
+          tree "$(Get-Location)" /F /A
+
+      - name: List generated OpenCover reports
+        shell: pwsh
+        run: |
+          Write-Host "=== Listing all coverage.opencover.xml files ==="
+          Get-ChildItem -Path "${{ env.SOLUTION_DIR }}" -Recurse -Filter "coverage.opencover.xml" | ForEach-Object {
+            Write-Host "Found: $($_.FullName)"
+          }
+
+      - name: Inspect OpenCover XML contents
+        shell: pwsh
+        run: |
+          $coverageFiles = Get-ChildItem -Path "${{ env.SOLUTION_DIR }}" -Recurse -Filter "coverage.opencover.xml"
+          foreach ($file in $coverageFiles) {
+              Write-Host "`n=== Showing first lines of: $($file.FullName) ==="
+              Get-Content $file -Head 100 | Out-String
+          }
+      
+      - name: SonarCloud End (Analyze)
         shell: powershell
         run: |
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
-        env:
-          SONAR_SCANNER_OPTS: >
-            -Dsonar.coverageReportPaths=${{ env.SOLUTION_DIR }}/TestResults/CoverageReport/SonarQube.xml
-
-      - name: Verify coverage outputs
+      
+      - name: Debug Sonar properties
+        shell: pwsh
         run: |
-          echo "=== Listing generated coverage reports ==="
-          dir Stage-02-new-architecture\Src\TestResults /s
+          Write-Host "=== Contents of .sonarqube/out/sonar-project.properties ==="
+          Get-Content ".sonarqube/out/sonar-project.properties" | Out-String
 
