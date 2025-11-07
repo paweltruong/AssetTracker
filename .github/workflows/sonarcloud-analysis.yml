@@ -101,6 +101,7 @@ jobs:
               /p:CollectCoverage=true `
               /p:CoverletOutput="$projResults/" `
               /p:CoverletOutputFormat=opencover `
+              /p:UseSourceLink=true `
               /p:Exclude="[xunit.*]*" `
               /p:ExcludeByFile="**/Migrations/*.cs"
       
