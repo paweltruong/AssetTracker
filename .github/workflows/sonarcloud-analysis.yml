@@ -60,7 +60,7 @@ jobs:
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
             /d:sonar.verbose=true `
             /d:"sonar.projectBaseDir=${{ github.workspace }}/Stage-02-new-architecture" `
-            /d:"sonar.cs.opencover.reportsPaths=${{ env.SOLUTION_DIR }}/**/TestResults/*.opencover.xml" `
+            /d:"sonar.cs.opencover.reportsPaths=${{ env.SOLUTION_DIR }}/**/TestResults/**/*.opencover.xml" `
             /d:"sonar.sources=${{ env.SOLUTION_DIR }}" `
             /d:"sonar.tests=${{ env.SOLUTION_DIR }}/**/*.Tests.csproj" `
             /d:"sonar.coverage.exclusions=**/Migrations/**" `
@@ -73,46 +73,14 @@ jobs:
         shell: powershell
         run: |
           $solutionDir = (Resolve-Path "${{ env.SOLUTION_DIR }}").Path
-          $testResultsDir = Join-Path $solutionDir "TestResults"
-          if (-Not (Test-Path $testResultsDir)) {
-            New-Item -ItemType Directory -Path $testResultsDir | Out-Null
-          }
-      
           $testProjects = Get-ChildItem -Path $solutionDir -Recurse -Filter "*.Tests.csproj" | Select-Object -ExpandProperty FullName
-          if (-Not $testProjects) {
-            Write-Error "No test projects found under $solutionDir"
-            exit 1
-          }
-      
           foreach ($proj in $testProjects) {
             $projName = [System.IO.Path]::GetFileNameWithoutExtension($proj)
             Write-Host "=== Running tests for: $projName ==="
-      
-            # Determine per-project output directory
-            $projDir = Split-Path $proj
-            $projResults = Join-Path $projDir "TestResults"
-            if (-Not (Test-Path $projResults)) {
-              New-Item -ItemType Directory -Path $projResults | Out-Null
-            }
-      
-            # Run tests for this project with OpenCover format (for SonarCloud)
-            dotnet test $proj `
-              --configuration Release `
-              /p:CollectCoverage=true `
-              /p:CoverletOutput="$projResults/" `
-              /p:CoverletOutputFormat=opencover `
-              /p:UseSourceLink=false `
-              /p:Exclude="[xunit.*]*" `
-              /p:ExcludeByFile="**/Migrations/*.cs"
-      
+            dotnet test $proj --no-build --configuration Release --collect:"XPlat Code Coverage"
             if ($LASTEXITCODE -ne 0) {
               Write-Error "dotnet test failed for $projName"
               exit $LASTEXITCODE
-            }
-      
-            # Show generated file
-            Get-ChildItem -Path $projResults -Recurse -Filter "*.opencover.xml" | ForEach-Object {
-              Write-Host "✅ Coverage generated: $($_.FullName)"
             }
           }
 
@@ -128,17 +96,6 @@ jobs:
           Write-Host "=== Listing all coverage.opencover.xml files ==="
           Get-ChildItem -Path "${{ env.SOLUTION_DIR }}" -Recurse -Filter "coverage.opencover.xml" | ForEach-Object {
             Write-Host "Found: $($_.FullName)"
-          }
-
-      - name: Normalize coverage paths
-        shell: pwsh
-        run: |
-          $workspace = (Resolve-Path "${{ github.workspace }}").Path
-          $pattern = [regex]::Escape($workspace) + "[\\/]"
-          Get-ChildItem -Path "$workspace/Stage-02-new-architecture/Src" -Recurse -Filter "coverage.opencover.xml" | ForEach-Object {
-            $file = $_.FullName
-            Write-Host "Normalizing paths in $file"
-            (Get-Content $file) -replace $pattern, "Stage-02-new-architecture/Src/" | Set-Content $file
           }
 
       - name: Inspect OpenCover XML contents
