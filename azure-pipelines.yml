@@ -13,7 +13,6 @@ pool:
   demands:
     - Agent.Version -gtVersion 4.260.0
     - java
-    - Agent.Name -equals 'PAWCIU-NZXT'
 
 variables:
   solution: 'Stage-02-new-architecture/Src/AssetTracker.sln'
