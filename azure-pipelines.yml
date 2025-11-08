@@ -27,7 +27,7 @@ steps:
   inputs:
     SonarQube: 'SonarQubeCloud'
     organization: 'paweltruong'
-    scannerMode: 'dotnet'
+    scannerMode: 'MSBuild'
     projectKey: 'paweltruong_AssetTracker'
     extraProperties: |
       # Additional properties that will be passed to the scanner, 
