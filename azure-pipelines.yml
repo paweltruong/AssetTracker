@@ -38,12 +38,18 @@ steps:
 
 - task: VSBuild@1
   inputs:
-    solution: '$(solution)'
+    solution: 'Stage-02-new-architecture\**\*.sln'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
 
 - task: VSTest@2
   inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: |
+      **\bin\**\*test.dll
+      **\bin\**\*tests.dll
+    searchFolder: '$(System.DefaultWorkingDirectory)\Stage-02-new-architecture\Src'
+    codeCoverageEnabled: true
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
 
