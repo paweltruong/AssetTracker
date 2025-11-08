@@ -19,7 +19,9 @@ steps:
 
 - task: NuGetCommand@2
   inputs:
-    restoreSolution: '$(solution)'
+    command: 'restore'
+    restoreSolution: 'Stage-02-new-architecture\Src'
+    feedsToUse: 'select'
 
 - task: SonarCloudPrepare@3
   inputs:
@@ -33,6 +35,8 @@ steps:
       # sonar.exclusions=**/*.bin
       sonar.coverage.exclusions=**/Migrations/**
       sonar.exclusions=Stage-01-poc/**
+      sonar.cs.vstest.reportsPaths=$(Agent.TempDirectory)/**/*.trx
+      sonar.cs.opencover.reportsPaths=$(Agent.TempDirectory)/**/coverage.opencover.xml
 
 
 
@@ -50,6 +54,8 @@ steps:
       **\bin\**\*tests.dll
     searchFolder: '$(System.DefaultWorkingDirectory)\Stage-02-new-architecture\Src'
     codeCoverageEnabled: true
+    resultsFolder: '$(Agent.TempDirectory)/TestResults'
+    otherConsoleOptions: '--logger:trx;LogFileName=testresults.trx --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
 
