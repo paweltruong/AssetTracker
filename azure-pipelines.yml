@@ -6,8 +6,12 @@
 trigger:
 - main
 
+# pool:
+#  vmImage: 'windows-latest'
 pool:
-  vmImage: 'windows-latest'
+  name: 'Default'  # Your self-hosted agent pool
+  demands:
+    - agent.name -equals 'PAWCIU-NZXT'
 
 variables:
   solution: 'Stage-02-new-architecture/Src/AssetTracker.sln'
