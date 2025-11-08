@@ -5,6 +5,9 @@ on:
       - main
   pull_request:
     types: [opened, synchronize, reopened]
+
+env:
+  SOLUTION_DIR: Stage-02-new-architecture/Src
 jobs:
   build:
     name: Build and analyze
@@ -43,5 +46,5 @@ jobs:
         shell: powershell
         run: |
           ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"paweltruong_AssetTracker" /o:"paweltruong" /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
-          dotnet build
+          dotnet build ${{ env.SOLUTION_DIR }}/AssetTracker.sln --configuration Release /p:EnableWindowsTargeting=true
           ${{ runner.temp }}\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
