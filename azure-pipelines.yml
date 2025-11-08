@@ -9,9 +9,10 @@ trigger:
 # pool:
 #  vmImage: 'windows-latest'
 pool:
-  name: 'Default'  # Your self-hosted agent pool
+  name: 'Default'
   demands:
-    - Agent.Name -equals 'PAWCIU-NZXT'
+    - Agent.Version -gtVersion 4.260.0
+    - java
 
 variables:
   solution: 'Stage-02-new-architecture/Src/AssetTracker.sln'
