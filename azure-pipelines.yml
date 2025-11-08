@@ -1,0 +1,64 @@
+# .NET Desktop
+# Build and run tests for .NET Desktop or Windows classic desktop solutions.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/windows/dot-net
+
+trigger:
+- main
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+steps:
+- task: NuGetToolInstaller@1
+
+- task: NuGetCommand@2
+  inputs:
+    command: 'restore'
+    restoreSolution: 'Stage-02-new-architecture\Src\AssetTracker.sln'
+    feedsToUse: 'select'
+
+- task: SonarCloudPrepare@3
+  inputs:
+    SonarQube: 'SonarQubeCloud'
+    organization: 'paweltruong'
+    scannerMode: 'dotnet'
+    projectKey: 'paweltruong_AssetTracker'
+    extraProperties: |
+      # Additional properties that will be passed to the scanner, 
+      # Put one key=value per line, example:
+      # sonar.exclusions=**/*.bin
+      sonar.coverage.exclusions=**/Migrations/**
+      sonar.exclusions=Stage-01-poc/**
+      sonar.cs.vstest.reportsPaths=$(Agent.TempDirectory)/**/*.trx
+      sonar.cs.opencover.reportsPaths=$(Agent.TempDirectory)/**/coverage.opencover.xml
+
+
+
+- task: VSBuild@1
+  inputs:
+    solution: 'Stage-02-new-architecture\**\*.sln'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+
+- task: VSTest@2
+  inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: |
+      **\bin\**\*test.dll
+      **\bin\**\*tests.dll
+    searchFolder: '$(System.DefaultWorkingDirectory)\Stage-02-new-architecture\Src'
+    codeCoverageEnabled: true
+    resultsFolder: '$(Agent.TempDirectory)/TestResults'
+    otherConsoleOptions: '--logger:trx;LogFileName=testresults.trx --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+
+- task: SonarCloudAnalyze@3
+  inputs:
+    jdkversion: 'JAVA_HOME_17_X64'
