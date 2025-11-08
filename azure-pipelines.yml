@@ -11,7 +11,7 @@ trigger:
 pool:
   name: 'Default'  # Your self-hosted agent pool
   demands:
-    - agent.name -equals 'PAWCIU-NZXT'
+    - Agent.Name -equals 'PAWCIU-NZXT'
 
 variables:
   solution: 'Stage-02-new-architecture/Src/AssetTracker.sln'
