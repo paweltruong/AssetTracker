@@ -69,25 +69,40 @@ jobs:
       - name: Build solution
         run: dotnet build ${{ env.SOLUTION_DIR }}/AssetTracker.sln --configuration Release /p:EnableWindowsTargeting=true
 
-      - name: Run tests with Coverlet coverage
+      - name: Run tests with Coverlet MSBuild integration
         shell: powershell
         run: |
           $testProjects = Get-ChildItem -Path "${{ env.SOLUTION_DIR }}" -Recurse -Filter "*.Tests.csproj"
           
           foreach ($proj in $testProjects) {
-            $projName = $proj.BaseName
-            $coverageFile = Join-Path $proj.DirectoryName "coverage.opencover.xml"
-            
-            Write-Host "=== Running tests with Coverlet for: $projName ==="
-            
-            # Use coverlet.console for better path handling
-            coverlet $proj.FullName `
-              --target "dotnet" `
-              --targetargs "test $($proj.FullName) --configuration Release --no-build --logger trx" `
-              --format opencover `
-              --output $coverageFile `
-              --exclude-by-file "**/Migrations/*.cs" `
-              --exclude "[xunit.*]*"
+              $projName = $proj.BaseName
+              $coverageFile = Join-Path $proj.DirectoryName "coverage.opencover.xml"
+              
+              Write-Host "=== Running tests with Coverlet MSBuild for: $projName ==="
+              
+              # Use Coverlet MSBuild integration
+              dotnet test $proj.FullName `
+                --configuration Release `
+                --no-build `
+                --logger "trx;LogFileName=results.trx" `
+                --settings coverlet.runsettings `
+                --results-directory TestResults
+              
+              # Check if coverage was generated in the expected location
+              $possiblePaths = @(
+                  Join-Path $proj.DirectoryName "coverage.opencover.xml",
+                  Join-Path $proj.DirectoryName "TestResults\coverage.opencover.xml",
+                  Join-Path $proj.DirectoryName "TestResults\*\coverage.opencover.xml"
+              )
+              
+              foreach ($path in $possiblePaths) {
+                  if (Test-Path $path) {
+                      Write-Host "✓ Coverage found at: $path"
+                      # Copy to consistent location
+                      Copy-Item $path $coverageFile -Force
+                      break
+                  }
+              }
           }
 
       - name: Debug generated coverage files
