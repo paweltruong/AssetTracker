@@ -60,7 +60,7 @@ steps:
   inputs:
     command: 'test'
     projects: '$(solution)'
-    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --settings coverage.runsettings --logger trx;LogFileName=testresults.trx'
+    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --settings Stage-02-new-architecture/Src/coverage.runsettings --logger trx;LogFileName=testresults.trx'
     publishTestResults: true
 
 - task: SonarCloudAnalyze@3
