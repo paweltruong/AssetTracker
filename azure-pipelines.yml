@@ -72,3 +72,14 @@ steps:
 - task: SonarCloudAnalyze@3
   inputs:
     jdkversion: 'JAVA_HOME'
+
+- task: SonarCloudPublish@3
+  inputs:
+    pollingTimeoutSec: '300'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Coverage Reports'
+  inputs:
+    PathtoPublish: '$(Agent.TempDirectory)'
+    ArtifactName: 'CoverageReports'
+    publishLocation: 'Container'
