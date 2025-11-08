@@ -41,8 +41,6 @@ steps:
       # sonar.exclusions=**/*.bin
       sonar.coverage.exclusions=**/Migrations/**
       sonar.exclusions=Stage-01-poc/**
-      sonar.tests=**/*Tests*
-      sonar.test.exclusions=**/obj/**,**/bin/**
       sonar.dotnet.exclude.temporary.projects=false
       sonar.cs.vstest.reportsPaths=$(Agent.TempDirectory)/**/*.trx
       sonar.cs.opencover.reportsPaths=$(Agent.TempDirectory)/**/coverage.opencover.xml
