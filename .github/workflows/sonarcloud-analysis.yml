@@ -1,135 +1,47 @@
-name: SonarCloud Analysis
+name: SonarQube
 on:
   push:
-    branches: [ "main" ]
-    paths-ignore:
-      - 'Stage-01-poc/**'
+    branches:
+      - main
   pull_request:
     types: [opened, synchronize, reopened]
-    paths-ignore:
-      - 'Stage-01-poc/**'
-
-env:
-  SOLUTION_DIR: Stage-02-new-architecture/Src
-
-jobs:    
-  SonarQubeForDotNet:
+jobs:
+  build:
+    name: Build and analyze
     runs-on: windows-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: 17
-          distribution: 'zulu'
-          
-      - name: Cache SonarQube packages
+          distribution: 'zulu' # Alternative distribution options are available.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Cache SonarQube Cloud packages
         uses: actions/cache@v4
         with:
-          path: ~\.sonar\cache
+          path: ~\sonar\cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
-          
-      - name: Cache SonarQube scanner
+      - name: Cache SonarQube Cloud scanner
         id: cache-sonar-scanner
         uses: actions/cache@v4
         with:
-          path: .\.sonar\scanner
+          path: ${{ runner.temp }}\scanner
           key: ${{ runner.os }}-sonar-scanner
           restore-keys: ${{ runner.os }}-sonar-scanner
-          
-      - name: Install SonarQube scanner
+      - name: Install SonarQube Cloud scanner
         if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
         shell: powershell
         run: |
-          New-Item -Path .\.sonar\scanner -ItemType Directory
-          dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
-
-      - name: SonarCloud Begin
+          New-Item -Path ${{ runner.temp }}\scanner -ItemType Directory
+          dotnet tool update dotnet-sonarscanner --tool-path ${{ runner.temp }}\scanner
+      - name: Build and analyze
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin `
-            /k:"${{ secrets.SONAR_PROJECT_KEY }}" `
-            /o:"${{ secrets.SONAR_ORGANIZATION }}" `
-            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
-            /d:sonar.host.url="https://sonarcloud.io" `
-            /d:sonar.verbose=true `
-            /d:"sonar.sources=Stage-02-new-architecture/Src" `
-            /d:"sonar.tests=Stage-02-new-architecture/Src/**/*.Tests.csproj" `
-            /d:"sonar.dotnet.excludeTestProjects=false" `
-            /d:"sonar.cs.vstest.reportsPaths=**/*.trx" `
-            /d:"sonar.cs.nunit.reportsPaths=**/*.trx" `
-            /d:"sonar.coverage.exclusions=**/Migrations/**" `
-            /d:"sonar.exclusions=Stage-01-poc/**"
-
-      - name: Build solution
-        run: dotnet build ${{ env.SOLUTION_DIR }}/AssetTracker.sln --configuration Release /p:EnableWindowsTargeting=true
-
-      - name: Run tests and generate TRX files
-        shell: powershell
-        run: |
-          # Run tests and generate TRX files only
-          dotnet test ${{ env.SOLUTION_DIR }}/AssetTracker.sln `
-            --configuration Release `
-            --no-build `
-            --logger "trx;LogFileName=TestResults.trx" `
-            --results-directory ${{ env.SOLUTION_DIR }}/TestResults
-
-      - name: SonarCloud End (Analyze)
-        shell: powershell
-        run: |
-          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
-
-      - name: Debug generated coverage files
-        shell: pwsh
-        run: |
-          Write-Host "=== Coverage files and their contents ==="
-          $coverageFiles = Get-ChildItem -Path . -Recurse -Filter "coverage.opencover.xml"
-          foreach ($file in $coverageFiles) {
-              Write-Host "File: $($file.FullName)"
-              if (Test-Path $file.FullName) {
-                  [xml]$xml = Get-Content $file.FullName -ErrorAction SilentlyContinue
-                  if ($xml -and $xml.CoverageSession -and $xml.CoverageSession.Modules) {
-                      $xml.CoverageSession.Modules.Module | Select-Object -First 1 | ForEach-Object {
-                          Write-Host "  Module: $($_.fullName)"
-                          $_.Files.File | Select-Object -First 3 | ForEach-Object {
-                              Write-Host "    File path in coverage: $($_.fullPath)"
-                          }
-                      }
-                  }
-              }
-          }
-
-      - name: Print directory tree
-        shell: pwsh
-        run: |
-          Write-Host "=== Current Directory: $(Get-Location) ==="
-          tree "$(Get-Location)" /F /A
-
-      - name: List generated OpenCover reports
-        shell: pwsh
-        run: |
-          Write-Host "=== Listing all coverage.opencover.xml files ==="
-          Get-ChildItem -Path "${{ env.SOLUTION_DIR }}" -Recurse -Filter "coverage.opencover.xml" | ForEach-Object {
-            Write-Host "Found: $($_.FullName)"
-          }
-
-      - name: Inspect OpenCover XML contents
-        shell: pwsh
-        run: |
-          $coverageFiles = Get-ChildItem -Path "${{ env.SOLUTION_DIR }}" -Recurse -Filter "coverage.opencover.xml"
-          foreach ($file in $coverageFiles) {
-              Write-Host "`n=== Showing first lines of: $($file.FullName) ==="
-              Get-Content $file -Head 100 | Out-String
-          }
-      
-      - name: Debug Sonar properties
-        shell: pwsh
-        run: |
-          Write-Host "=== Contents of .sonarqube/out/sonar-project.properties ==="
-          Get-Content ".sonarqube/out/sonar-project.properties" | Out-String
+          ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"paweltruong_AssetTracker" /o:"paweltruong" /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+          dotnet build
+          ${{ runner.temp }}\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
