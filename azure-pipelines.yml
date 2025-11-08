@@ -67,24 +67,24 @@ steps:
   displayName: 'Run tests with coverage'
   inputs:
     command: 'test'
-    projects: 'Stage-02-new-architecture/Src/AssetTracker.Application.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --settings Stage-02-new-architecture/Src/coverage.runsettings --logger trx;LogFileName=ApplicationTests.trx'
+    projects: 'Stage-02-new-architecture/Src/AssetTracker.Application.Tests/AssetTracker.Application.Tests.csproj'
+    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --settings Stage-02-new-architecture/Src/coverage.runsettings --logger trx;LogFileName=ApplicationTests.trx --results-directory $(Agent.TempDirectory)'
     publishTestResults: true
 
 - task: DotNetCoreCLI@2
-  displayName: 'Run tests with coverage'
+  displayName: 'Run tests with coverage2'
   inputs:
     command: 'test'
-    projects: 'Stage-02-new-architecture/Src/AssetTracker.AssetsImporter.Steam.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --settings Stage-02-new-architecture/Src/coverage.runsettings --logger trx;LogFileName=AssetsImporterSteamTests.trx'
+    projects: 'Stage-02-new-architecture/Src/AssetTracker.AssetsImporter.Steam.Tests/AssetTracker.AssetsImporter.Steam.Tests.csproj'
+    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --settings Stage-02-new-architecture/Src/coverage.runsettings --logger trx;LogFileName=AssetsImporterSteamTests.trx --results-directory $(Agent.TempDirectory)'
     publishTestResults: true
 
 - task: DotNetCoreCLI@2
-  displayName: 'Run tests with coverage'
+  displayName: 'Run tests with coverage2'
   inputs:
     command: 'test'
-    projects: 'Stage-02-new-architecture/Src/AssetTracker.AssetsResolver.HumbleBundle.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --settings Stage-02-new-architecture/Src/coverage.runsettings --logger trx;LogFileName=AssetsResolverHumbleBundleTests.trx'
+    projects: 'Stage-02-new-architecture/Src/AssetTracker.AssetsResolver.HumbleBundle.Tests/AssetTracker.AssetsResolver.HumbleBundle.Tests.csproj'
+    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --settings Stage-02-new-architecture/Src/coverage.runsettings --logger trx;LogFileName=AssetsResolverHumbleBundleTests.trx --results-directory $(Agent.TempDirectory)'
     publishTestResults: true
 - task: SonarCloudAnalyze@3
   inputs:
