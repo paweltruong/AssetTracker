@@ -27,6 +27,14 @@ steps:
     organization: 'paweltruong'
     scannerMode: 'dotnet'
     projectKey: 'paweltruong_AssetTracker'
+    extraProperties: |
+      # Additional properties that will be passed to the scanner, 
+      # Put one key=value per line, example:
+      # sonar.exclusions=**/*.bin
+      sonar.coverage.exclusions=**/Migrations/**
+      sonar.exclusions=Stage-01-poc/**
+
+
 
 - task: VSBuild@1
   inputs:
