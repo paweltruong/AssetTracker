@@ -41,6 +41,8 @@ steps:
       # sonar.exclusions=**/*.bin
       sonar.coverage.exclusions=**/Migrations/**
       sonar.exclusions=Stage-01-poc/**
+      sonar.tests=**/Tests/**,**/*Test*
+      sonar.test.exclusions=**/obj/**,**/bin/**
       sonar.dotnet.exclude.temporary.projects=false
       sonar.cs.vstest.reportsPaths=$(Agent.TempDirectory)/**/*.trx
       sonar.cs.opencover.reportsPaths=$(Agent.TempDirectory)/**/coverage.opencover.xml
@@ -65,10 +67,25 @@ steps:
   displayName: 'Run tests with coverage'
   inputs:
     command: 'test'
-    projects: '$(solution)'
-    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --settings Stage-02-new-architecture/Src/coverage.runsettings --logger trx;LogFileName=testresults.trx'
+    projects: 'Stage-02-new-architecture/Src/AssetTracker.Application.Tests.csproj'
+    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --settings Stage-02-new-architecture/Src/coverage.runsettings --logger trx;LogFileName=ApplicationTests.trx'
     publishTestResults: true
 
+- task: DotNetCoreCLI@2
+  displayName: 'Run tests with coverage'
+  inputs:
+    command: 'test'
+    projects: 'Stage-02-new-architecture/Src/AssetTracker.AssetsImporter.Steam.Tests.csproj'
+    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --settings Stage-02-new-architecture/Src/coverage.runsettings --logger trx;LogFileName=AssetsImporterSteamTests.trx'
+    publishTestResults: true
+
+- task: DotNetCoreCLI@2
+  displayName: 'Run tests with coverage'
+  inputs:
+    command: 'test'
+    projects: 'Stage-02-new-architecture/Src/AssetTracker.AssetsResolver.HumbleBundle.Tests.csproj'
+    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --settings Stage-02-new-architecture/Src/coverage.runsettings --logger trx;LogFileName=AssetsResolverHumbleBundleTests.trx'
+    publishTestResults: true
 - task: SonarCloudAnalyze@3
   inputs:
     jdkversion: 'JAVA_HOME'
