@@ -90,9 +90,9 @@ jobs:
               
               # Check if coverage was generated in the expected location
               $possiblePaths = @(
-                  Join-Path $proj.DirectoryName "coverage.opencover.xml",
-                  Join-Path $proj.DirectoryName "TestResults\coverage.opencover.xml",
-                  Join-Path $proj.DirectoryName "TestResults\*\coverage.opencover.xml"
+                  (Join-Path $proj.DirectoryName "coverage.opencover.xml"),
+                  (Join-Path $proj.DirectoryName "TestResults\coverage.opencover.xml"),
+                  (Join-Path $proj.DirectoryName "TestResults\*\coverage.opencover.xml")
               )
               
               foreach ($path in $possiblePaths) {
