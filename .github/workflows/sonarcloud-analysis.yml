@@ -59,7 +59,6 @@ jobs:
             /d:sonar.host.url="https://sonarcloud.io" `
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
             /d:sonar.verbose=true `
-            /d:"sonar.projectBaseDir=${{ github.workspace }}/Stage-02-new-architecture" `
             /d:"sonar.cs.opencover.reportsPaths=${{ env.SOLUTION_DIR }}/**/TestResults/**/*.opencover.xml" `
             /d:"sonar.sources=${{ env.SOLUTION_DIR }}" `
             /d:"sonar.tests=${{ env.SOLUTION_DIR }}/**/*.Tests.csproj" `
