@@ -53,6 +53,7 @@ steps:
       sonar.test.exclusions=**/bin/**,**/obj/**
       sonar.coverage.inclusions=**/*.cs
       sonar.coverageReportPaths=
+      sonar.testExecutionReportPaths=
 
 # 2. Restore NuGet packages
 - task: DotNetCoreCLI@2
@@ -125,6 +126,72 @@ steps:
     searchFolder: '$(testResultsDir)'
     mergeTestResults: true
     failTaskOnFailedTests: false
+
+# Debug categories
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      # Write your PowerShell commands here.
+      
+      Write-Host "=== Updating TRX Files with Correct Coverage Paths ==="
+    
+      $trxFiles = Get-ChildItem -Path "$(testResultsDir)" -Filter "*.trx"
+      
+      foreach ($trxFile in $trxFiles) {
+          Write-Host "Processing TRX: $($trxFile.Name)"
+          
+          # Read the deployment root from TRX
+          $trxContent = [xml](Get-Content $trxFile.FullName)
+          $deploymentRoot = $trxContent.TestRun.TestSettings.Deployment.runDeploymentRoot
+          
+          if ($deploymentRoot) {
+              Write-Host "  Deployment root: $deploymentRoot"
+              
+              # Check if coverage file exists in the expected nested location
+              $expectedCoveragePath = Join-Path $trxFile.DirectoryName "$deploymentRoot/In/PAWCIU-NZXT/coverage.opencover.xml"
+              
+              if (Test-Path $expectedCoveragePath) {
+                  Write-Host "  Coverage file found at: $expectedCoveragePath"
+                  
+                  # Update the TRX to point to the correct path
+                  $collector = $trxContent.SelectSingleNode("//*[@uri='datacollector://microsoft/CoverletCodeCoverage/1.0']")
+                  if ($collector) {
+                      $uriAttachment = $collector.SelectSingleNode(".//UriAttachment/A")
+                      if ($uriAttachment) {
+                          # Update to the correct relative path
+                          $correctPath = "$deploymentRoot/In/PAWCIU-NZXT/coverage.opencover.xml"
+                          $uriAttachment.SetAttribute("href", $correctPath)
+                          Write-Host "  Updated TRX coverage path to: $correctPath"
+                          
+                          # Save the updated TRX
+                          $trxContent.Save($trxFile.FullName)
+                      }
+                  }
+              } else {
+                  Write-Host "  Coverage file not found at expected location"
+                  
+                  # Try to find and copy the coverage file
+                  $coverageFiles = Get-ChildItem -Path "$(testResultsDir)" -Recurse -Filter "coverage.opencover.xml" | Where-Object { 
+                      $_.Directory.Name -eq "PAWCIU-NZXT" -and $_.Directory.Parent.Name -eq "In"
+                  }
+                  
+                  if ($coverageFiles) {
+                      $targetDir = Join-Path $trxFile.DirectoryName "$deploymentRoot/In/PAWCIU-NZXT"
+                      New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
+                      
+                      foreach ($coverageFile in $coverageFiles) {
+                          $targetFile = Join-Path $targetDir "coverage.opencover.xml"
+                          Write-Host "  Copying coverage file to: $targetFile"
+                          Copy-Item -Path $coverageFile.FullName -Destination $targetFile -Force
+                      }
+                  }
+              }
+          }
+      }
+      
+      Write-Host "=== TRX files processed ==="
+  displayName: 'Fix coverage file locations for trx files'
 
 
 
