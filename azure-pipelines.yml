@@ -108,6 +108,20 @@ steps:
     arguments: '--configuration $(buildConfiguration) --no-build --logger trx;LogFileName=AssetsResolverHumbleBundleTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/HumbleBundleTests'
     publishTestResults: false
 
+- task: DotNetCoreCLI@2
+  displayName: 'Install ReportGenerator'
+  inputs:
+    command: 'custom'
+    custom: 'tool'
+    arguments: 'install --global dotnet-reportgenerator-globaltool'
+
+- task: CmdLine@2
+  displayName: 'Merge Coverage Reports'
+  inputs:
+    script: |
+      reportgenerator -reports:$(testResultsDir)/Coverage/*.opencover.xml -targetdir:$(coverageReportsDir) -reporttypes:OpenCover
+
+
 - task: PowerShell@2
   inputs:
     targetType: 'inline'
