@@ -55,13 +55,15 @@ steps:
     projects: '$(solution)'
 
 # Create persistent directories for test results and coverage
-- task: Bash@3
+- task: PowerShell@2
   inputs:
     targetType: 'inline'
     script: |
-      mkdir "$(testResultsDir)"
-      mkdir "$(coverageReportsDir)"
-      displayName: 'Create persistent directories'
+      # Write your PowerShell commands here.
+      
+       New-Item -ItemType Directory -Path "$(testResultsDir)" -Force
+      New-Item -ItemType Directory -Path "$(coverageReportsDir)" -Force
+      Write-Host "Directories created successfully"
     
 # 3. Build the solution (including WPF)
 - task: DotNetCoreCLI@2
@@ -96,15 +98,16 @@ steps:
     arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --settings Stage-02-new-architecture/Src/coverage.runsettings --logger trx;LogFileName=AssetsResolverHumbleBundleTests.trx --results-directory $(testResultsDir) -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.FileName=HumbleBundleTests.coverage.opencover.xml'
     publishTestResults: false
 
-
-- task: Bash@3
+- task: PowerShell@2
   inputs:
     targetType: 'inline'
     script: |
-      echo "Copying coverage files from test results to coverage reports directory..."
-      find "$(testResultsDir)" -name "coverage.opencover.xml" -exec cp {} "$(coverageReportsDir)" \;
-      echo "Contents of coverage reports directory:"
-      ls -la "$(coverageReportsDir)"
+      # Write your PowerShell commands here.
+      
+      Write-Host "Copying coverage files from test results to coverage reports directory..."
+      Get-ChildItem -Path "$(testResultsDir)" -Recurse -Filter "*.coverage.opencover.xml" | Copy-Item -Destination "$(coverageReportsDir)" -Force
+      Write-Host "Contents of coverage reports directory:"
+      Get-ChildItem -Path "$(coverageReportsDir)" -Recurse
 
 # Publish test results separately if needed
 - task: PublishTestResults@2
