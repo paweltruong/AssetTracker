@@ -141,8 +141,14 @@ steps:
       foreach ($trxFile in $trxFiles) {
           Write-Host "Processing TRX: $($trxFile.Name)"
           
-          # Read the deployment root from TRX
+          # Read the TRX file with proper namespace handling
           $trxContent = [xml](Get-Content $trxFile.FullName)
+          
+          # Create namespace manager
+          $nsManager = New-Object System.Xml.XmlNamespaceManager($trxContent.NameTable)
+          $nsManager.AddNamespace("ns", "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")
+          
+          # Get deployment root
           $deploymentRoot = $trxContent.TestRun.TestSettings.Deployment.runDeploymentRoot
           
           if ($deploymentRoot) {
@@ -154,10 +160,12 @@ steps:
               if (Test-Path $expectedCoveragePath) {
                   Write-Host "  Coverage file found at: $expectedCoveragePath"
                   
-                  # Update the TRX to point to the correct path
-                  $collector = $trxContent.SelectSingleNode("//*[@uri='datacollector://microsoft/CoverletCodeCoverage/1.0']")
+                  # Find the collector using namespace-aware XPath
+                  $collector = $trxContent.SelectSingleNode("//ns:Collector[@uri='datacollector://microsoft/CoverletCodeCoverage/1.0']", $nsManager)
                   if ($collector) {
-                      $uriAttachment = $collector.SelectSingleNode(".//UriAttachment/A")
+                      Write-Host "  Found collector element"
+                      
+                      $uriAttachment = $collector.SelectSingleNode(".//ns:UriAttachment/ns:A", $nsManager)
                       if ($uriAttachment) {
                           # Update to the correct relative path
                           $correctPath = "$deploymentRoot/In/PAWCIU-NZXT/coverage.opencover.xml"
@@ -166,27 +174,27 @@ steps:
                           
                           # Save the updated TRX
                           $trxContent.Save($trxFile.FullName)
+                          Write-Host "  TRX file saved successfully"
+                      } else {
+                          Write-Host "  UriAttachment/A element not found"
+                          # Debug: show what elements we found
+                          $allUris = $collector.SelectNodes(".//ns:UriAttachment", $nsManager)
+                          Write-Host "  Found $($allUris.Count) UriAttachment elements"
+                      }
+                  } else {
+                      Write-Host "  Collector element not found"
+                      # Debug: list all collectors
+                      $allCollectors = $trxContent.SelectNodes("//ns:Collector", $nsManager)
+                      Write-Host "  Found $($allCollectors.Count) collector elements:"
+                      foreach ($col in $allCollectors) {
+                          Write-Host "    - $($col.uri) : $($col.collectorDisplayName)"
                       }
                   }
               } else {
-                  Write-Host "  Coverage file not found at expected location"
-                  
-                  # Try to find and copy the coverage file
-                  $coverageFiles = Get-ChildItem -Path "$(testResultsDir)" -Recurse -Filter "coverage.opencover.xml" | Where-Object { 
-                      $_.Directory.Name -eq "PAWCIU-NZXT" -and $_.Directory.Parent.Name -eq "In"
-                  }
-                  
-                  if ($coverageFiles) {
-                      $targetDir = Join-Path $trxFile.DirectoryName "$deploymentRoot/In/PAWCIU-NZXT"
-                      New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
-                      
-                      foreach ($coverageFile in $coverageFiles) {
-                          $targetFile = Join-Path $targetDir "coverage.opencover.xml"
-                          Write-Host "  Copying coverage file to: $targetFile"
-                          Copy-Item -Path $coverageFile.FullName -Destination $targetFile -Force
-                      }
-                  }
+                  Write-Host "  Coverage file not found at expected location: $expectedCoveragePath"
               }
+          } else {
+              Write-Host "  No deployment root found in TRX"
           }
       }
       
