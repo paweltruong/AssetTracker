@@ -47,6 +47,10 @@ steps:
       sonar.cs.vstest.reportsPaths=$(testResultsDir)/*.trx
       sonar.cs.opencover.reportsPaths=$(testResultsDir)/**/coverage.opencover.xml
       sonar.sources=Stage-02-new-architecture/Src
+       # Explicitly define test and main patterns
+      sonar.test.inclusions=**/*.Tests.csproj,**/*.Test.csproj
+      sonar.test.exclusions=**/bin/**,**/obj/**
+      sonar.coverage.inclusions=**/*.cs
 
 # 2. Restore NuGet packages
 - task: DotNetCoreCLI@2
@@ -119,6 +123,34 @@ steps:
     searchFolder: '$(testResultsDir)'
     mergeTestResults: true
     failTaskOnFailedTests: false
+
+
+
+# Debug categories
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      # Write your PowerShell commands here.
+      
+      Write-Host "=== SonarQube Analysis Diagnostics ==="
+      Write-Host "Checking SonarQube output directory..."
+      $sonarOutDir = "$(Agent.WorkFolder)\.sonarqube\out"
+      if (Test-Path $sonarOutDir) {
+        Get-ChildItem -Path $sonarOutDir -Recurse -Directory | ForEach-Object {
+            Write-Host "Project directory: $($_.Name)"
+            $configFile = Join-Path $_.FullName "ProjectInfo.xml"
+            if (Test-Path $configFile) {
+                Write-Host "  Config: $configFile"
+                $content = Get-Content $configFile -Raw
+                if ($content -match "<ProjectType>(.*?)</ProjectType>") {
+                    Write-Host "  ProjectType: $($Matches[1])"
+                }
+            }
+        }
+      }
+      Write-Host "=== End Diagnostics ==="
+  displayName: 'Diagnose SonarQube Project Detection'
 
 - task: SonarCloudAnalyze@3
   inputs:
