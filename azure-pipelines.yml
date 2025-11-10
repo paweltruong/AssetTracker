@@ -41,19 +41,16 @@ steps:
       # Additional properties that will be passed to the scanner, 
       # Put one key=value per line, example:
       # sonar.exclusions=**/*.bin
+      sonar.language=csharp
       sonar.coverage.exclusions=**/Migrations/**
       sonar.exclusions=Stage-01-poc/**
       sonar.dotnet.exclude.temporary.projects=false
-      sonar.cs.opencover.reportsPaths=$(testResultsDir)/Coverage/ApplicationTests.opencover.xml,$(testResultsDir)/Coverage/SteamTests.opencover.xml,$(testResultsDir)/Coverage/HumbleBundleTests.opencover.xml
-      sonar.cs.vstest.reportsPaths=
+      sonar.cs.opencover.reportsPaths=$(testResultsDir)/Coverage/*.opencover.xml
        # sonar.cs.vstest.reportsPaths=$(testResultsDir)/**/*.trx
       sonar.sources=Stage-02-new-architecture/Src
        # Explicitly define test and main patterns
       sonar.test.inclusions=**/*.Tests.csproj,**/*.Test.csproj
       sonar.test.exclusions=**/bin/**,**/obj/**
-      sonar.coverage.inclusions=**/*.cs
-      sonar.coverageReportPaths=
-      sonar.testExecutionReportPaths=
 
 # 2. Restore NuGet packages
 - task: DotNetCoreCLI@2
