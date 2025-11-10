@@ -44,7 +44,7 @@ steps:
       sonar.coverage.exclusions=**/Migrations/**
       sonar.exclusions=Stage-01-poc/**
       sonar.dotnet.exclude.temporary.projects=false
-      sonar.cs.opencover.reportsPaths=$(testResultsDir)/**/*/coverage.opencover.xml
+      sonar.cs.opencover.reportsPaths=$(testResultsDir)/Coverage/*.opencover.xml
       sonar.cs.vstest.reportsPaths=
        # sonar.cs.vstest.reportsPaths=$(testResultsDir)/**/*.trx
       sonar.sources=Stage-02-new-architecture/Src
@@ -71,6 +71,7 @@ steps:
       
       New-Item -ItemType Directory -Path "$(testResultsDir)" -Force
       New-Item -ItemType Directory -Path "$(coverageReportsDir)" -Force
+      New-Item -ItemType Directory -Path "$(testResultsDir)/Coverage" -Force | Out-Null
       Write-Host "Directories created successfully"
     
 # 3. Build the solution (including WPF)
@@ -82,28 +83,29 @@ steps:
     arguments: '--configuration $(buildConfiguration) --no-restore --verbosity normal'
     
 # 4. Run tests with coverage
+
 - task: DotNetCoreCLI@2
-  displayName: 'Application.Tests with coverage'
+  displayName: 'Application.Tests with Coverlet'
   inputs:
     command: 'test'
     projects: 'Stage-02-new-architecture/Src/AssetTracker.Application.Tests/AssetTracker.Application.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --settings Stage-02-new-architecture/Src/coverage.runsettings --logger trx;LogFileName=ApplicationTests.trx --results-directory $(testResultsDir) -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.FileName=ApplicationTests.coverage.opencover.xml'
+    arguments: '--configuration $(buildConfiguration) --no-build --logger trx;LogFileName=ApplicationTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/ApplicationTests.'
     publishTestResults: false
 
 - task: DotNetCoreCLI@2
-  displayName: 'AssetsImporter.Steam.Tests with coverage'
+  displayName: 'Steam.Tests with Coverlet'
   inputs:
     command: 'test'
     projects: 'Stage-02-new-architecture/Src/AssetTracker.AssetsImporter.Steam.Tests/AssetTracker.AssetsImporter.Steam.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --settings Stage-02-new-architecture/Src/coverage.runsettings --logger trx;LogFileName=AssetsImporterSteamTests.trx --results-directory $(testResultsDir) -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.FileName=SteamImporterTests.coverage.opencover.xml'
+    arguments: '--configuration $(buildConfiguration) --no-build --logger trx;LogFileName=AssetsImporterSteamTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/SteamTests.'
     publishTestResults: false
 
 - task: DotNetCoreCLI@2
-  displayName: 'AssetsResolver.HumbleBundle.Tests with coverage'
+  displayName: 'HumbleBundle.Tests with Coverlet'
   inputs:
     command: 'test'
     projects: 'Stage-02-new-architecture/Src/AssetTracker.AssetsResolver.HumbleBundle.Tests/AssetTracker.AssetsResolver.HumbleBundle.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --settings Stage-02-new-architecture/Src/coverage.runsettings --logger trx;LogFileName=AssetsResolverHumbleBundleTests.trx --results-directory $(testResultsDir) -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.FileName=HumbleBundleTests.coverage.opencover.xml'
+    arguments: '--configuration $(buildConfiguration) --no-build --logger trx;LogFileName=AssetsResolverHumbleBundleTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/HumbleBundleTests.'
     publishTestResults: false
 
 - task: PowerShell@2
@@ -126,82 +128,6 @@ steps:
     searchFolder: '$(testResultsDir)'
     mergeTestResults: true
     failTaskOnFailedTests: false
-
-# Debug categories
-- task: PowerShell@2
-  inputs:
-    targetType: 'inline'
-    script: |
-      # Write your PowerShell commands here.
-      
-      Write-Host "=== Updating TRX Files with Correct Coverage Paths ==="
-    
-      $trxFiles = Get-ChildItem -Path "$(testResultsDir)" -Filter "*.trx"
-      
-      foreach ($trxFile in $trxFiles) {
-          Write-Host "Processing TRX: $($trxFile.Name)"
-          
-          # Read the TRX file with proper namespace handling
-          $trxContent = [xml](Get-Content $trxFile.FullName)
-          
-          # Create namespace manager
-          $nsManager = New-Object System.Xml.XmlNamespaceManager($trxContent.NameTable)
-          $nsManager.AddNamespace("ns", "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")
-          
-          # Get deployment root
-          $deploymentRoot = $trxContent.TestRun.TestSettings.Deployment.runDeploymentRoot
-          
-          if ($deploymentRoot) {
-              Write-Host "  Deployment root: $deploymentRoot"
-              
-              # Check if coverage file exists in the expected nested location
-              $expectedCoveragePath = Join-Path $trxFile.DirectoryName "$deploymentRoot/In/PAWCIU-NZXT/coverage.opencover.xml"
-              
-              if (Test-Path $expectedCoveragePath) {
-                  Write-Host "  Coverage file found at: $expectedCoveragePath"
-                  
-                  # Find the collector using namespace-aware XPath
-                  $collector = $trxContent.SelectSingleNode("//ns:Collector[@uri='datacollector://microsoft/CoverletCodeCoverage/1.0']", $nsManager)
-                  if ($collector) {
-                      Write-Host "  Found collector element"
-                      
-                      $uriAttachment = $collector.SelectSingleNode(".//ns:UriAttachment/ns:A", $nsManager)
-                      if ($uriAttachment) {
-                          # Update to the correct relative path
-                          $correctPath = "$deploymentRoot/In/PAWCIU-NZXT/coverage.opencover.xml"
-                          $uriAttachment.SetAttribute("href", $correctPath)
-                          Write-Host "  Updated TRX coverage path to: $correctPath"
-                          
-                          # Save the updated TRX
-                          $trxContent.Save($trxFile.FullName)
-                          Write-Host "  TRX file saved successfully"
-                      } else {
-                          Write-Host "  UriAttachment/A element not found"
-                          # Debug: show what elements we found
-                          $allUris = $collector.SelectNodes(".//ns:UriAttachment", $nsManager)
-                          Write-Host "  Found $($allUris.Count) UriAttachment elements"
-                      }
-                  } else {
-                      Write-Host "  Collector element not found"
-                      # Debug: list all collectors
-                      $allCollectors = $trxContent.SelectNodes("//ns:Collector", $nsManager)
-                      Write-Host "  Found $($allCollectors.Count) collector elements:"
-                      foreach ($col in $allCollectors) {
-                          Write-Host "    - $($col.uri) : $($col.collectorDisplayName)"
-                      }
-                  }
-              } else {
-                  Write-Host "  Coverage file not found at expected location: $expectedCoveragePath"
-              }
-          } else {
-              Write-Host "  No deployment root found in TRX"
-          }
-      }
-      
-      Write-Host "=== TRX files processed ==="
-  displayName: 'Fix coverage file locations for trx files'
-
-
 
 # Debug categories
 - task: PowerShell@2
