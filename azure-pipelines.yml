@@ -44,8 +44,8 @@ steps:
       sonar.coverage.exclusions=**/Migrations/**
       sonar.exclusions=Stage-01-poc/**
       sonar.dotnet.exclude.temporary.projects=false
-      sonar.cs.vstest.reportsPaths=$(testResultsDir)/**/*.trx
-      sonar.cs.opencover.reportsPaths=$(coverageReportsDir)/**/*coverage.opencover.xml
+      sonar.cs.vstest.reportsPaths=$(testResultsDir)/*.trx
+      sonar.cs.opencover.reportsPaths=$(testResultsDir)/**/coverage.opencover.xml
 
 # 2. Restore NuGet packages
 - task: DotNetCoreCLI@2
