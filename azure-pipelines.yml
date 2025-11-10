@@ -135,6 +135,67 @@ steps:
       }
       Write-Host "=== End Verification ==="
 
+# Fix trx coverage references
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      # Write your PowerShell commands here.
+      
+      Write-Host "=== Updating TRX Files with Correct Coverage Paths ==="
+
+      $trxFiles = Get-ChildItem -Path "$(testResultsDir)" -Recurse -Filter "*.trx"
+
+      foreach ($trxFile in $trxFiles) {
+          Write-Host "Processing TRX: $($trxFile.FullName)"
+          
+          # Read the TRX file with proper namespace handling
+          $trxContent = [xml](Get-Content $trxFile.FullName)
+          
+          # Create namespace manager
+          $nsManager = New-Object System.Xml.XmlNamespaceManager($trxContent.NameTable)
+          $nsManager.AddNamespace("ns", "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")
+          
+          # Find the collector using namespace-aware XPath
+          $collector = $trxContent.SelectSingleNode("//ns:Collector[@uri='datacollector://microsoft/CoverletCodeCoverage/1.0']", $nsManager)
+          if ($collector) {
+              Write-Host "  Found collector element"
+              
+              $uriAttachment = $collector.SelectSingleNode(".//ns:UriAttachment/ns:A", $nsManager)
+              if ($uriAttachment) {
+                  # Update to the correct path - adjust this path as needed for your environment
+                  $currentPath = $uriAttachment.GetAttribute("href")
+                  Write-Host "  Current coverage path: $currentPath"
+                  
+                  # Update to the correct path - modify this line based on your actual coverage file location
+                  $correctPath = "TestResults/Coverage/ApplicationTests.opencover.xml"
+                  $uriAttachment.SetAttribute("href", $correctPath)
+                  Write-Host "  Updated TRX coverage path to: $correctPath"
+                  
+                  # Save the updated TRX
+                  $trxContent.Save($trxFile.FullName)
+                  Write-Host "  TRX file saved successfully"
+              } else {
+                  Write-Host "  UriAttachment/A element not found"
+                  # Debug: show what elements we found
+                  $allUris = $collector.SelectNodes(".//ns:UriAttachment", $nsManager)
+                  Write-Host "  Found $($allUris.Count) UriAttachment elements"
+              }
+          } else {
+              Write-Host "  Collector element not found"
+              # Debug: list all collectors
+              $allCollectors = $trxContent.SelectNodes("//ns:Collector", $nsManager)
+              Write-Host "  Found $($allCollectors.Count) collector elements:"
+              foreach ($col in $allCollectors) {
+                  Write-Host "    - $($col.uri) : $($col.collectorDisplayName)"
+              }
+          }
+      }
+
+      Write-Host "=== TRX files processed ==="
+  displayName: 'Fix coverage file locations for trx files'
+
+
 - task: PowerShell@2
   inputs:
     targetType: 'inline'
