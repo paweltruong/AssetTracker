@@ -85,7 +85,7 @@ steps:
   inputs:
     command: 'test'
     projects: 'Stage-02-new-architecture/Src/AssetTracker.Application.Tests/AssetTracker.Application.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --logger trx;LogFileName=ApplicationTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/ApplicationTests'
+    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --logger trx;LogFileName=ApplicationTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/ApplicationTests'
     publishTestResults: false
 
 - task: DotNetCoreCLI@2
@@ -93,7 +93,7 @@ steps:
   inputs:
     command: 'test'
     projects: 'Stage-02-new-architecture/Src/AssetTracker.AssetsImporter.Steam.Tests/AssetTracker.AssetsImporter.Steam.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --logger trx;LogFileName=AssetsImporterSteamTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/SteamTests'
+    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --logger trx;LogFileName=AssetsImporterSteamTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/SteamTests'
     publishTestResults: false
 
 - task: DotNetCoreCLI@2
@@ -101,7 +101,7 @@ steps:
   inputs:
     command: 'test'
     projects: 'Stage-02-new-architecture/Src/AssetTracker.AssetsResolver.HumbleBundle.Tests/AssetTracker.AssetsResolver.HumbleBundle.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --logger trx;LogFileName=AssetsResolverHumbleBundleTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/HumbleBundleTests'
+    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --logger trx;LogFileName=AssetsResolverHumbleBundleTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/HumbleBundleTests'
     publishTestResults: false
 
 # Add diagnostic step to verify coverage files
