@@ -22,6 +22,22 @@ variables:
   coverageReportsDir: '$(Build.SourcesDirectory)/CoverageReports'
 
 steps:
+
+# Install SonarScanner for .NET globally
+- task: DotNetCoreCLI@2
+  displayName: 'Install SonarScanner for .NET'
+  inputs:
+    command: custom
+    custom: tool
+    arguments: 'install --global dotnet-sonarscanner'
+
+- task: PowerShell@2
+  displayName: Install Sonar scanner
+  inputs:
+    targetType: 'inline'
+    script: |
+      dotnet tool update dotnet-sonarscanner --global
+
 - task: NuGetToolInstaller@1
 
 - task: NuGetCommand@2
@@ -30,27 +46,30 @@ steps:
     restoreSolution: 'Stage-02-new-architecture\Src\AssetTracker.sln'
     feedsToUse: 'select'
 
-- task: SonarCloudPrepare@3
+- task: PowerShell@2
+  displayName: Start SonarCloud Analysis
+  env:
+    SONAR_TOKEN: $(SONAR_TOKEN)
   inputs:
-    SonarQube: 'SonarQubeCloud'
-    organization: 'paweltruong'
-    scannerMode: 'dotnet'
-    projectKey: 'paweltruong_AssetTracker'
-    projectName: 'AssetTracker'
-    extraProperties: |
-      # Additional properties that will be passed to the scanner, 
-      # Put one key=value per line, example:
-      # sonar.exclusions=**/*.bin
-      sonar.language=csharp
-      sonar.coverage.exclusions=**/Migrations/**
-      sonar.exclusions=Stage-01-poc/**
-      sonar.dotnet.exclude.temporary.projects=false
-      sonar.cs.opencover.reportsPaths=**/TestResults/Coverage/*.opencover.xml
-       # sonar.cs.vstest.reportsPaths=$(testResultsDir)/**/*.trx
-      sonar.sources=Stage-02-new-architecture/Src
-       # Explicitly define test and main patterns
-      sonar.test.inclusions=**/*.Tests.csproj,**/*.Test.csproj
-      sonar.test.exclusions=**/bin/**,**/obj/**
+    targetType: 'inline'
+    script: |
+      $sonarArgs = @(
+            "begin",
+            "/k:`"paweltruong_AssetTracker`"",
+            "/o:`"paweltruong`"",
+            "/d:sonar.token=`"$(SONAR_TOKEN)`"",
+            "/d:sonar.verbose=true",
+            "/d:sonar.language=csharp",
+            "/d:sonar.coverage.exclusions=**/Migrations/**,**/*.Tests.csproj",
+            "/d:sonar.exclusions=Stage-01-poc/**",
+            "/d:sonar.cs.opencover.reportsPaths=$(testResultsDir)/Coverage/*.opencover.xml",
+            "/d:sonar.sources=Stage-02-new-architecture/Src",
+            "/d:sonar.test.inclusions=**/*.Tests.csproj,**/*.Test.csproj",
+            "/d:sonar.test.exclusions=**/bin/**,**/obj/**",
+            "/d:sonar.host.url=https://sonarcloud.io"
+          )
+          Write-Host "Starting SonarCloud analysis..."
+          dotnet sonarscanner $sonarArgs
 
 # 2. Restore NuGet packages
 - task: DotNetCoreCLI@2
@@ -71,7 +90,6 @@ steps:
       New-Item -ItemType Directory -Path "$(testResultsDir)/Coverage" -Force | Out-Null
       Write-Host "Directories created successfully"
     
-# 3. Build the solution (including WPF)
 - task: DotNetCoreCLI@2
   displayName: 'Build solution'
   inputs:
@@ -79,32 +97,30 @@ steps:
     projects: '$(solution)'
     arguments: '--configuration $(buildConfiguration) --no-restore --verbosity normal'
     
-# 4. Run tests with coverage
 - task: DotNetCoreCLI@2
   displayName: 'Application.Tests with Coverlet'
   inputs:
     command: 'test'
     projects: 'Stage-02-new-architecture/Src/AssetTracker.Application.Tests/AssetTracker.Application.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --settings Stage-02-new-architecture/Src/coverage.runsettings --collect:"XPlat Code Coverage" --logger trx;LogFileName=ApplicationTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/ApplicationTests'
+    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --logger trx;LogFileName=ApplicationTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/'
     publishTestResults: false
-
+    
 - task: DotNetCoreCLI@2
   displayName: 'Steam.Tests with Coverlet'
   inputs:
     command: 'test'
     projects: 'Stage-02-new-architecture/Src/AssetTracker.AssetsImporter.Steam.Tests/AssetTracker.AssetsImporter.Steam.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --settings Stage-02-new-architecture/Src/coverage.runsettings --collect:"XPlat Code Coverage" --logger trx;LogFileName=AssetsImporterSteamTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/AssetsImporterSteamTests'
+    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --logger trx;LogFileName=AssetsImporterSteamTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/'
     publishTestResults: false
-
+    
 - task: DotNetCoreCLI@2
   displayName: 'HumbleBundle.Tests with Coverlet'
   inputs:
     command: 'test'
     projects: 'Stage-02-new-architecture/Src/AssetTracker.AssetsResolver.HumbleBundle.Tests/AssetTracker.AssetsResolver.HumbleBundle.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --settings Stage-02-new-architecture/Src/coverage.runsettings --collect:"XPlat Code Coverage" --logger trx;LogFileName=AssetsResolverHumbleBundleTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/AssetsResolverHumbleBundleTests'
+    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --logger trx;LogFileName=AssetsResolverHumbleBundleTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/'
     publishTestResults: false
-
-# Add diagnostic step to verify coverage files
+    
 - task: PowerShell@2
   displayName: 'Verify Coverage Files'
   inputs:
@@ -113,7 +129,7 @@ steps:
       Write-Host "=== Coverage Files Verification ==="
       $coveragePath = "$(testResultsDir)/Coverage"
       Write-Host "Checking coverage directory: $coveragePath"
-      
+          
       if (Test-Path $coveragePath) {
           $files = Get-ChildItem -Path $coveragePath -Filter "*.opencover.xml"
           Write-Host "Found $($files.Count) coverage files:"
@@ -121,7 +137,7 @@ steps:
               Write-Host "  - $($file.Name)"
               Write-Host "    Full path: $($file.FullName)"
               Write-Host "    Size: $([math]::Round($file.Length/1024, 2)) KB"
-              
+                  
               # Check if file has content
               $content = Get-Content $file.FullName -Raw
               if ($content -match "<CoverageSession") {
@@ -134,19 +150,6 @@ steps:
           Write-Host "Coverage directory does not exist: $coveragePath"
       }
       Write-Host "=== End Verification ==="
-
-- task: PowerShell@2
-  displayName: 'Temporarily move TRX files to avoid TFS Processor'
-  inputs:
-    targetType: 'inline'
-    script: |
-      $trxDir = "$(testResultsDir)"
-      $backupDir = "$(testResultsDir)\..\trx_backup"
-      New-Item -ItemType Directory -Force -Path $backupDir | Out-Null
-      Get-ChildItem -Path $trxDir -Filter *.trx -Recurse | ForEach-Object {
-          Move-Item $_.FullName -Destination $backupDir -Force
-      }
-      Write-Host "Moved TRX files to $backupDir temporarily"
 
 
 - task: PowerShell@2
@@ -196,42 +199,16 @@ steps:
       Write-Host "=== End Diagnostics ==="
   displayName: 'Diagnose SonarQube Project Detection'
 
-# Copy OpenCover coverage reports into Sonar's working directory
+# End SonarCloud analysis using SonarScanner for .NET
 - task: PowerShell@2
-  displayName: 'Copy coverage files into Sonar temp dir'
+  displayName: 'End SonarCloud Analysis'
   inputs:
     targetType: 'inline'
     script: |
-      Write-Host "=== Preparing coverage files for Sonar ==="
-      $sourceDir = "$(testResultsDir)\Coverage"
-      $targetDir = "$(Agent.TempDirectory)"
-      Write-Host "Source directory: $sourceDir"
-      Write-Host "Target directory: $targetDir"
-
-      if (-not (Test-Path $sourceDir)) {
-        Write-Error "Coverage source directory not found: $sourceDir"
-        exit 1
-      }
-
-      if (-not (Test-Path $targetDir)) {
-        New-Item -ItemType Directory -Force -Path $targetDir | Out-Null
-      }
-
-      Get-ChildItem -Path $sourceDir -Filter *.opencover.xml -Recurse | ForEach-Object {
-        Write-Host "Copying: $($_.FullName)"
-        Copy-Item $_.FullName -Destination $targetDir -Force
-      }
-
-      Write-Host "Coverage files now located in:"
-      Get-ChildItem -Path $targetDir -Filter *.opencover.xml
-
-- task: SonarCloudAnalyze@3
-  inputs:
-    jdkversion: 'JAVA_HOME'
-
-- task: SonarCloudPublish@3
-  inputs:
-    pollingTimeoutSec: '300'
+      Write-Host "Ending SonarCloud analysis..."
+      dotnet sonarscanner end /d:sonar.token="$(SONAR_TOKEN)"
+  env:
+    SONAR_TOKEN: $(SONAR_TOKEN)
 
 # Optional: Publish coverage reports as artifacts for debugging
 - task: PublishBuildArtifacts@1
