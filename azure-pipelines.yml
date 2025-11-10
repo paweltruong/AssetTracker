@@ -90,6 +90,7 @@ steps:
       New-Item -ItemType Directory -Path "$(testResultsDir)/Coverage" -Force | Out-Null
       Write-Host "Directories created successfully"
     
+# 3. Build the solution (including WPF)
 - task: DotNetCoreCLI@2
   displayName: 'Build solution'
   inputs:
@@ -97,29 +98,31 @@ steps:
     projects: '$(solution)'
     arguments: '--configuration $(buildConfiguration) --no-restore --verbosity normal'
     
+# 4. Run tests with coverage
 - task: DotNetCoreCLI@2
   displayName: 'Application.Tests with Coverlet'
   inputs:
     command: 'test'
     projects: 'Stage-02-new-architecture/Src/AssetTracker.Application.Tests/AssetTracker.Application.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --logger trx;LogFileName=ApplicationTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/'
+    arguments: '--configuration $(buildConfiguration) --no-build --settings Stage-02-new-architecture/Src/coverage.runsettings --collect:"XPlat Code Coverage" --logger trx;LogFileName=ApplicationTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/ApplicationTests'
     publishTestResults: false
-    
+
 - task: DotNetCoreCLI@2
   displayName: 'Steam.Tests with Coverlet'
   inputs:
     command: 'test'
     projects: 'Stage-02-new-architecture/Src/AssetTracker.AssetsImporter.Steam.Tests/AssetTracker.AssetsImporter.Steam.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --logger trx;LogFileName=AssetsImporterSteamTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/'
+    arguments: '--configuration $(buildConfiguration) --no-build --settings Stage-02-new-architecture/Src/coverage.runsettings --collect:"XPlat Code Coverage" --logger trx;LogFileName=AssetsImporterSteamTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/AssetsImporterSteamTests'
     publishTestResults: false
-    
+
 - task: DotNetCoreCLI@2
   displayName: 'HumbleBundle.Tests with Coverlet'
   inputs:
     command: 'test'
     projects: 'Stage-02-new-architecture/Src/AssetTracker.AssetsResolver.HumbleBundle.Tests/AssetTracker.AssetsResolver.HumbleBundle.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --logger trx;LogFileName=AssetsResolverHumbleBundleTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/'
+    arguments: '--configuration $(buildConfiguration) --no-build --settings Stage-02-new-architecture/Src/coverage.runsettings --collect:"XPlat Code Coverage" --logger trx;LogFileName=AssetsResolverHumbleBundleTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/AssetsResolverHumbleBundleTests'
     publishTestResults: false
+
     
 - task: PowerShell@2
   displayName: 'Verify Coverage Files'
