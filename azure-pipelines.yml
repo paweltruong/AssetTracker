@@ -45,7 +45,7 @@ steps:
       sonar.coverage.exclusions=**/Migrations/**
       sonar.exclusions=Stage-01-poc/**
       sonar.dotnet.exclude.temporary.projects=false
-      sonar.cs.opencover.reportsPaths=$(testResultsDir)/Coverage/*.opencover.xml
+      sonar.cs.opencover.reportsPaths=**/TestResults/Coverage/*.opencover.xml
        # sonar.cs.vstest.reportsPaths=$(testResultsDir)/**/*.trx
       sonar.sources=Stage-02-new-architecture/Src
        # Explicitly define test and main patterns
