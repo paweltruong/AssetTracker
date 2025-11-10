@@ -85,41 +85,12 @@ steps:
 # 4. Run tests with coverage
 
 - task: DotNetCoreCLI@2
-  displayName: 'Application.Tests with Coverlet'
+  displayName: 'Run All Tests with Merged Coverage'
   inputs:
     command: 'test'
-    projects: 'Stage-02-new-architecture/Src/AssetTracker.Application.Tests/AssetTracker.Application.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --logger trx;LogFileName=ApplicationTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/ApplicationTests'
+    projects: '**/*.Tests.csproj'
+    arguments: '--configuration $(buildConfiguration) --no-build --logger trx;LogFileName=Tests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/coverage /p:MergeWith="$(testResultsDir)/Coverage/coverage.opencover.xml"'
     publishTestResults: false
-
-- task: DotNetCoreCLI@2
-  displayName: 'Steam.Tests with Coverlet'
-  inputs:
-    command: 'test'
-    projects: 'Stage-02-new-architecture/Src/AssetTracker.AssetsImporter.Steam.Tests/AssetTracker.AssetsImporter.Steam.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --logger trx;LogFileName=AssetsImporterSteamTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/SteamTests'
-    publishTestResults: false
-
-- task: DotNetCoreCLI@2
-  displayName: 'HumbleBundle.Tests with Coverlet'
-  inputs:
-    command: 'test'
-    projects: 'Stage-02-new-architecture/Src/AssetTracker.AssetsResolver.HumbleBundle.Tests/AssetTracker.AssetsResolver.HumbleBundle.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --logger trx;LogFileName=AssetsResolverHumbleBundleTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/HumbleBundleTests'
-    publishTestResults: false
-
-- task: DotNetCoreCLI@2
-  displayName: 'Install ReportGenerator'
-  inputs:
-    command: 'custom'
-    custom: 'tool'
-    arguments: 'install --global dotnet-reportgenerator-globaltool'
-
-- task: CmdLine@2
-  displayName: 'Merge Coverage Reports'
-  inputs:
-    script: |
-      reportgenerator -reports:$(testResultsDir)/Coverage/*.opencover.xml -targetdir:$(coverageReportsDir) -reporttypes:OpenCover
 
 
 - task: PowerShell@2
