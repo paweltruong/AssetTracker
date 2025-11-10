@@ -52,6 +52,7 @@ steps:
       sonar.test.inclusions=**/*.Tests.csproj,**/*.Test.csproj
       sonar.test.exclusions=**/bin/**,**/obj/**
       sonar.coverage.inclusions=**/*.cs
+      sonar.coverageReportPaths=
 
 # 2. Restore NuGet packages
 - task: DotNetCoreCLI@2
