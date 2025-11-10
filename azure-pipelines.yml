@@ -18,6 +18,8 @@ variables:
   solution: 'Stage-02-new-architecture/Src/AssetTracker.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+  testResultsDir: '$(Build.SourcesDirectory)/TestResults'
+  coverageReportsDir: '$(Build.SourcesDirectory)/CoverageReports'
 
 steps:
 - task: NuGetToolInstaller@1
@@ -42,8 +44,8 @@ steps:
       sonar.coverage.exclusions=**/Migrations/**
       sonar.exclusions=Stage-01-poc/**
       sonar.dotnet.exclude.temporary.projects=false
-      sonar.cs.vstest.reportsPaths=$(Agent.TempDirectory)/**/*.trx
-      sonar.cs.opencover.reportsPaths=$(Agent.TempDirectory)/**/coverage.opencover.xml
+      sonar.cs.vstest.reportsPaths=$(testResultsDir)/**/*.trx
+      sonar.cs.opencover.reportsPaths=$(coverageReportsDir)/**/*coverage.opencover.xml
 
 # 2. Restore NuGet packages
 - task: DotNetCoreCLI@2
@@ -51,6 +53,15 @@ steps:
   inputs:
     command: 'restore'
     projects: '$(solution)'
+
+# Create persistent directories for test results and coverage
+- task: Bash@3
+  inputs:
+    targetType: 'inline'
+    script: |
+      mkdir "$(testResultsDir)"
+      mkdir "$(coverageReportsDir)"
+      displayName: 'Create persistent directories'
     
 # 3. Build the solution (including WPF)
 - task: DotNetCoreCLI@2
@@ -62,28 +73,49 @@ steps:
     
 # 4. Run tests with coverage
 - task: DotNetCoreCLI@2
-  displayName: 'Run tests with coverage'
+  displayName: 'Application.Tests with coverage'
   inputs:
     command: 'test'
     projects: 'Stage-02-new-architecture/Src/AssetTracker.Application.Tests/AssetTracker.Application.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --settings Stage-02-new-architecture/Src/coverage.runsettings --logger trx;LogFileName=ApplicationTests.trx'
-    publishTestResults: true
+    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --settings Stage-02-new-architecture/Src/coverage.runsettings --logger trx;LogFileName=ApplicationTests.trx --results-directory $(testResultsDir) -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.FileName=ApplicationTests.coverage.opencover.xml'
+    publishTestResults: false
 
 - task: DotNetCoreCLI@2
-  displayName: 'Run tests with coverage2'
+  displayName: 'AssetsImporter.Steam.Tests with coverage'
   inputs:
     command: 'test'
     projects: 'Stage-02-new-architecture/Src/AssetTracker.AssetsImporter.Steam.Tests/AssetTracker.AssetsImporter.Steam.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --settings Stage-02-new-architecture/Src/coverage.runsettings --logger trx;LogFileName=AssetsImporterSteamTests.trx'
-    publishTestResults: true
+    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --settings Stage-02-new-architecture/Src/coverage.runsettings --logger trx;LogFileName=AssetsImporterSteamTests.trx --results-directory $(testResultsDir) -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.FileName=SteamImporterTests.coverage.opencover.xml'
+    publishTestResults: false
 
 - task: DotNetCoreCLI@2
-  displayName: 'Run tests with coverage3'
+  displayName: 'AssetsResolver.HumbleBundle.Tests with coverage'
   inputs:
     command: 'test'
     projects: 'Stage-02-new-architecture/Src/AssetTracker.AssetsResolver.HumbleBundle.Tests/AssetTracker.AssetsResolver.HumbleBundle.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --settings Stage-02-new-architecture/Src/coverage.runsettings --logger trx;LogFileName=AssetsResolverHumbleBundleTests.trx'
-    publishTestResults: true
+    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --settings Stage-02-new-architecture/Src/coverage.runsettings --logger trx;LogFileName=AssetsResolverHumbleBundleTests.trx --results-directory $(testResultsDir) -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.FileName=HumbleBundleTests.coverage.opencover.xml'
+    publishTestResults: false
+
+
+- task: Bash@3
+  inputs:
+    targetType: 'inline'
+    script: |
+      echo "Copying coverage files from test results to coverage reports directory..."
+      find "$(testResultsDir)" -name "coverage.opencover.xml" -exec cp {} "$(coverageReportsDir)" \;
+      echo "Contents of coverage reports directory:"
+      ls -la "$(coverageReportsDir)"
+
+# Publish test results separately if needed
+- task: PublishTestResults@2
+  displayName: 'Publish Test Results'
+  inputs:
+    testResultsFormat: 'VSTest'
+    testResultsFiles: '**/*.trx'
+    searchFolder: '$(testResultsDir)'
+    mergeTestResults: true
+    failTaskOnFailedTests: false
+
 - task: SonarCloudAnalyze@3
   inputs:
     jdkversion: 'JAVA_HOME'
@@ -92,9 +124,10 @@ steps:
   inputs:
     pollingTimeoutSec: '300'
 
+# Optional: Publish coverage reports as artifacts for debugging
 - task: PublishBuildArtifacts@1
-  displayName: 'Publish Coverage Reports'
+  displayName: 'Publish Coverage Reports for Debugging'
   inputs:
-    PathtoPublish: '$(Agent.TempDirectory)'
+    PathtoPublish: '$(coverageReportsDir)'
     ArtifactName: 'CoverageReports'
     publishLocation: 'Container'
