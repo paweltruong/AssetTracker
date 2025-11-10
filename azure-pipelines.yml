@@ -196,6 +196,35 @@ steps:
       Write-Host "=== End Diagnostics ==="
   displayName: 'Diagnose SonarQube Project Detection'
 
+# Copy OpenCover coverage reports into Sonar's working directory
+- task: PowerShell@2
+  displayName: 'Copy coverage files into Sonar temp dir'
+  inputs:
+    targetType: 'inline'
+    script: |
+      Write-Host "=== Preparing coverage files for Sonar ==="
+      $sourceDir = "$(testResultsDir)\Coverage"
+      $targetDir = "$(Agent.TempDirectory)\.sonarqube\out"
+      Write-Host "Source directory: $sourceDir"
+      Write-Host "Target directory: $targetDir"
+
+      if (-not (Test-Path $sourceDir)) {
+        Write-Error "Coverage source directory not found: $sourceDir"
+        exit 1
+      }
+
+      if (-not (Test-Path $targetDir)) {
+        New-Item -ItemType Directory -Force -Path $targetDir | Out-Null
+      }
+
+      Get-ChildItem -Path $sourceDir -Filter *.opencover.xml -Recurse | ForEach-Object {
+        Write-Host "Copying: $($_.FullName)"
+        Copy-Item $_.FullName -Destination $targetDir -Force
+      }
+
+      Write-Host "Coverage files now located in:"
+      Get-ChildItem -Path $targetDir -Filter *.opencover.xml
+
 - task: SonarCloudAnalyze@3
   inputs:
     jdkversion: 'JAVA_HOME'
