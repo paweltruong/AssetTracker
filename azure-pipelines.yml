@@ -44,7 +44,7 @@ steps:
       sonar.coverage.exclusions=**/Migrations/**
       sonar.exclusions=Stage-01-poc/**
       sonar.dotnet.exclude.temporary.projects=false
-      sonar.cs.opencover.reportsPaths=$(testResultsDir)/Coverage/*.opencover.xml
+      sonar.cs.opencover.reportsPaths=$(testResultsDir)/Coverage/ApplicationTests.opencover.xml,$(testResultsDir)/Coverage/SteamTests.opencover.xml,$(testResultsDir)/Coverage/HumbleBundleTests.opencover.xml
       sonar.cs.vstest.reportsPaths=
        # sonar.cs.vstest.reportsPaths=$(testResultsDir)/**/*.trx
       sonar.sources=Stage-02-new-architecture/Src
@@ -83,15 +83,60 @@ steps:
     arguments: '--configuration $(buildConfiguration) --no-restore --verbosity normal'
     
 # 4. Run tests with coverage
-
 - task: DotNetCoreCLI@2
-  displayName: 'Run All Tests with Merged Coverage'
+  displayName: 'Application.Tests with Coverlet'
   inputs:
     command: 'test'
-    projects: '**/*.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --logger trx;LogFileName=Tests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/coverage /p:MergeWith="$(testResultsDir)/Coverage/coverage.opencover.xml"'
+    projects: 'Stage-02-new-architecture/Src/AssetTracker.Application.Tests/AssetTracker.Application.Tests.csproj'
+    arguments: '--configuration $(buildConfiguration) --no-build --logger trx;LogFileName=ApplicationTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/ApplicationTests'
     publishTestResults: false
 
+- task: DotNetCoreCLI@2
+  displayName: 'Steam.Tests with Coverlet'
+  inputs:
+    command: 'test'
+    projects: 'Stage-02-new-architecture/Src/AssetTracker.AssetsImporter.Steam.Tests/AssetTracker.AssetsImporter.Steam.Tests.csproj'
+    arguments: '--configuration $(buildConfiguration) --no-build --logger trx;LogFileName=AssetsImporterSteamTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/SteamTests'
+    publishTestResults: false
+
+- task: DotNetCoreCLI@2
+  displayName: 'HumbleBundle.Tests with Coverlet'
+  inputs:
+    command: 'test'
+    projects: 'Stage-02-new-architecture/Src/AssetTracker.AssetsResolver.HumbleBundle.Tests/AssetTracker.AssetsResolver.HumbleBundle.Tests.csproj'
+    arguments: '--configuration $(buildConfiguration) --no-build --logger trx;LogFileName=AssetsResolverHumbleBundleTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/HumbleBundleTests'
+    publishTestResults: false
+
+# Add diagnostic step to verify coverage files
+- task: PowerShell@2
+  displayName: 'Verify Coverage Files'
+  inputs:
+    targetType: 'inline'
+    script: |
+      Write-Host "=== Coverage Files Verification ==="
+      $coveragePath = "$(testResultsDir)/Coverage"
+      Write-Host "Checking coverage directory: $coveragePath"
+      
+      if (Test-Path $coveragePath) {
+          $files = Get-ChildItem -Path $coveragePath -Filter "*.opencover.xml"
+          Write-Host "Found $($files.Count) coverage files:"
+          foreach ($file in $files) {
+              Write-Host "  - $($file.Name)"
+              Write-Host "    Full path: $($file.FullName)"
+              Write-Host "    Size: $([math]::Round($file.Length/1024, 2)) KB"
+              
+              # Check if file has content
+              $content = Get-Content $file.FullName -Raw
+              if ($content -match "<CoverageSession") {
+                  Write-Host "    Status: ✓ Valid OpenCover XML"
+              } else {
+                  Write-Host "    Status: ✗ Invalid or empty"
+              }
+          }
+      } else {
+          Write-Host "Coverage directory does not exist: $coveragePath"
+      }
+      Write-Host "=== End Verification ==="
 
 - task: PowerShell@2
   inputs:
