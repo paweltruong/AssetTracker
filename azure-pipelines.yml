@@ -204,7 +204,7 @@ steps:
     script: |
       Write-Host "=== Preparing coverage files for Sonar ==="
       $sourceDir = "$(testResultsDir)\Coverage"
-      $targetDir = "$(Agent.TempDirectory)\.sonarqube\out"
+      $targetDir = "$(Agent.TempDirectory)"
       Write-Host "Source directory: $sourceDir"
       Write-Host "Target directory: $targetDir"
 
