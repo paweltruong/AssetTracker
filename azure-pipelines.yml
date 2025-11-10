@@ -46,6 +46,7 @@ steps:
       sonar.dotnet.exclude.temporary.projects=false
       sonar.cs.vstest.reportsPaths=$(testResultsDir)/*.trx
       sonar.cs.opencover.reportsPaths=$(testResultsDir)/**/coverage.opencover.xml
+      sonar.sources=Stage-02-new-architecture/Src
 
 # 2. Restore NuGet packages
 - task: DotNetCoreCLI@2
@@ -61,7 +62,7 @@ steps:
     script: |
       # Write your PowerShell commands here.
       
-       New-Item -ItemType Directory -Path "$(testResultsDir)" -Force
+      New-Item -ItemType Directory -Path "$(testResultsDir)" -Force
       New-Item -ItemType Directory -Path "$(coverageReportsDir)" -Force
       Write-Host "Directories created successfully"
     
