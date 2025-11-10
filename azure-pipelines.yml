@@ -93,7 +93,7 @@ steps:
   inputs:
     command: 'test'
     projects: 'Stage-02-new-architecture/Src/AssetTracker.AssetsImporter.Steam.Tests/AssetTracker.AssetsImporter.Steam.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --logger trx;LogFileName=AssetsImporterSteamTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/SteamTests'
+    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --logger trx;LogFileName=AssetsImporterSteamTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/AssetsImporterSteamTests'
     publishTestResults: false
 
 - task: DotNetCoreCLI@2
@@ -101,7 +101,7 @@ steps:
   inputs:
     command: 'test'
     projects: 'Stage-02-new-architecture/Src/AssetTracker.AssetsResolver.HumbleBundle.Tests/AssetTracker.AssetsResolver.HumbleBundle.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --logger trx;LogFileName=AssetsResolverHumbleBundleTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/HumbleBundleTests'
+    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --logger trx;LogFileName=AssetsResolverHumbleBundleTests.trx --results-directory $(testResultsDir) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=$(testResultsDir)/Coverage/AssetsResolverHumbleBundleTests'
     publishTestResults: false
 
 # Add diagnostic step to verify coverage files
@@ -167,8 +167,11 @@ steps:
                   $currentPath = $uriAttachment.GetAttribute("href")
                   Write-Host "  Current coverage path: $currentPath"
                   
-                  # Update to the correct path - modify this line based on your actual coverage file location
-                  $correctPath = "TestResults/Coverage/ApplicationTests.opencover.xml"
+                  # Generate coverage filename based on TRX filename
+                  $trxFileNameWithoutExt = [System.IO.Path]::GetFileNameWithoutExtension($trxFile.Name)
+                  $correctPath = "TestResults/Coverage/$trxFileNameWithoutExt.opencover.xml"
+                  Write-Host "  Generated coverage path: $correctPath"
+                  
                   $uriAttachment.SetAttribute("href", $correctPath)
                   Write-Host "  Updated TRX coverage path to: $correctPath"
                   
