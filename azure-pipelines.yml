@@ -169,7 +169,7 @@ steps:
                   
                   # Generate coverage filename based on TRX filename
                   $trxFileNameWithoutExt = [System.IO.Path]::GetFileNameWithoutExtension($trxFile.Name)
-                  $correctPath = "TestResults/Coverage/$trxFileNameWithoutExt.opencover.xml"
+                  $correctPath = "Coverage/$trxFileNameWithoutExt.opencover.xml"
                   Write-Host "  Generated coverage path: $correctPath"
                   
                   $uriAttachment.SetAttribute("href", $correctPath)
