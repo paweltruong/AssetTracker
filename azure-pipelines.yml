@@ -135,67 +135,18 @@ steps:
       }
       Write-Host "=== End Verification ==="
 
-# Hacky fix: clone Coverlet collector as a fake Microsoft CodeCoverage collector
 - task: PowerShell@2
+  displayName: 'Temporarily move TRX files to avoid TFS Processor'
   inputs:
     targetType: 'inline'
     script: |
-      Write-Host "=== Injecting fake CodeCoverage collectors into TRX files ==="
-
-      $trxFiles = Get-ChildItem -Path "$(testResultsDir)" -Recurse -Filter "*.trx"
-      foreach ($trxFile in $trxFiles) {
-          Write-Host "`nProcessing TRX: $($trxFile.FullName)"
-          $trxContent = [xml](Get-Content $trxFile.FullName)
-          $nsManager = New-Object System.Xml.XmlNamespaceManager($trxContent.NameTable)
-          $nsManager.AddNamespace("ns", "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")
-
-          $collector = $trxContent.SelectSingleNode("//ns:Collector[@uri='datacollector://microsoft/CoverletCodeCoverage/1.0']", $nsManager)
-          if ($collector) {
-              Write-Host "  Found Coverlet collector, cloning..."
-              
-              # Clone and modify collector
-              $fakeCollector = $collector.Clone()
-              $fakeCollector.uri = "datacollector://microsoft/CodeCoverage/2.0"
-              $fakeCollector.collectorDisplayName = "Code Coverage"
-
-              # Optionally ensure href is in expected format
-              $uriAttachment = $fakeCollector.SelectSingleNode(".//ns:UriAttachment/ns:A", $nsManager)
-              if ($uriAttachment -and -not [string]::IsNullOrWhiteSpace($uriAttachment.GetAttribute("href"))) {
-                  $href = $uriAttachment.GetAttribute("href")
-                  Write-Host "  Using coverage file: $href"
-              } else {
-                  $trxFileNameWithoutExt = [System.IO.Path]::GetFileNameWithoutExtension($trxFile.Name)
-                  $href = "TestResults/Coverage/$trxFileNameWithoutExt.opencover.xml"
-                  Write-Host "  Setting fallback coverage file path: $href"
-                  if (-not $uriAttachment) {
-                      # create missing structure
-                      $uriAttachments = $trxContent.CreateElement("UriAttachments", $trxContent.DocumentElement.NamespaceURI)
-                      $uriAttachment = $trxContent.CreateElement("UriAttachment", $trxContent.DocumentElement.NamespaceURI)
-                      $aNode = $trxContent.CreateElement("A", $trxContent.DocumentElement.NamespaceURI)
-                      $aNode.SetAttribute("href", $href)
-                      $uriAttachment.AppendChild($aNode) | Out-Null
-                      $uriAttachments.AppendChild($uriAttachment) | Out-Null
-                      $fakeCollector.AppendChild($uriAttachments) | Out-Null
-                  } else {
-                      $uriAttachment.SetAttribute("href", $href)
-                  }
-              }
-
-              # Append the fake collector under the same parent node
-              $parent = $collector.ParentNode
-              $parent.AppendChild($fakeCollector) | Out-Null
-              Write-Host "  Injected fake CodeCoverage collector."
-              
-              # Save updated TRX
-              $trxContent.Save($trxFile.FullName)
-              Write-Host "  TRX file updated."
-          } else {
-              Write-Host "  No Coverlet collector found in this TRX."
-          }
+      $trxDir = "$(testResultsDir)"
+      $backupDir = "$(testResultsDir)\..\trx_backup"
+      New-Item -ItemType Directory -Force -Path $backupDir | Out-Null
+      Get-ChildItem -Path $trxDir -Filter *.trx -Recurse | ForEach-Object {
+          Move-Item $_.FullName -Destination $backupDir -Force
       }
-
-      Write-Host "`n=== TRX modification complete ==="
-  displayName: 'Inject fake CodeCoverage collector for Sonar workaround'
+      Write-Host "Moved TRX files to $backupDir temporarily"
 
 
 - task: PowerShell@2
